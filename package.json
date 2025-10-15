@@ -9,10 +9,12 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.1.14",
     "@types/chrome": "^0.0.329",
     "@types/node": "^24.0.10",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "tailwindcss": "^4.1.14",
     "typescript": "~5.8.3",
     "vite": "^7.0.0",
     "vite-plugin-chrome-extension": "^0.0.7",
