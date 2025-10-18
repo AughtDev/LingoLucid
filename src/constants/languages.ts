@@ -12,6 +12,10 @@ const createDefaultLang = (): Language => ({
     settings: {
         skill_level: 0,
         learning_pace: "medium"
+    },
+    progress: {
+        started: false,
+        mastery: 0
     }
 })
 

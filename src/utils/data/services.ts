@@ -1,6 +1,6 @@
 import {INITIAL_LANGUAGES} from "../../constants/languages.ts";
 import {getLanguageFromLocalStorage, saveLanguageToLocalStorage} from "./core.ts";
-import {Card, LanguageSettings} from "../../types/types.ts";
+import {AppConfig, Card, LanguageSettings} from "../../types/types.ts";
 
 export async function initializeLanguagesService() {
     // for each language, check if it's there, if not, create it with default settings
@@ -24,6 +24,7 @@ export async function saveLanguageSettingsService(slug: string, data: LanguageSe
     const lang = await getLanguageFromLocalStorage(slug)
     if (lang) {
         lang.settings = data
+        lang.progress.started = true
         return await saveLanguageToLocalStorage(slug, lang)
     }
     return false
@@ -52,4 +53,40 @@ export async function recordCardReviewService(slug: string, cardText: string, re
         }
     }
     return false
+}
+
+export async function getAppConfigService(): Promise<AppConfig> {
+    const result = await chrome.storage.local.get('app_config');
+    const data = result['app_config'] as AppConfig | undefined
+    if (data) {
+        console.log('service', 'App config retrieved from local storage:', data);
+        return data;
+    } else {
+        console.warn('service', 'No app config found in local storage');
+        return {
+            curr_language: null
+        }
+    }
+}
+
+
+export async function setCurrentLanguageService(slug: string) {
+    const app_config_result = await chrome.storage.local.get('app_config');
+    const app_config = app_config_result['app_config'] as AppConfig | undefined || {
+        curr_language: null
+    }
+    app_config.curr_language = slug
+    await chrome.storage.local.set({'app_config': app_config});
+    console.log('service', 'Current language set to', slug, 'in app config');
+}
+
+
+export async function clearAppDataService() {
+    return chrome.storage.local.clear().then(() => {
+        console.log('service', 'All app data cleared from local storage');
+        return true;
+    }).catch((error) => {
+        console.error('service', 'Error clearing app data from local storage:', error);
+        return false;
+    });
 }

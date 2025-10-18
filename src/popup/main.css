@@ -1,8 +1,118 @@
 @import "tailwindcss";
 
+@font-face {
+    font-family: "Inter";
+    src: url("../assets/fonts/Inter.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
 
 body {
+    font-family: "Inter", sans-serif;
     width: 350px;
     height: 600px;
     padding: 0;
+    background-color: #FFFAF0;
+}
+
+button:hover svg {
+    stroke: #FF9C66 !important;
+}
+button svg {
+    stroke: #333;
+    transition: all 0.1s ease;
+}
+
+/* Slider Component Styles */
+.slider-container {
+    padding: 4px 0;
+    width: 100%;
+}
+
+.slider-track {
+    position: relative;
+    height: 6px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 12px;
+}
+
+.slider-container:hover .slider-track {
+    height: 8px;
+    border-radius: 4px;
+}
+
+.slider-track.dragging {
+    cursor: grabbing;
+}
+
+.slider-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 2px;
+    height: 10px;
+    background-color: rgba(255, 255, 255, 0.15);
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.slider-track:hover .slider-marker {
+    height: 12px;
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+.slider-thumb {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    cursor: grab;
+    transition: all 0.2s ease;
+    pointer-events: none;
+}
+
+.slider-thumb.hovering {
+    width: 22px;
+    height: 22px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.slider-thumb.dragging {
+    cursor: grabbing;
+    width: 20px;
+    height: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.slider-labels {
+    position: relative;
+    height: 20px;
+    margin-top: 8px;
+}
+
+.slider-label {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: #666;
+    white-space: nowrap;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.slider-label.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.slider-track:hover ~ .slider-labels .slider-label {
+    color: #333;
+    font-weight: 500;
 }

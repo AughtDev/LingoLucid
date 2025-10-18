@@ -1,54 +1,53 @@
 import React from 'react';
-import {Language} from "../../../types/types.ts";
-import {getLanguageService} from "../../../utils/data/services.ts";
+import {setCurrentLanguageService} from "../../../utils/data/services.ts";
 import useAppContext from "../../context.tsx";
 import CardsView from "./CardsView.tsx";
+import {HomeIcon, SettingsIcon} from "../../../constants/icons.tsx";
+import {useLanguage} from "../../hooks/useLanguage.tsx";
+import LanguageSettingsModal from "../../modals/language-settings";
 
 interface LangPageProps {
     slug: string
 }
 
 export default function LangPage({slug}: LangPageProps) {
-    const [lang, setLang] = React.useState<Language | null>(null)
-    const [loading, setLoading] = React.useState<boolean>(true)
+    const {nav: {goToPage},modal: {openModal}} = useAppContext()
 
-    const [_rfr, _reloadLang] = React.useReducer(x => x + 1, 0);
-
-    const {
-        nav: {goToPage}
-    } = useAppContext()
-
+    const {lang, loading} = useLanguage(slug)
     React.useEffect(() => {
-        // fetch language data from local storage
-        getLanguageService(slug).then(res => {
-            if (res) {
-                setLang(res)
-            }
-        }).finally(() => {
-            setLoading(false)
-        })
-    }, [_rfr]);
+        // set lang as current language
+        if (!lang) return;
+        setCurrentLanguageService(slug).then()
+    }, [lang]);
 
     return (
-        <div className={"flex flex-col w-full h-full"}>
+        <div className={"relative flex flex-col w-full h-full"}>
+            <div className={"absolute top-0 left-0 p-2"}>
+                <img src={"./icons/icon128.png"} alt={"LingoLucid Logo"} className={"h-14 w-14"}/>
+            </div>
+            <div className={"absolute flex flex-row gap-4 items-center justify-center top-0 right-0 p-2"}>
+                <button
+                    onClick={() => {
+                        if (!lang) return;
+                        openModal(<LanguageSettingsModal language={lang}/>);
+                    }}>
+                    <SettingsIcon size={"20px"}/>
+                </button>
+                <button
+                    onClick={() => goToPage("home")}>
+                    <HomeIcon size={"20px"}/>
+                </button>
+            </div>
+
             {!loading ? lang ? (
                 <>
-                    <div className={"flex flex-row justify-between w-full h-8"}>
-                        <div/>
-                        <h1>
-                            {lang.slug}
+                    <div className={"flex flex-row items-center justify-center w-full h-12 gap-2"}>
+                        <img src={lang.flag_href} alt={lang.label} className={"h-4 m-1 rounded-sm"}/>
+                        <h1 className={"text-lg font-semibold"}>
+                            {lang.slug.toUpperCase()}
                         </h1>
-                        <div className={"flex flex-row gap-4 items-center justify-center"}>
-                            <button>
-                                stngs
-                            </button>
-                            <button
-                                onClick={() => goToPage("home")}>
-                                home
-                            </button>
-                        </div>
                     </div>
-                    <div className={"flex-grow w-full"}>
+                    <div className={"flex-grow w-full items-center"}>
                         <CardsView lang_slug={slug} cards={lang.cards}/>
                     </div>
                 </>

@@ -1,5 +1,5 @@
 import React from 'react';
-import {initializeLanguagesService} from "../utils/data/services.ts";
+import {getAppConfigService, initializeLanguagesService} from "../utils/data/services.ts";
 import HomePage from "./pages/home";
 import {AppContext, AppContextProps} from "./context.tsx";
 import {INITIAL_LANGUAGES} from "../constants/languages.ts";
@@ -46,11 +46,18 @@ export default function App() {
     const [modal, setModal] = React.useState<React.ReactElement | null>(null)
 
     React.useEffect(() => {
-        initializeLanguagesService().then(_ => {
+        initializeLanguagesService().then(async () => {
             console.log('All Languages initialized')
+            return await getAppConfigService()
+        }).then(config => {
+            // if there is a current language set, set curr_page to that language page
+            if (config.curr_language) {
+                setCurrPage(`lang/${config.curr_language}`)
+            }
             setLoading(false)
         })
     }, []);
+
 
     const app_context: AppContextProps = React.useMemo(() => ({
         meta: {
@@ -76,8 +83,8 @@ export default function App() {
         <AppContext.Provider value={app_context}>
             <div style={{height: '590px'}} className={"relative w-full"}>
                 {modal ? (
-                    <div style={{height: '600px'}}
-                         className={"absolute w-full flex flex-col justify-center items-center backdrop-blur-md bg-white/10"}>
+                    <div style={{height: '600px',zIndex: 10}}
+                         className={"absolute w-full flex flex-col justify-center items-center backdrop-blur-sm bg-white/10"}>
                         {modal}
                     </div>
                 ) : null}
