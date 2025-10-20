@@ -3,7 +3,7 @@ import {Language, LanguageSettings} from "../../../types/types.ts";
 import {Slider} from "../../../components/Slider.tsx";
 import {BACKGROUND_COLOR, PRIMARY_COLOR} from "../../../constants/styling.ts";
 import {saveLanguageSettingsService} from "../../../utils/data/services.ts";
-import {CloseIcon, SaveIcon} from "../../../constants/icons.tsx";
+import {CloseIcon} from "../../../constants/icons.tsx";
 import useAppContext from "../../context.tsx";
 
 interface LanguageSettingsModalProps {
@@ -13,15 +13,15 @@ interface LanguageSettingsModalProps {
 export default function LanguageSettingsModal({language}: LanguageSettingsModalProps) {
     const {modal: {closeModal}} = useAppContext()
 
-    const [mastery, setMastery] = React.useState<number>(1)
-    const [pace, setPace] = React.useState<LanguageSettings["learning_pace"]>("medium")
+    const [mastery, setMastery] = React.useState<number>(language.settings.skill_level)
+    const [pace, setPace] = React.useState<LanguageSettings["learning_pace"]>(language.settings.learning_pace)
 
     const saveSettings = React.useCallback(() => {
         saveLanguageSettingsService(language.slug, {
             skill_level: mastery,
             learning_pace: pace,
-        }).then()
-    }, [language.slug, mastery, pace]);
+        }).finally( closeModal )
+    }, [language.slug, mastery, pace, closeModal]);
 
 
     const mastery_options = React.useMemo(() => {
@@ -77,7 +77,7 @@ export default function LanguageSettingsModal({language}: LanguageSettingsModalP
                     className={"mt-4 px-2 py-1 text-white rounded-lg hover:brightness-50"}>
                     <div className={"flex flex-row justify-center items-center"}>
                         Save
-                        <SaveIcon size={20} color={"white"}/>
+                        {/*<SaveIcon size={20} color={"white"}/>*/}
                     </div>
                 </button>
             </div>

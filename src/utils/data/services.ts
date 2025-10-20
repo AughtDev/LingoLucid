@@ -5,8 +5,8 @@ import {AppConfig, Card, LanguageSettings} from "../../types/types.ts";
 export async function initializeLanguagesService() {
     // for each language, check if it's there, if not, create it with default settings
     for (const lang of Object.values(INITIAL_LANGUAGES)) {
-        // const storedLang = await getLanguageFromLocalStorage(lang.slug)
-        if (true) {
+        const storedLang = await getLanguageFromLocalStorage(lang.slug)
+        if (storedLang) {
             await saveLanguageToLocalStorage(lang.slug, lang)
             console.log("service", `Language ${lang.label} initialized`)
         } else {

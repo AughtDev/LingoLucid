@@ -1,4 +1,5 @@
 import React from "react";
+import {Language} from "../types/types.ts";
 
 export interface AppContextProps {
     meta: {
@@ -11,6 +12,10 @@ export interface AppContextProps {
     modal: {
         openModal: (modal: React.ReactElement) => void
         closeModal: () => void
+    },
+    data: {
+        languages: Map<string, Language>
+        getLanguage: (slug: string) => Language | null
     }
 }
 
@@ -26,6 +31,10 @@ export const AppContext = React.createContext<AppContextProps>({
         curr_page: "",
         goToPage: (_page: string) => null
     },
+    data: {
+        languages: new Map(),
+        getLanguage: (_slug: string) => null
+    }
 })
 
 

@@ -101,3 +101,38 @@ export function SaveIcon({size, color}: IconProps) {
         </svg>
     )
 }
+
+export function InfoIcon({size, color}: IconProps) {
+    return (
+        <svg
+            height={size} width={size}
+            viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+            <g id="SVGRepo_iconCarrier">
+                <path d="M12 17V11" stroke={color || "#1C274C"} stroke-width="1.5" stroke-linecap="round"></path>
+                <circle cx="1" cy="1" r="1" transform="matrix(1 0 0 -1 11 9)" fill={color || "#1C274C"}></circle>
+                <path
+                    d="M7 3.33782C8.47087 2.48697 10.1786 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 10.1786 2.48697 8.47087 3.33782 7"
+                    stroke={color || "#1C274C"} stroke-width="1.5" stroke-linecap="round"></path>
+            </g>
+        </svg>
+    )
+}
+
+
+export function PlayIcon({size, color}: IconProps) {
+    return (
+        <svg
+            height={size} width={size}
+            viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+            <g id="SVGRepo_iconCarrier">
+                <path
+                    d="M3 12L3 18.9671C3 21.2763 5.53435 22.736 7.59662 21.6145L10.7996 19.8727M3 8L3 5.0329C3 2.72368 5.53435 1.26402 7.59661 2.38548L20.4086 9.35258C22.5305 10.5065 22.5305 13.4935 20.4086 14.6474L14.0026 18.131"
+                    stroke={color ?? "#1C274C"} stroke-width="1.5" stroke-linecap="round"></path>
+            </g>
+        </svg>
+    )
+}

@@ -1,9 +1,10 @@
 import React from 'react';
-import {getAppConfigService, initializeLanguagesService} from "../utils/data/services.ts";
+import {getAppConfigService} from "../utils/data/services.ts";
 import HomePage from "./pages/home";
 import {AppContext, AppContextProps} from "./context.tsx";
 import {INITIAL_LANGUAGES} from "../constants/languages.ts";
 import LangPage from "./pages/lang";
+import {useLanguages} from "./hooks/useLanguages.tsx";
 
 // async function _runAIPrompt(promptText: string, setModelDownloadProgress: (progress: number) => void) {
 //
@@ -40,24 +41,33 @@ const PAGES: { id: string, content: () => React.ReactElement }[] = [
 ]
 
 
+const getCurrentUrl = async (): Promise<string | null> => {
+    try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        return tab.url || null;
+    } catch (error) {
+        console.error('Error getting current URL:', error);
+        return null;
+    }
+};
 export default function App() {
+    const {languages, loading, getLanguage} = useLanguages()
+
     const [curr_page, setCurrPage] = React.useState<string>(PAGES[0].id);
-    const [loading, setLoading] = React.useState<boolean>(true)
     const [modal, setModal] = React.useState<React.ReactElement | null>(null)
 
     React.useEffect(() => {
-        initializeLanguagesService().then(async () => {
-            console.log('All Languages initialized')
-            return await getAppConfigService()
-        }).then(config => {
-            // if there is a current language set, set curr_page to that language page
+        getCurrentUrl().then(url => {
+            if (url) {
+                // confirm valid url
+            }
+        });
+        getAppConfigService().then(config => {
             if (config.curr_language) {
                 setCurrPage(`lang/${config.curr_language}`)
             }
-            setLoading(false)
         })
     }, []);
-
 
     const app_context: AppContextProps = React.useMemo(() => ({
         meta: {
@@ -76,14 +86,15 @@ export default function App() {
             closeModal: () => {
                 setModal(null)
             }
-        }
-    }), [loading, curr_page, setCurrPage, setModal]);
+        },
+        data: {languages,getLanguage}
+    }), [loading, curr_page, setCurrPage, setModal, languages, getLanguage]);
 
     return (
         <AppContext.Provider value={app_context}>
             <div style={{height: '590px'}} className={"relative w-full"}>
                 {modal ? (
-                    <div style={{height: '600px',zIndex: 10}}
+                    <div style={{height: '600px', zIndex: 40}}
                          className={"absolute w-full flex flex-col justify-center items-center backdrop-blur-sm bg-white/10"}>
                         {modal}
                     </div>

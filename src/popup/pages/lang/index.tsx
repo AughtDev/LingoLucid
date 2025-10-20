@@ -3,22 +3,30 @@ import {setCurrentLanguageService} from "../../../utils/data/services.ts";
 import useAppContext from "../../context.tsx";
 import CardsView from "./CardsView.tsx";
 import {HomeIcon, SettingsIcon} from "../../../constants/icons.tsx";
-import {useLanguage} from "../../hooks/useLanguage.tsx";
 import LanguageSettingsModal from "../../modals/language-settings";
+import {Language} from "../../../types/types.ts";
 
 interface LangPageProps {
     slug: string
 }
 
 export default function LangPage({slug}: LangPageProps) {
-    const {nav: {goToPage},modal: {openModal}} = useAppContext()
+    const [lang, setLang] = React.useState<Language | null>(null)
+    const {nav: {goToPage}, modal: {openModal}, data: {languages}} = useAppContext()
 
-    const {lang, loading} = useLanguage(slug)
+    React.useEffect(() => {
+        setLang(languages.get(slug) || null);
+    }, [languages]);
     React.useEffect(() => {
         // set lang as current language
         if (!lang) return;
         setCurrentLanguageService(slug).then()
     }, [lang]);
+
+    const onClickSettings = React.useCallback(() => {
+        if (!lang) return;
+        openModal(<LanguageSettingsModal language={lang}/>);
+    }, [lang, openModal]);
 
     return (
         <div className={"relative flex flex-col w-full h-full"}>
@@ -27,10 +35,7 @@ export default function LangPage({slug}: LangPageProps) {
             </div>
             <div className={"absolute flex flex-row gap-4 items-center justify-center top-0 right-0 p-2"}>
                 <button
-                    onClick={() => {
-                        if (!lang) return;
-                        openModal(<LanguageSettingsModal language={lang}/>);
-                    }}>
+                    onClick={onClickSettings}>
                     <SettingsIcon size={"20px"}/>
                 </button>
                 <button
@@ -39,7 +44,7 @@ export default function LangPage({slug}: LangPageProps) {
                 </button>
             </div>
 
-            {!loading ? lang ? (
+            {lang ? (
                 <>
                     <div className={"flex flex-row items-center justify-center w-full h-12 gap-2"}>
                         <img src={lang.flag_href} alt={lang.label} className={"h-4 m-1 rounded-sm"}/>
@@ -54,10 +59,6 @@ export default function LangPage({slug}: LangPageProps) {
             ) : (
                 <div className={"flex justify-center items-center h-full w-full"}>
                     <p>Language not found.</p>
-                </div>
-            ) : (
-                <div className={"flex justify-center items-center h-full w-full"}>
-                    <p>Loading...</p>
                 </div>
             )}
         </div>
