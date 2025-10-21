@@ -1,54 +1,59 @@
 import {INITIAL_LANGUAGES} from "../../constants/languages.ts";
 import {getLanguageFromLocalStorage, saveLanguageToLocalStorage} from "./core.ts";
-import {AppConfig, Card, LanguageSettings} from "../../types/types.ts";
+import {AppConfig, Card, LanguageSettings} from "../../types/core.ts";
 
-export async function initializeLanguagesService() {
+// region STORAGE
+// ? ........................
+
+export async function initializeService() {
     // for each language, check if it's there, if not, create it with default settings
     for (const lang of Object.values(INITIAL_LANGUAGES)) {
-        const storedLang = await getLanguageFromLocalStorage(lang.slug)
+        const storedLang = await getLanguageFromLocalStorage(lang.code)
         if (storedLang) {
-            await saveLanguageToLocalStorage(lang.slug, lang)
+            await saveLanguageToLocalStorage(lang.code, lang)
             console.log("service", `Language ${lang.label} initialized`)
         } else {
             console.log("service", `Language ${lang.label} already initialized`)
         }
     }
+    // check if app config exists, if not, create it
+    await getAppConfigService()
 }
 
-export async function getLanguageService(slug: string) {
-    return await getLanguageFromLocalStorage(slug)
+export async function getLanguageService(code: string) {
+    return await getLanguageFromLocalStorage(code)
 }
 
 
-export async function saveLanguageSettingsService(slug: string, data: LanguageSettings) {
-    const lang = await getLanguageFromLocalStorage(slug)
+export async function saveLanguageSettingsService(code: string, data: LanguageSettings) {
+    const lang = await getLanguageFromLocalStorage(code)
     if (lang) {
         lang.settings = data
         lang.progress.started = true
-        return await saveLanguageToLocalStorage(slug, lang)
+        return await saveLanguageToLocalStorage(code, lang)
     }
     return false
 }
 
 
-export async function saveLanguageCardService(slug: string, data: Card, type: 'saved' | 'recent') {
-    const lang = await getLanguageFromLocalStorage(slug)
+export async function saveLanguageCardService(code: string, data: Card, type: 'saved' | 'recent') {
+    const lang = await getLanguageFromLocalStorage(code)
     if (lang) {
         lang.cards[type].push(data)
-        return await saveLanguageToLocalStorage(slug, lang)
+        return await saveLanguageToLocalStorage(code, lang)
     }
     return false
 }
 
-export async function recordCardReviewService(slug: string, cardText: string, review: "easy" | "medium" | "hard") {
-    const lang = await getLanguageFromLocalStorage(slug)
+export async function recordCardReviewService(code: string, cardText: string, review: "easy" | "medium" | "hard") {
+    const lang = await getLanguageFromLocalStorage(code)
     if (lang) {
         for (const type of ['saved', 'recent'] as ('saved' | 'recent')[]) {
             const card = lang.cards[type].find(c => c.text === cardText)
             if (card) {
                 const now = Date.now()
                 card.reviews.push({dateT: now, review})
-                return await saveLanguageToLocalStorage(slug, lang)
+                return await saveLanguageToLocalStorage(code, lang)
             }
         }
     }
@@ -63,21 +68,24 @@ export async function getAppConfigService(): Promise<AppConfig> {
         return data;
     } else {
         console.warn('service', 'No app config found in local storage');
-        return {
+        // create default app config
+        const default_config: AppConfig = {
             curr_language: null
         }
+        await chrome.storage.local.set({'app_config': default_config});
+        console.log('service', 'Default app config created in local storage:', default_config);
+        return default_config
     }
 }
 
-
-export async function setCurrentLanguageService(slug: string) {
+export async function setCurrentLanguageService(code: string) {
     const app_config_result = await chrome.storage.local.get('app_config');
     const app_config = app_config_result['app_config'] as AppConfig | undefined || {
         curr_language: null
     }
-    app_config.curr_language = slug
+    app_config.curr_language = code
     await chrome.storage.local.set({'app_config': app_config});
-    console.log('service', 'Current language set to', slug, 'in app config');
+    console.log('service', 'Current language set to', code, 'in app config');
 }
 
 
@@ -90,3 +98,27 @@ export async function clearAppDataService() {
         return false;
     });
 }
+
+// ? ........................
+// endregion ........................
+
+// region CONTENT
+// ? ........................
+
+export async function getActiveTabId(): Promise<number | null> {
+    const tabs = await chrome.tabs.query({active: true, currentWindow: true});
+    if (tabs.length === 0 || !tabs[0].id) {
+        console.error('service', 'No active tab found');
+        return null;
+    }
+    console.log('service', 'Active tab ID:', tabs[0].id);
+    return tabs[0].id;
+}
+
+
+
+// ? ........................
+// endregion ........................
+
+
+

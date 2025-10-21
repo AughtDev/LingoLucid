@@ -15,7 +15,7 @@ export interface LanguageProgress {
 
 
 export interface Language {
-    slug: string
+    code: string
     label: string
     flag_href: string
     cards: LanguageCards

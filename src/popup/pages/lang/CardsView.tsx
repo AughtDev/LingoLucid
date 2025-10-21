@@ -1,12 +1,12 @@
 import React from 'react';
-import {Card, LanguageCards} from "../../../types/types.ts";
+import {Card, LanguageCards} from "../../../types/core.ts";
 import useAppContext from "../../context.tsx";
 import CardReviewModal from "../../modals/card-review";
 import {PRIMARY_COLOR} from "../../../constants/styling.ts";
 import {BookIcon} from "../../../constants/icons.tsx";
 
 interface CardsViewProps {
-    lang_slug: string
+    lang_code: string
     cards: LanguageCards
 }
 
@@ -88,7 +88,7 @@ function CardPane({card}: CardPaneProps) {
     )
 }
 
-export default function CardsView({lang_slug, cards}: CardsViewProps) {
+export default function CardsView({lang_code, cards}: CardsViewProps) {
     const {modal: {openModal}} = useAppContext()
 
     const [active_tab, setActiveTab] = React.useState<"saved" | "recent">("recent")
@@ -96,11 +96,11 @@ export default function CardsView({lang_slug, cards}: CardsViewProps) {
     const reviewCards = React.useCallback(() => {
         openModal(
             <CardReviewModal
-                lang_slug={lang_slug}
+                lang_code={lang_code}
                 cards={active_tab === "recent" ? cards.recent : cards.saved}
                 limit={10}/>
         )
-    }, [openModal, lang_slug, active_tab, cards.recent, cards.saved]);
+    }, [openModal, lang_code, active_tab, cards.recent, cards.saved]);
 
     const active_cards = React.useMemo(() => {
         return active_tab === "recent" ? cards.recent : cards.saved

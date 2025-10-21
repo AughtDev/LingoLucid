@@ -1,8 +1,8 @@
-import {Language} from "../types/types.ts";
+import {Language} from "../types/core.ts";
 
 
 const createDefaultLang = (): Language => ({
-    slug: "",
+    code: "",
     label: "",
     flag_href: "",
     cards: {
@@ -22,7 +22,7 @@ const createDefaultLang = (): Language => ({
 export const INITIAL_LANGUAGES = {
     FRENCH: {
         ...createDefaultLang(),
-        slug: "french",
+        code: "fr",
         label: "French",
         flag_href: "https://flagcdn.com/w320/fr.png",
         cards: {
@@ -54,25 +54,25 @@ export const INITIAL_LANGUAGES = {
     },
     SPANISH: {
         ...createDefaultLang(),
-        slug: "spanish",
+        code: "es",
         label: "Spanish",
         flag_href: "https://flagcdn.com/w320/es.png",
     },
     GERMAN: {
         ...createDefaultLang(),
-        slug: "german",
+        code: "de",
         label: "German",
         flag_href: "https://flagcdn.com/w320/de.png",
     },
     PORTUGUESE: {
         ...createDefaultLang(),
-        slug: "portuguese",
+        code: "pt",
         label: "Portuguese",
         flag_href: "https://flagcdn.com/w320/pt.png",
     },
     ITALIAN: {
         ...createDefaultLang(),
-        slug: "italian",
+        code: "it",
         label: "Italian",
         flag_href: "https://flagcdn.com/w320/it.png",
     }

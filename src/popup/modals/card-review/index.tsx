@@ -1,12 +1,12 @@
 import React from 'react';
-import {Card, CardReview} from "../../../types/types.ts";
+import {Card, CardReview} from "../../../types/core.ts";
 import useAppContext from "../../context.tsx";
 import {recordCardReviewService} from "../../../utils/data/services.ts";
 import {CloseIcon} from "../../../constants/icons.tsx";
 import {BACKGROUND_COLOR} from "../../../constants/styling.ts";
 
 interface CardReviewModalProps {
-    lang_slug: string
+    lang_code: string
     cards: Card[]
     limit: number
 }
@@ -16,7 +16,7 @@ function generateCardOrder(cards: Card[], limit: number): number[] {
     return cards.map((_card, idx) => idx).slice(0, limit);
 }
 
-export default function CardReviewModal({lang_slug, cards: og_cards, limit}: CardReviewModalProps) {
+export default function CardReviewModal({lang_code, cards: og_cards, limit}: CardReviewModalProps) {
     const {modal: {closeModal}} = useAppContext()
 
     const [cards, setCards] = React.useState<Card[]>(og_cards)
@@ -29,12 +29,12 @@ export default function CardReviewModal({lang_slug, cards: og_cards, limit}: Car
 
     const onReviewCard = React.useCallback((review: CardReview["review"]) => {
         recordCardReviewService(
-            lang_slug, cards[card_order[active_card_idx]].text, review
+            lang_code, cards[card_order[active_card_idx]].text, review
         ).then(() => {
             setCardFlipped(false)
             setActiveCardIdx(prev => prev + 1)
         })
-    }, [lang_slug, setActiveCardIdx, setCardFlipped, cards, card_order, active_card_idx]);
+    }, [lang_code, setActiveCardIdx, setCardFlipped, cards, card_order, active_card_idx]);
 
     return (
         <div className={"w-4/5 h-48"}>

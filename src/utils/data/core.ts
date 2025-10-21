@@ -1,24 +1,24 @@
-import {Language} from "../../types/types.ts";
+import {Language} from "../../types/core.ts";
 
-export async function getLanguageFromLocalStorage(slug: string): Promise<Language | undefined> {
-    const result = await chrome.storage.local.get(slug);
-    const data = result[slug] as Language | undefined;
+export async function getLanguageFromLocalStorage(code: string): Promise<Language | undefined> {
+    const result = await chrome.storage.local.get(code);
+    const data = result[code] as Language | undefined;
     if (data) {
-        console.log('storage', 'data', data, 'retrieved from slug', slug, 'in local storage');
+        console.log('storage', 'data', data, 'retrieved from code', code, 'in local storage');
         return data;
     } else {
-        console.warn('storage', 'No data found for key', slug, 'in local storage');
+        console.warn('storage', 'No data found for key', code, 'in local storage');
         return undefined;
     }
 }
 
 
 export async function saveLanguageToLocalStorage(
-    slug: string, data: Language,
+    code: string, data: Language,
     onSuccess?: () => void, onFailure?: () => void
 ): Promise<boolean> {
-    return chrome.storage.local.set({[slug]: data}).then(() => {
-        console.log('storage', 'data', data, 'saved to slug', slug, 'in local storage');
+    return chrome.storage.local.set({[code]: data}).then(() => {
+        console.log('storage', 'data', data, 'saved to code', code, 'in local storage');
         onSuccess?.();
         return true;
     }).catch((error) => {

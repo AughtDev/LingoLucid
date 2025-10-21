@@ -1,5 +1,5 @@
 import React from "react";
-import {Language} from "../types/types.ts";
+import {Language} from "../types/core.ts";
 
 export interface AppContextProps {
     meta: {
@@ -15,7 +15,6 @@ export interface AppContextProps {
     },
     data: {
         languages: Map<string, Language>
-        getLanguage: (slug: string) => Language | null
     }
 }
 
@@ -33,7 +32,6 @@ export const AppContext = React.createContext<AppContextProps>({
     },
     data: {
         languages: new Map(),
-        getLanguage: (_slug: string) => null
     }
 })
 

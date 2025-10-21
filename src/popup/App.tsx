@@ -6,40 +6,17 @@ import {INITIAL_LANGUAGES} from "../constants/languages.ts";
 import LangPage from "./pages/lang";
 import {useLanguages} from "./hooks/useLanguages.tsx";
 
-// async function _runAIPrompt(promptText: string, setModelDownloadProgress: (progress: number) => void) {
-//
-//     if (!('Translator' in self)) {
-//         return
-//     }
-//     const translatorCapabilities = await Translator.availability({
-//         sourceLanguage: 'en',
-//         targetLanguage: 'fr',
-//
-//     });
-//     console.log('Translator capabilities:', translatorCapabilities);
-//
-//     const translator = await Translator.create({
-//         sourceLanguage: 'es',
-//         targetLanguage: 'fr',
-//         monitor(m: any) {
-//             m.addEventListener('downloadprogress', (e: { loaded: number }) => {
-//                 console.log(`Downloaded ${e.loaded * 100}%`);
-//                 setModelDownloadProgress(e.loaded)
-//             });
-//         },
-//     });
-//     return await translator.translate(promptText)
-// }
 
 
 const PAGES: { id: string, content: () => React.ReactElement }[] = [
     {id: "home", content: HomePage},
-    ...(Object.values(INITIAL_LANGUAGES).map(({slug}) => ({
-        id: `lang/${slug}`,
-        content: () => <LangPage slug={slug}/>
+    ...(Object.values(INITIAL_LANGUAGES).map(({code}) => ({
+        id: `lang/${code}`,
+        content: () => <LangPage code={code}/>
     })))
 ]
 
+console.log("PAGES:", PAGES);
 
 const getCurrentUrl = async (): Promise<string | null> => {
     try {
@@ -51,7 +28,7 @@ const getCurrentUrl = async (): Promise<string | null> => {
     }
 };
 export default function App() {
-    const {languages, loading, getLanguage} = useLanguages()
+    const {languages, loading} = useLanguages()
 
     const [curr_page, setCurrPage] = React.useState<string>(PAGES[0].id);
     const [modal, setModal] = React.useState<React.ReactElement | null>(null)
@@ -87,8 +64,8 @@ export default function App() {
                 setModal(null)
             }
         },
-        data: {languages,getLanguage}
-    }), [loading, curr_page, setCurrPage, setModal, languages, getLanguage]);
+        data: {languages}
+    }), [loading, curr_page, setCurrPage, setModal, languages]);
 
     return (
         <AppContext.Provider value={app_context}>

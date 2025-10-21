@@ -1,5 +1,5 @@
 import React from 'react';
-import {Language, LanguageSettings} from "../../../types/types.ts";
+import {Language, LanguageSettings} from "../../../types/core.ts";
 import {Slider} from "../../../components/Slider.tsx";
 import {BACKGROUND_COLOR, PRIMARY_COLOR} from "../../../constants/styling.ts";
 import {saveLanguageSettingsService} from "../../../utils/data/services.ts";
@@ -17,11 +17,11 @@ export default function LanguageSettingsModal({language}: LanguageSettingsModalP
     const [pace, setPace] = React.useState<LanguageSettings["learning_pace"]>(language.settings.learning_pace)
 
     const saveSettings = React.useCallback(() => {
-        saveLanguageSettingsService(language.slug, {
+        saveLanguageSettingsService(language.code, {
             skill_level: mastery,
             learning_pace: pace,
         }).finally( closeModal )
-    }, [language.slug, mastery, pace, closeModal]);
+    }, [language.code, mastery, pace, closeModal]);
 
 
     const mastery_options = React.useMemo(() => {

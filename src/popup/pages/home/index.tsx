@@ -1,7 +1,7 @@
 import React from 'react';
 import useAppContext from "../../context.tsx";
 import LanguageSetupModal from "../../modals/language-setup";
-import {Language} from "../../../types/types.ts";
+import {Language} from "../../../types/core.ts";
 import AppInfoModal from "../../modals/app-info";
 import {InfoIcon, PlayIcon} from "../../../constants/icons.tsx";
 
@@ -13,7 +13,7 @@ function LanguageSelector({lang}: LanguageSelectorProps) {
     const [is_hovered, setIsHovered] = React.useState<boolean>(false)
 
     const div_ref = React.useRef<HTMLDivElement | null>(null);
-    const {nav: {goToPage}, modal: {openModal, closeModal}} = useAppContext()
+    const {nav: {goToPage}, modal: {openModal}} = useAppContext()
 
     React.useEffect(() => {
         const div_element = div_ref.current;
@@ -31,8 +31,6 @@ function LanguageSelector({lang}: LanguageSelectorProps) {
         }
     }, []);
 
-    console.log("Rendering LanguageSelector for ", lang.slug, " with progress ", lang.progress, "started", lang.progress.started);
-
     return (
         <div
             style={{
@@ -40,12 +38,9 @@ function LanguageSelector({lang}: LanguageSelectorProps) {
             }}
             onClick={() => {
                 if (lang.progress.started) {
-                    goToPage(`lang/${lang.slug}`);
+                    goToPage(`lang/${lang.code}`);
                 } else {
-                    openModal(<LanguageSetupModal language={lang} proceed={() => {
-                        closeModal();
-                        goToPage(`lang/${lang.slug}`);
-                    }}/>)
+                    openModal(<LanguageSetupModal language={lang}/>)
                 }
             }}
             ref={div_ref}
@@ -66,7 +61,7 @@ function LanguageSelector({lang}: LanguageSelectorProps) {
                 style={{
                     filter: is_hovered ? 'brightness(60%)' : 'none',
                 }}
-                key={lang.slug}
+                key={lang.code}
                 className={""}>
                 <img src={lang.flag_href} alt={lang.label} className={"h-10 m-1 rounded-md"}/>
             </div>
@@ -128,7 +123,7 @@ export default function HomePage() {
                             style={{rowGap: "1rem"}}
                             className={"flex flex-row flex-wrap gap-6 justify-center items-center w-70"}>
                             {Array.from(languages.values()).map(lang => (
-                                <LanguageSelector key={lang.slug} lang={lang}/>
+                                <LanguageSelector key={lang.code} lang={lang}/>
                             ))}
                         </div>
                     </div>
