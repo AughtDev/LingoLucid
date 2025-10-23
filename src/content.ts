@@ -2,21 +2,31 @@ import {Message, MessageResponse, MessageType, TranslationPayload} from "./types
 import {translateToTargetLanguage} from "./ai/translation.ts";
 import {createRoot} from "react-dom/client";
 import {InspectTextPopup} from "./ui/inspect";
-// import "./ui/inspect/index.tsx"
+import tailwind from "./popup/main.css?inline"
+import React from "react";
+import {updatePopupState} from "./ui/inspect/store.ts";
 
 console.log("Hello everybody, this is LingoLucid")
 
 const ll_root = document.createElement("div")
 ll_root.id = "lingolucid-root"
-ll_root.style.display = "none"
+// ll_root.style.display = "none"
 ll_root.style.position = "absolute"
-ll_root.style.zIndex = "99999"  // maximum z-index to ensure it's on top
+ll_root.style.top = "0"
+ll_root.style.left = "0"
+ll_root.style.zIndex = "99999"
 document.body.appendChild(ll_root)
 
 export const SHADOW_ROOT = ll_root.attachShadow({mode: "open"})
+
+// inject tailwind styles into shadow root
+const style = document.createElement("style")
+style.textContent = tailwind
+SHADOW_ROOT.appendChild(style)
+
 const root = createRoot(SHADOW_ROOT)
 
-root.render(InspectTextPopup())
+root.render(React.createElement(InspectTextPopup))
 
 chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (response?: MessageResponse) => void) => {
     console.log("Messaging", "Content script received message:", message, "from", sender);
@@ -55,6 +65,11 @@ export async function translatePage(tgt_lang_code: string): Promise<boolean> {
     // convert all text nodes within any article tags to the target language
     const articles = document.getElementsByTagName('article');
     for (let article of articles) {
+        // check if article has already been translated
+        if (article.classList.contains('lingolucid-translated')) {
+            console.log("Article already translated, skipping");
+            continue;
+        }
         const text_nodes: Text[] = [];
         const walker = document.createTreeWalker(article, NodeFilter.SHOW_TEXT, null);
         let node;
@@ -76,7 +91,10 @@ export async function translatePage(tgt_lang_code: string): Promise<boolean> {
                 console.error("Translation error for text:", og_text, error);
             }
         }
+        // add translated class to article to prevent re-translation
+        article.classList.add('lingolucid-translated');
     }
+    document.body.setAttribute("data-target-lang", tgt_lang_code);
     return true
 }
 
@@ -88,18 +106,29 @@ export async function translatePage(tgt_lang_code: string): Promise<boolean> {
 // ? ........................
 
 function addSelectionListenerToArticles() {
-    const ll_root = document.getElementById("lingolucid-root");
-    if (!ll_root) {
-        console.error("LingoLucid root element not found");
-        return;
-    }
     const articles = document.getElementsByTagName('article');
     for (let article of articles) {
         article.addEventListener('mouseup', (_e) => {
             const selection = window.getSelection();
             if (selection && selection.toString().length > 0) {
                 console.log("User selected text:", selection.toString());
-                ll_root.style.display = "block";
+
+                // set the position of the popup near the selection
+                const range = selection.getRangeAt(0);
+                const rect = range.getBoundingClientRect();
+
+                // root.render(React.createElement(InspectTextPopup, {
+                //     translation: selection.toString(),
+                //     top: rect.bottom + window.scrollY,
+                //     left: rect.left + window.scrollX,
+                //     closePopup: closePopup
+                // }))
+                updatePopupState({
+                    isVisible: true,
+                    translation: selection.toString(),
+                    top: rect.bottom + window.scrollY,
+                    left: rect.left + window.scrollX
+                });
             }
         })
     }

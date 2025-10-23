@@ -13,7 +13,17 @@ export async function downloadTranslationModel(tgt_lang_code: string, onProgress
         monitor(m: any) {
             m.addEventListener('downloadprogress', (e: { loaded: number }) => {
                 console.log(`Downloaded ${e.loaded * 100}%`);
-                onProgress(e.loaded)
+                onProgress(e.loaded * 0.5)
+            });
+        },
+    });
+    await Translator.create({
+        sourceLanguage: tgt_lang_code,
+        targetLanguage: "en",
+        monitor(m: any) {
+            m.addEventListener('downloadprogress', (e: { loaded: number }) => {
+                console.log(`Downloaded ${e.loaded * 100}%`);
+                onProgress(e.loaded * 0.5 + 0.5)
             });
         },
     });
@@ -31,4 +41,16 @@ export async function translateToTargetLanguage(text: string, target_lang_code: 
         targetLanguage: target_lang_code,
     });
     return await translator.translate(text)
+}
+
+export async function translateFromTargetLanguage(translation: string, tgt_lang_code: string): Promise<string | null> {
+    if (!chromeHasTranslator()) {
+        return null
+    }
+
+    const translator = await Translator.create({
+        sourceLanguage: tgt_lang_code,
+        targetLanguage: 'en',
+    });
+    return await translator.translate(translation)
 }

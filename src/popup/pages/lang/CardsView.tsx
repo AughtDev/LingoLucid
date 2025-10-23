@@ -3,7 +3,9 @@ import {Card, LanguageCards} from "../../../types/core.ts";
 import useAppContext from "../../context.tsx";
 import CardReviewModal from "../../modals/card-review";
 import {PRIMARY_COLOR} from "../../../constants/styling.ts";
-import {BookIcon} from "../../../constants/icons.tsx";
+import {BookIcon, DeleteIcon, SaveIcon} from "../../../constants/icons.tsx";
+import {deleteLanguageCardService, saveLanguageCardService} from "../../../utils/data/services.ts";
+import ConfirmationModal from "../../modals/confirmation";
 
 interface CardsViewProps {
     lang_code: string
@@ -70,17 +72,94 @@ function CardActions({actions}: CardActionsProps) {
 }
 
 interface CardPaneProps {
+    code: string
     card: Card
+    type: keyof LanguageCards
 }
 
-function CardPane({card}: CardPaneProps) {
+function CardPane({code, card, type}: CardPaneProps) {
+    const [is_hovered, setIsHovered] = React.useState<boolean>(false)
+    const card_ref = React.useRef<HTMLDivElement | null>(null);
+
+    const {modal: {openModal}} = useAppContext()
+
+    const deleteCard = React.useCallback(async () => {
+        openModal(
+            <ConfirmationModal
+                prompt={"Are you sure you want to delete this card? This action is permanent"}
+                onAccept={async () => {
+                    await deleteLanguageCardService(code, card.text, type).then(() => {
+                        console.log("Card deleted successfully");
+                    }).catch((error) => {
+                        console.error("Error deleting card:", error);
+                    });
+                }}
+                onReject={() => {
+                    console.log("Card deletion cancelled");
+                }}/>
+        )
+
+        // return await deleteLanguageCardService(code, card.text,type)
+    }, [code, card.text, type, openModal]);
+
+    const saveCard = React.useCallback(() => {
+        saveLanguageCardService(
+            code, {
+                text: card.text,
+                translation: card.translation,
+                reviews: []
+            }, "saved"
+        ).then(() => {
+            console.log("Card saved successfully");
+        }).catch((error) => {
+            console.error("Error saving card:", error);
+        })
+    }, [code, card.text, card.translation]);
+
+    React.useEffect(() => {
+        const card_elem = card_ref.current;
+        if (!card_elem) return;
+
+        const handleMouseEnter = () => setIsHovered(true);
+        const handleMouseLeave = () => setIsHovered(false);
+
+        card_elem.addEventListener("mouseenter", handleMouseEnter);
+        card_elem.addEventListener("mouseleave", handleMouseLeave);
+
+        return () => {
+            card_elem.removeEventListener("mouseenter", handleMouseEnter);
+            card_elem.removeEventListener("mouseleave", handleMouseLeave);
+        };
+    }, []);
+
     return (
         <div
+            ref={card_ref}
             style={{
                 backgroundColor: "white",
                 width: '300px'
             }}
-            className={"flex flex-col justify-center p-4 mb-2 mt-2 rounded-2xl"}>
+            className={"relative flex flex-col justify-center p-4 mb-2 mt-2 rounded-2xl"}>
+            {/* delete button */}
+            <div className={"absolute top-0 right-0 flex flex-row gap-2 justify-center items-center m-2"}>
+                {is_hovered && (
+                    <button
+                        onClick={deleteCard}>
+                        <div className={"flex flex-row gap-2"}>
+                            <DeleteIcon size={24}/>
+                        </div>
+                    </button>
+                )}
+
+                {is_hovered && type === "recent" && (
+                    <button
+                        onClick={saveCard}>
+                        <div className={"flex flex-row gap-2"}>
+                            <SaveIcon size={24}/>
+                        </div>
+                    </button>
+                )}
+            </div>
             <p className={"text-md font-semibold p-1 text-center"}>{card.text}</p>
             <hr style={{width: "70%", opacity: 0.1}}/>
             <p className={"text-md text-gray-600 p-1 text-center"}>{card.translation}</p>
@@ -128,7 +207,14 @@ export default function CardsView({lang_code, cards}: CardsViewProps) {
                     height: "calc(590px - 108px)"
                 }}
                 className={"w-full flex flex-col items-center overflow-y-auto"}>
-                {active_cards.length > 0 ? active_cards.map(card => <CardPane card={card}/>) : (
+                {active_cards.length > 0 ? active_cards.map(card => (
+                    <CardPane
+                        key={card.text}
+                        card={card}
+                        code={lang_code}
+                        type={active_tab === "recent" ? "recent" : "saved"}
+                    />
+                )) : (
                     <div className={"w-full h-full flex flex-col items-center justify-center gap-2"}>
                         <p className={"text-gray-500 text-lg text-center"}>
                             {active_tab === "recent" ? "No recent cards collected yet." : "No saved cards yet."}

@@ -39,6 +39,12 @@ export async function saveLanguageSettingsService(code: string, data: LanguageSe
 export async function saveLanguageCardService(code: string, data: Card, type: 'saved' | 'recent') {
     const lang = await getLanguageFromLocalStorage(code)
     if (lang) {
+        // make sure that a card with the same text doesn't already exist in the specified type
+        const existing_card = lang.cards[type].find(c => c.text === data.text)
+        if (existing_card) {
+            console.log("service", `Card with text "${data.text}" already exists in ${type} cards for language ${code}`)
+            return false
+        }
         lang.cards[type].push(data)
         return await saveLanguageToLocalStorage(code, lang)
     }
@@ -56,6 +62,15 @@ export async function recordCardReviewService(code: string, cardText: string, re
                 return await saveLanguageToLocalStorage(code, lang)
             }
         }
+    }
+    return false
+}
+
+export async function deleteLanguageCardService(code: string, cardText: string, type: 'saved' | 'recent') {
+    const lang = await getLanguageFromLocalStorage(code)
+    if (lang) {
+        lang.cards[type] = lang.cards[type].filter(c => c.text !== cardText)
+        return await saveLanguageToLocalStorage(code, lang)
     }
     return false
 }
