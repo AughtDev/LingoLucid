@@ -47,6 +47,7 @@ export function useLanguages(): LanguagesHookReturn {
                     map.set(lang.code, lang)
                 }
             })
+            console.log("initializing languages hook", map)
             setLanguages(map)
         }).finally(() => {
 

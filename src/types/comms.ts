@@ -2,6 +2,7 @@ import {LanguageCards} from "./core.ts";
 
 export enum MessageType {
     TRANSLATE_PAGE,
+    CHECK_IF_TRANSLATED,
     SAVE_CARD
 }
 

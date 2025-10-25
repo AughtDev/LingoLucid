@@ -2,7 +2,7 @@ import React from 'react';
 import {getActiveTabId, setCurrentLanguageService} from "../../../utils/data/services.ts";
 import useAppContext from "../../context.tsx";
 import CardsView from "./CardsView.tsx";
-import {HomeIcon, SettingsIcon} from "../../../constants/icons.tsx";
+import {HomeIcon, SettingsIcon, TranslateIcon} from "../../../constants/icons.tsx";
 import LanguageSettingsModal from "../../modals/language-settings";
 import {MessageResponse, MessageType, TranslationPayload} from "../../../types/comms.ts";
 
@@ -11,12 +11,14 @@ interface LangPageProps {
 }
 
 enum PageStatus {
+    Loading,
+    Untranslated,
     Translating,
     Ready,
     Error
 }
 
-export function translatePageService(lang_code: string, onSuccess: () => void, onFailure: () => void) {
+function translatePageService(lang_code: string, onSuccess: () => void, onFailure: () => void) {
     getActiveTabId().then((activeTabId) => {
         if (activeTabId === null) {
             return false;
@@ -39,22 +41,58 @@ export function translatePageService(lang_code: string, onSuccess: () => void, o
     })
 }
 
+async function checkIfPageTranslatedService(): Promise<boolean> {
+    return new Promise((resolve) => {
+        getActiveTabId().then((activeTabId) => {
+            if (activeTabId === null) {
+                resolve(false);
+                return;
+            }
+            console.log("service", `Checking if page is already translated`);
+            chrome.tabs.sendMessage(activeTabId, {
+                type: MessageType.CHECK_IF_TRANSLATED
+            }, (res: MessageResponse<boolean>) => {
+                if (res.is_success && res.data !== undefined) {
+                    console.log('service', `Page translation status: ${res.data}`);
+                    resolve(res.data);
+                } else {
+                    console.error('service', `Failed to check page translation status:`, res.error_message);
+                    resolve(false);
+                }
+            })
+        })
+    })
+}
+
+
+
 export default function LangPage({code}: LangPageProps) {
-    const [page_status, setPageStatus] = React.useState<PageStatus>(PageStatus.Translating)
+    const [page_status, setPageStatus] = React.useState<PageStatus>(PageStatus.Loading)
 
     const {nav: {goToPage}, modal: {openModal}, data: {languages}} = useAppContext()
     const lang = languages.get(code)
 
     React.useEffect(() => {
+        // check if page is already translated
+        checkIfPageTranslatedService().then((is_translated) => {
+            if (is_translated) {
+                setPageStatus(PageStatus.Ready);
+            } else {
+                setPageStatus(PageStatus.Untranslated);
+            }
+        })
+    }, []);
+    const translatePage = React.useCallback(() => {
         // set lang as current language
         if (!lang) return;
-        translatePageService(code, () => {
-            setCurrentLanguageService(code).then()
+        setPageStatus(PageStatus.Translating)
+        translatePageService(code, async () => {
+            await setCurrentLanguageService(code).then()
             setPageStatus(PageStatus.Ready);
         }, () => {
             setPageStatus(PageStatus.Error);
         })
-    }, [lang]);
+    }, [lang, code, setPageStatus]);
 
     const onClickSettings = React.useCallback(() => {
         if (!lang) return;
@@ -67,6 +105,10 @@ export default function LangPage({code}: LangPageProps) {
                 <img src={"./icons/icon128.png"} alt={"LingoLucid Logo"} className={"h-14 w-14"}/>
             </div>
             <div className={"absolute flex flex-row gap-4 items-center justify-center top-0 right-0 p-2"}>
+                {/*<button*/}
+                {/*    onClick={translate}>*/}
+                {/*    <PlayIcon size={"20px"}/>*/}
+                {/*</button>*/}
                 <button
                     onClick={onClickSettings}>
                     <SettingsIcon size={"20px"}/>
@@ -86,23 +128,35 @@ export default function LangPage({code}: LangPageProps) {
                         </h1>
                     </div>
 
-                    {page_status === PageStatus.Translating ? (
-                        <div className={"flex flex-grow w-full items-center justify-center"}>
-                            <p className={"text-gray-500 text-lg text-center"}>
-                                Translating page...
-                            </p>
-                        </div>
-                    ) : page_status === PageStatus.Error ? (
-                        <div className={"flex flex-grow w-full items-center justify-center"}>
-                            <p className={"text-gray-500 text-lg text-center"}>
-                                Error translating page. Please try again later.
-                            </p>
-                        </div>
-                    ) : (
-                        <div className={"flex-grow w-full items-center"}>
-                            <CardsView lang_code={code} cards={lang.cards}/>
-                        </div>
-                    )}
+                    {page_status === PageStatus.Untranslated ? (
+                            <div className={"flex flex-grow w-full items-center justify-center"}>
+                                <button onClick={translatePage}>
+                                    <div className={"flex flex-col items-center justify-center"}>
+                                        <TranslateIcon size={64} color={"black"}/>
+                                        <p className={"text-gray-500 text-lg text-center mt-2"}>
+                                            Translate Page
+                                        </p>
+                                    </div>
+                                </button>
+                            </div>
+                        ) :
+                        page_status === PageStatus.Translating ? (
+                            <div className={"flex flex-grow w-full items-center justify-center"}>
+                                <p className={"text-gray-500 text-lg text-center"}>
+                                    Translating page...
+                                </p>
+                            </div>
+                        ) : page_status === PageStatus.Error ? (
+                            <div className={"flex flex-grow w-full items-center justify-center"}>
+                                <p className={"text-gray-500 text-lg text-center"}>
+                                    Error translating page. Please try again later.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className={"flex-grow w-full items-center"}>
+                                <CardsView lang_code={code} cards={lang.cards}/>
+                            </div>
+                        )}
                 </>
             ) : (
                 <div className={"flex justify-center items-center h-full w-full"}>

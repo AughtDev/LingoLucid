@@ -49,6 +49,10 @@ chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (r
             });
             return true
 
+        case MessageType.CHECK_IF_TRANSLATED:
+            const is_translated = document.body.getAttribute('data-target-lang') !== null;
+            sendResponse({is_success: true, data: is_translated});
+            break;
 
         default:
             console.warn('Content Script: Unknown message type:', message.type);
@@ -73,8 +77,15 @@ export async function translatePage(tgt_lang_code: string): Promise<boolean> {
         const text_nodes: Text[] = [];
         const walker = document.createTreeWalker(article, NodeFilter.SHOW_TEXT, null);
         let node;
+        // only the first 200 words for testing
+        let word_count = 0;
         while (node = walker.nextNode()) {
             text_nodes.push(node as Text);
+            word_count += (node.nodeValue || '').split(' ').length;
+            if (word_count >= 200) {
+                console.log("Reached word limit for translation, stopping");
+                break;
+            }
         }
 
         for (let text_node of text_nodes) {
@@ -133,6 +144,23 @@ function addSelectionListenerToArticles() {
         })
     }
 }
+
+// on clicking outside the popup, hide the popup
+// document.addEventListener('click', (e) => {
+//     const ll_root_elem = SHADOW_ROOT.host;
+//     if (!ll_root_elem.contains(e.target as Node)) {
+//         // hide the popup
+//         updatePopupState({
+//             isVisible: false
+//         });
+//     }
+// })
+// // or scrolling the page
+// window.addEventListener("scroll", () => {
+//     updatePopupState({
+//         isVisible: false
+//     });
+// });
 
 
 // ? ........................

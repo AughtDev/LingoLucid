@@ -9,7 +9,7 @@ export async function initializeService() {
     // for each language, check if it's there, if not, create it with default settings
     for (const lang of Object.values(INITIAL_LANGUAGES)) {
         const storedLang = await getLanguageFromLocalStorage(lang.code)
-        if (storedLang) {
+        if (!storedLang) {
             await saveLanguageToLocalStorage(lang.code, lang)
             console.log("service", `Language ${lang.label} initialized`)
         } else {
@@ -28,9 +28,13 @@ export async function getLanguageService(code: string) {
 export async function saveLanguageSettingsService(code: string, data: LanguageSettings) {
     const lang = await getLanguageFromLocalStorage(code)
     if (lang) {
-        lang.settings = data
-        lang.progress.started = true
-        return await saveLanguageToLocalStorage(code, lang)
+        return await saveLanguageToLocalStorage(code, {
+            ...lang,
+            settings: {
+                ...lang.settings,
+                ...data
+            }
+        })
     }
     return false
 }
@@ -45,8 +49,13 @@ export async function saveLanguageCardService(code: string, data: Card, type: 's
             console.log("service", `Card with text "${data.text}" already exists in ${type} cards for language ${code}`)
             return false
         }
-        lang.cards[type].push(data)
-        return await saveLanguageToLocalStorage(code, lang)
+        return await saveLanguageToLocalStorage(code, {
+            ...lang,
+            cards: {
+                ...lang.cards,
+                [type]: [...lang.cards[type], data]
+            }
+        })
     }
     return false
 }
@@ -58,8 +67,17 @@ export async function recordCardReviewService(code: string, cardText: string, re
             const card = lang.cards[type].find(c => c.text === cardText)
             if (card) {
                 const now = Date.now()
-                card.reviews.push({dateT: now, review})
-                return await saveLanguageToLocalStorage(code, lang)
+                // card.reviews.push({dateT: now, review})
+                return await saveLanguageToLocalStorage(code, {
+                    ...lang,
+                    cards: {
+                        ...lang.cards,
+                        [type]: lang.cards[type].map(c => c.text === cardText ? {
+                            ...c,
+                            reviews: [...c.reviews, {dateT: now, review}]
+                        } : c)
+                    }
+                })
             }
         }
     }
@@ -69,8 +87,14 @@ export async function recordCardReviewService(code: string, cardText: string, re
 export async function deleteLanguageCardService(code: string, cardText: string, type: 'saved' | 'recent') {
     const lang = await getLanguageFromLocalStorage(code)
     if (lang) {
-        lang.cards[type] = lang.cards[type].filter(c => c.text !== cardText)
-        return await saveLanguageToLocalStorage(code, lang)
+        // lang.cards[type] = lang.cards[type].filter(c => c.text !== cardText)
+        return await saveLanguageToLocalStorage(code, {
+            ...lang,
+            cards: {
+                ...lang.cards,
+                [type]: lang.cards[type].filter(c => c.text !== cardText)
+            }
+        })
     }
     return false
 }

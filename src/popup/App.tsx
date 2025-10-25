@@ -7,7 +7,6 @@ import LangPage from "./pages/lang";
 import {useLanguages} from "./hooks/useLanguages.tsx";
 
 
-
 const PAGES: { id: string, content: () => React.ReactElement }[] = [
     {id: "home", content: HomePage},
     ...(Object.values(INITIAL_LANGUAGES).map(({code}) => ({
@@ -20,7 +19,7 @@ console.log("PAGES:", PAGES);
 
 const getCurrentUrl = async (): Promise<string | null> => {
     try {
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
         return tab.url || null;
     } catch (error) {
         console.error('Error getting current URL:', error);
@@ -67,12 +66,20 @@ export default function App() {
         data: {languages}
     }), [loading, curr_page, setCurrPage, setModal, languages]);
 
+    const onClickModalBackground = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        // make sure that it's not the modal being clicked
+        if (e.target === e.currentTarget) {
+            setModal(null)
+        }
+    }, [setModal]);
+
     return (
         <AppContext.Provider value={app_context}>
             <div style={{height: '590px'}} className={"relative w-full"}>
                 {modal ? (
                     <div style={{height: '600px', zIndex: 40}}
-                         className={"absolute w-full flex flex-col justify-center items-center backdrop-blur-sm bg-white/10"}>
+                         onClick={onClickModalBackground}
+                         className={"absolute w-full flex flex-col justify-center items-center backdrop-blur-sm bg-black/10"}>
                         {modal}
                     </div>
                 ) : null}

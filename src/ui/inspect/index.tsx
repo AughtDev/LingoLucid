@@ -5,6 +5,7 @@ import {translateFromTargetLanguage} from "../../ai/translation.ts";
 import {MessageType, SaveCardPayload} from "../../types/comms.ts";
 import {LanguageCards} from "../../types/core.ts";
 import {getPopupState, PopupState, subscribe, updatePopupState} from "./store.ts";
+import {SHADOW_ROOT} from "../../content.ts";
 
 // interface InspectTextPopupProps {
 //     translation: string;
@@ -76,7 +77,7 @@ export function InspectTextPopup() {
     // add on click listeners to close the popup when clicking outside of it of scrolling the page
     React.useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            const popup = document.getElementById("inspect-popup");
+            const popup = SHADOW_ROOT.getElementById("inspect-popup-container");
             if (popup && !popup.contains(event.target as Node)) {
                 closePopup();
             }
@@ -102,18 +103,25 @@ export function InspectTextPopup() {
     return (
         <div
             id={"inspect-popup-container"}
-            className={"flex flex-col items-start justify-center pl-2"}
+            className={"flex flex-col items-start justify-center"}
             style={{
                 position: "absolute",
                 backgroundColor: BACKGROUND_COLOR,
                 borderRadius: "1rem",
                 padding: "1rem",
+                paddingLeft: "2rem",
+                paddingRight: "2rem",
                 width: "300px",
                 top: state.top,
                 left: state.left,
             }}>
             {/* close button */}
-            <div className={"absolute top-0 left-0 m-2"}>
+            <div
+                style={{
+                    top: "-10px",
+                    left: 0
+                }}
+                className={"absolute m-2.5"}>
                 <button
                     className={"text-sm text-gray-500 hover:text-gray-700"}
                     onClick={closePopup}>

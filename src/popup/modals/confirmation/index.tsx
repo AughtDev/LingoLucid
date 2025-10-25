@@ -1,5 +1,5 @@
 import React from 'react';
-import {BACKGROUND_COLOR} from "../../../constants/styling.ts";
+import {BACKGROUND_COLOR, PRIMARY_COLOR} from "../../../constants/styling.ts";
 import {CloseIcon} from "../../../constants/icons.tsx";
 import useAppContext from "../../context.tsx";
 
@@ -25,17 +25,33 @@ export default function ConfirmationModal({prompt, onAccept, onReject}: Confirma
                     <CloseIcon size={16}/>
                 </button>
             </div>
-            <div className={"h-2/3 w-full flex flex-col justify-center items-center"}>
-                <p className={"text-md text-center"}>{prompt}</p>
+            <div className={"w-full flex flex-col justify-center items-center pb-4"}>
+                <p
+                    style={{fontSize: "14px"}}
+                    className={"text-center text-gray-800 font-semibold"}>{prompt}</p>
             </div>
             <div className={"w-full flex flex-row justify-around items-center gap-4"}>
                 <button
-                    className={"px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"}
-                    onClick={onReject}>Cancel
+                    className={"px-4 py-2 rounded-xl transition-colors"}
+                    style={{
+                        border: `2px solid ${PRIMARY_COLOR}`,
+                        backgroundColor: BACKGROUND_COLOR,
+                        color: PRIMARY_COLOR
+                    }}
+                    onClick={() => {
+                        onReject()
+                        closeModal()
+                    }}>Cancel
                 </button>
                 <button
-                    className={"px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"}
-                    onClick={onAccept}>Confirm
+                    className={"px-4 py-2 text-white rounded-xl transition-colors"}
+                    style={{
+                        backgroundColor: PRIMARY_COLOR
+                    }}
+                    onClick={() => {
+                        onAccept()
+                        closeModal()
+                    }}>Confirm
                 </button>
             </div>
         </div>

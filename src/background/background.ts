@@ -11,7 +11,8 @@ chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (r
             saveLanguageCardService(payload.lang_code, {
                 text: payload.text,
                 translation: payload.translation,
-                reviews: []
+                reviews: [],
+                created_at_t: Date.now()
             }, payload.type).then(() => {
                 console.log("Background: Card saved successfully");
                 sendResponse({is_success: true});

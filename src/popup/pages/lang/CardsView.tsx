@@ -107,7 +107,8 @@ function CardPane({code, card, type}: CardPaneProps) {
             code, {
                 text: card.text,
                 translation: card.translation,
-                reviews: []
+                reviews: [],
+                created_at_t: Date.now()
             }, "saved"
         ).then(() => {
             console.log("Card saved successfully");
@@ -146,7 +147,7 @@ function CardPane({code, card, type}: CardPaneProps) {
                     <button
                         onClick={deleteCard}>
                         <div className={"flex flex-row gap-2"}>
-                            <DeleteIcon size={24}/>
+                            <DeleteIcon size={16}/>
                         </div>
                     </button>
                 )}
@@ -155,7 +156,7 @@ function CardPane({code, card, type}: CardPaneProps) {
                     <button
                         onClick={saveCard}>
                         <div className={"flex flex-row gap-2"}>
-                            <SaveIcon size={24}/>
+                            <SaveIcon size={16}/>
                         </div>
                     </button>
                 )}
@@ -182,7 +183,9 @@ export default function CardsView({lang_code, cards}: CardsViewProps) {
     }, [openModal, lang_code, active_tab, cards.recent, cards.saved]);
 
     const active_cards = React.useMemo(() => {
-        return active_tab === "recent" ? cards.recent : cards.saved
+        return (active_tab === "recent" ? cards.recent : cards.saved)
+            // sort by created date, latest to earliest
+            .sort((a, b) => b.created_at_t - a.created_at_t)
     }, [active_tab, cards.recent, cards.saved]);
 
     return (

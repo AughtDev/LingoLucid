@@ -26,6 +26,7 @@ export interface Language {
 export interface Card {
     text: string
     translation: string
+    created_at_t: number
     reviews: CardReview[]
 }
 
