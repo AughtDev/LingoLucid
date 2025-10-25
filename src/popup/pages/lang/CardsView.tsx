@@ -5,7 +5,7 @@ import CardReviewModal from "../../modals/card-review";
 import {PRIMARY_COLOR} from "../../../constants/styling.ts";
 import {BookIcon, DeleteIcon, SaveIcon} from "../../../constants/icons.tsx";
 import {deleteLanguageCardService, saveLanguageCardService} from "../../../utils/data/services.ts";
-import ConfirmationModal from "../../modals/confirmation";
+import Button from "../../../components/Button.tsx";
 
 interface CardsViewProps {
     lang_code: string
@@ -81,27 +81,6 @@ function CardPane({code, card, type}: CardPaneProps) {
     const [is_hovered, setIsHovered] = React.useState<boolean>(false)
     const card_ref = React.useRef<HTMLDivElement | null>(null);
 
-    const {modal: {openModal}} = useAppContext()
-
-    const deleteCard = React.useCallback(async () => {
-        openModal(
-            <ConfirmationModal
-                prompt={"Are you sure you want to delete this card? This action is permanent"}
-                onAccept={async () => {
-                    await deleteLanguageCardService(code, card.text, type).then(() => {
-                        console.log("Card deleted successfully");
-                    }).catch((error) => {
-                        console.error("Error deleting card:", error);
-                    });
-                }}
-                onReject={() => {
-                    console.log("Card deletion cancelled");
-                }}/>
-        )
-
-        // return await deleteLanguageCardService(code, card.text,type)
-    }, [code, card.text, type, openModal]);
-
     const saveCard = React.useCallback(() => {
         saveLanguageCardService(
             code, {
@@ -144,21 +123,22 @@ function CardPane({code, card, type}: CardPaneProps) {
             {/* delete button */}
             <div className={"absolute top-0 right-0 flex flex-row gap-2 justify-center items-center m-2"}>
                 {is_hovered && (
-                    <button
-                        onClick={deleteCard}>
-                        <div className={"flex flex-row gap-2"}>
-                            <DeleteIcon size={16}/>
-                        </div>
-                    </button>
+                    <Button
+                        variant={"icon"}
+                        confirmation_prompt={"Are you sure you want to delete this card? This action is permanent."}
+                        onClick={async () => {
+                            await deleteLanguageCardService(code, card.text, type).then(() => {
+                                console.log("Card deleted successfully");
+                            }).catch((error) => {
+                                console.error("Error deleting card:", error);
+                            });
+                        }} icon={DeleteIcon}/>
                 )}
 
                 {is_hovered && type === "recent" && (
-                    <button
-                        onClick={saveCard}>
-                        <div className={"flex flex-row gap-2"}>
-                            <SaveIcon size={16}/>
-                        </div>
-                    </button>
+                    <Button
+                        variant={"icon"}
+                        onClick={saveCard} icon={SaveIcon}/>
                 )}
             </div>
             <p className={"text-md font-semibold p-1 text-center"}>{card.text}</p>

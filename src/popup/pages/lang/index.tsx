@@ -5,6 +5,9 @@ import CardsView from "./CardsView.tsx";
 import {HomeIcon, SettingsIcon, TranslateIcon} from "../../../constants/icons.tsx";
 import LanguageSettingsModal from "../../modals/language-settings";
 import {MessageResponse, MessageType, TranslationPayload} from "../../../types/comms.ts";
+import Button from "../../../components/Button.tsx";
+import {Language} from "../../../types/core.ts";
+import {SnippetHighlightType} from "../../../ai/highlight.ts";
 
 interface LangPageProps {
     code: string
@@ -18,23 +21,40 @@ enum PageStatus {
     Error
 }
 
-function translatePageService(lang_code: string, onSuccess: () => void, onFailure: () => void) {
+function translatePageService(lang: Language, onSuccess: () => void, onFailure: () => void) {
     getActiveTabId().then((activeTabId) => {
         if (activeTabId === null) {
             return false;
         }
-        console.log("service", `Requesting translation of page to ${lang_code}`);
+
+        const highlight_map = new Map<string, SnippetHighlightType>();
+
+        lang.cards.saved.forEach(card => {
+            highlight_map.set(card.text, SnippetHighlightType.SAVED);
+        })
+
+        // for each recent card if not already in highlight_map, add it as RECENT
+        lang.cards.recent.forEach(card => {
+            if (!highlight_map.has(card.text)) {
+                highlight_map.set(card.text, SnippetHighlightType.NEW);
+            }
+        })
+
+        console.log("passing in highlight_map:", highlight_map);
+
+        console.log("service", `Requesting translation of page to ${lang.code}`);
         return chrome.tabs.sendMessage(activeTabId, {
             type: MessageType.TRANSLATE_PAGE,
             payload: {
-                tgt_lang_code: lang_code
+                tgt_lang_code: lang.code,
+                highlight_map: Array.from(highlight_map.entries()) as [string, SnippetHighlightType][]
             } satisfies TranslationPayload
         }, (res: MessageResponse) => {
             if (res.is_success) {
-                console.log('service', `Translation model for ${lang_code} downloaded successfully`);
+                console.log('service', `Translation model for ${lang.code} downloaded successfully`);
                 onSuccess()
             } else {
-                console.error('service', `Failed to download translation model for ${lang_code}:`, res.error_message);
+                console.error('service', `Failed to download translation model for ${lang.code}:`, res.error_message);
                 onFailure()
             }
         })
@@ -65,7 +85,6 @@ async function checkIfPageTranslatedService(): Promise<boolean> {
 }
 
 
-
 export default function LangPage({code}: LangPageProps) {
     const [page_status, setPageStatus] = React.useState<PageStatus>(PageStatus.Loading)
 
@@ -86,7 +105,7 @@ export default function LangPage({code}: LangPageProps) {
         // set lang as current language
         if (!lang) return;
         setPageStatus(PageStatus.Translating)
-        translatePageService(code, async () => {
+        translatePageService(lang, async () => {
             await setCurrentLanguageService(code).then()
             setPageStatus(PageStatus.Ready);
         }, () => {
@@ -105,18 +124,8 @@ export default function LangPage({code}: LangPageProps) {
                 <img src={"./icons/icon128.png"} alt={"LingoLucid Logo"} className={"h-14 w-14"}/>
             </div>
             <div className={"absolute flex flex-row gap-4 items-center justify-center top-0 right-0 p-2"}>
-                {/*<button*/}
-                {/*    onClick={translate}>*/}
-                {/*    <PlayIcon size={"20px"}/>*/}
-                {/*</button>*/}
-                <button
-                    onClick={onClickSettings}>
-                    <SettingsIcon size={"20px"}/>
-                </button>
-                <button
-                    onClick={() => goToPage("home")}>
-                    <HomeIcon size={"20px"}/>
-                </button>
+                <Button variant={"icon"} onClick={onClickSettings} icon={SettingsIcon} size={20}/>
+                <Button variant={"icon"} onClick={() => goToPage("home")} icon={HomeIcon} size={20}/>
             </div>
 
             {lang ? (

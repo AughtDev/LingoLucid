@@ -1,17 +1,24 @@
-// popupStore.ts
+export enum PopupType {
+    NONE, FULL, HOVER
+}
 
 // 1. Define the shape of your state
 export interface PopupState {
-    isVisible: boolean;
-    translation: string;
+    type: PopupType;
+    // isVisible: boolean;
+    text: string;
+    changeText: (newText: string) => void;
+    onSave: () => void;
     top: number;
     left: number;
 }
 
 // 2. Initial state
 let state: PopupState = {
-    isVisible: false,
-    translation: '',
+    type: PopupType.NONE,
+    text: '',
+    changeText: (_txt: string) => null,
+    onSave: () => null,
     top: 0,
     left: 0,
 };

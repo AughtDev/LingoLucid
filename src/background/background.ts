@@ -1,5 +1,5 @@
-import {Message, MessageResponse, MessageType, SaveCardPayload} from "../types/comms.ts";
-import {saveLanguageCardService} from "../utils/data/services.ts";
+import {GetCardsPayload, Message, MessageResponse, MessageType, SaveCardPayload} from "../types/comms.ts";
+import {getLanguageService, saveLanguageCardService} from "../utils/data/services.ts";
 
 chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (response?: MessageResponse) => void) => {
     console.log("Background: Received message:", message, "from", sender);
@@ -21,6 +21,21 @@ chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (r
                 sendResponse({is_success: false, error_message: error.message});
             });
             break;
+
+        case MessageType.GET_CARDS:
+            payload = message.payload as GetCardsPayload
+            getLanguageService(payload.lang_code).then((lang) => {
+                payload = message.payload as GetCardsPayload
+                if (!lang) {
+                    sendResponse({is_success: false, error_message: `Language ${payload.lang_code} not found`});
+                    return;
+                }
+                sendResponse({is_success: true, data: lang.cards[payload.type]});
+            }).catch((error) => {
+                console.error("Background: Error getting cards:", error);
+                sendResponse({is_success: false, error_message: error.message});
+            });
+            return true;
 
         default:
             console.warn('Background: Unknown message type:', message.type);
