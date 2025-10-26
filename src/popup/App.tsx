@@ -27,7 +27,7 @@ const getCurrentUrl = async (): Promise<string | null> => {
     }
 };
 export default function App() {
-    const {languages, loading} = useLanguages()
+    const {languages, init_log} = useLanguages()
 
     const [curr_page, setCurrPage] = React.useState<string>(PAGES[0].id);
     const [modal, setModal] = React.useState<React.ReactElement | null>(null)
@@ -46,9 +46,7 @@ export default function App() {
     }, []);
 
     const app_context: AppContextProps = React.useMemo(() => ({
-        meta: {
-            app_loading: loading
-        },
+        meta: init_log,
         nav: {
             curr_page: curr_page,
             goToPage: (page: string) => {
@@ -64,7 +62,7 @@ export default function App() {
             }
         },
         data: {languages}
-    }), [loading, curr_page, setCurrPage, setModal, languages]);
+    }), [curr_page, setCurrPage, setModal, languages, init_log]);
 
     const onClickModalBackground = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         // make sure that it's not the modal being clicked

@@ -6,7 +6,7 @@ import {HomeIcon, SettingsIcon, TranslateIcon} from "../../../constants/icons.ts
 import LanguageSettingsModal from "../../modals/language-settings";
 import {MessageResponse, MessageType, TranslationPayload} from "../../../types/comms.ts";
 import Button from "../../../components/Button.tsx";
-import {Language} from "../../../types/core.ts";
+import {Language, ProficiencyLevel} from "../../../types/core.ts";
 import {SnippetHighlightType} from "../../../ai/highlight.ts";
 
 interface LangPageProps {
@@ -19,6 +19,12 @@ enum PageStatus {
     Translating,
     Ready,
     Error
+}
+
+function masteryToProficiencyLevel(mastery: number): ProficiencyLevel {
+    const levels = ["a1", "a2", "b1", "b2", "c1", "c2"] as ProficiencyLevel[];
+    const index = Math.min(Math.floor(mastery * levels.length), levels.length - 1);
+    return levels[index];
 }
 
 function translatePageService(lang: Language, onSuccess: () => void, onFailure: () => void) {
@@ -47,7 +53,7 @@ function translatePageService(lang: Language, onSuccess: () => void, onFailure: 
             type: MessageType.TRANSLATE_PAGE,
             payload: {
                 tgt_lang_code: lang.code,
-                highlight_map: Array.from(highlight_map.entries()) as [string, SnippetHighlightType][]
+                tgt_proficiency: masteryToProficiencyLevel(lang.progress.mastery),
             } satisfies TranslationPayload
         }, (res: MessageResponse) => {
             if (res.is_success) {
@@ -57,6 +63,30 @@ function translatePageService(lang: Language, onSuccess: () => void, onFailure: 
                 console.error('service', `Failed to download translation model for ${lang.code}:`, res.error_message);
                 onFailure()
             }
+        })
+    })
+}
+
+
+export function highlightPageService(): Promise<void> {
+    return new Promise((resolve, reject) => {
+        getActiveTabId().then((activeTabId) => {
+            if (activeTabId === null) {
+                reject('No active tab');
+                return;
+            }
+            console.log("service", `Requesting page highlight`);
+            chrome.tabs.sendMessage(activeTabId, {
+                type: MessageType.HIGHLIGHT_PAGE
+            }, (res: MessageResponse) => {
+                if (res.is_success) {
+                    console.log('service', `Page highlighted successfully`);
+                    resolve();
+                } else {
+                    console.error('service', `Failed to highlight page:`, res.error_message);
+                    reject(res.error_message);
+                }
+            })
         })
     })
 }

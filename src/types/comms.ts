@@ -1,8 +1,8 @@
-import {LanguageCards} from "./core.ts";
-import {SnippetHighlightType} from "../ai/highlight.ts";
+import {LanguageCards, ProficiencyLevel} from "./core.ts";
 
 export enum MessageType {
     TRANSLATE_PAGE,
+    HIGHLIGHT_PAGE,
     CHECK_IF_TRANSLATED,
     SAVE_CARD,
     GET_CARDS
@@ -12,7 +12,7 @@ export enum MessageType {
 export interface TranslationPayload {
     // this is meant to be the language codes like 'en', 'es', 'fr', etc.
     tgt_lang_code: string;
-    highlight_map: [string, SnippetHighlightType][];
+    tgt_proficiency: ProficiencyLevel
 }
 
 export interface SaveCardPayload {
@@ -24,7 +24,6 @@ export interface SaveCardPayload {
 
 export interface GetCardsPayload {
     lang_code: string;
-    type: keyof LanguageCards
 }
 
 export interface Message<T = TranslationPayload | SaveCardPayload> {

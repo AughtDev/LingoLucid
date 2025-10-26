@@ -1,3 +1,5 @@
+import {LanguageCards} from "../types/core.ts";
+
 export interface SnippetHighlight {
     color: string; // e.g. '#FF0000'
     opacity: number; // e.g. 0.5
@@ -29,4 +31,19 @@ export function highlightTypeToStyle(type: SnippetHighlightType): SnippetHighlig
                 thickness: 2
             };
     }
+}
+
+
+export function cardsToHighlightMap(cards: LanguageCards): Map<string, SnippetHighlightType> {
+    const map = new Map<string, SnippetHighlightType>();
+
+    cards.saved.forEach(card => {
+        map.set(card.text, SnippetHighlightType.SAVED);
+    })
+
+    cards.recent.forEach(card => {
+        map.set(card.text, SnippetHighlightType.NEW);
+    })
+
+    return map;
 }

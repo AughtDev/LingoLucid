@@ -6,6 +6,7 @@ import {PRIMARY_COLOR} from "../../../constants/styling.ts";
 import {BookIcon, DeleteIcon, SaveIcon} from "../../../constants/icons.tsx";
 import {deleteLanguageCardService, saveLanguageCardService} from "../../../utils/data/services.ts";
 import Button from "../../../components/Button.tsx";
+import {highlightPageService} from "./index.tsx";
 
 interface CardsViewProps {
     lang_code: string
@@ -128,6 +129,7 @@ function CardPane({code, card, type}: CardPaneProps) {
                         confirmation_prompt={"Are you sure you want to delete this card? This action is permanent."}
                         onClick={async () => {
                             await deleteLanguageCardService(code, card.text, type).then(() => {
+                                highlightPageService()
                                 console.log("Card deleted successfully");
                             }).catch((error) => {
                                 console.error("Error deleting card:", error);

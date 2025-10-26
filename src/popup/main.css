@@ -16,9 +16,10 @@ body {
     background-color: #FFFAF0;
 }
 
-button:hover svg, button:hover svg path {
-    stroke: #FF9C66 !important;
-}
+/*button:hover svg, button:hover svg path {*/
+/*    stroke: #FF9C66 !important;*/
+/*}*/
+
 button svg {
     stroke: #333;
     transition: all 0.1s ease;

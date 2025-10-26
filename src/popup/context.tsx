@@ -1,10 +1,14 @@
 import React from "react";
 import {Language} from "../types/core.ts";
 
+export interface InitLog {
+    progress: number;
+    warnings: string[];
+    errors: string[];
+}
+
 export interface AppContextProps {
-    meta: {
-        app_loading: boolean
-    }
+    meta: InitLog,
     nav: {
         curr_page: string
         goToPage: (page: string) => void
@@ -20,7 +24,9 @@ export interface AppContextProps {
 
 export const AppContext = React.createContext<AppContextProps>({
     meta: {
-        app_loading: true
+        progress: 0,
+        warnings: [],
+        errors: []
     },
     modal: {
         openModal: (_modal: React.ReactElement) => null,

@@ -1,3 +1,5 @@
+export type ProficiencyLevel = "a1" | "a2" | "b1" | "b2" | "c1" | "c2"
+
 export interface LanguageSettings {
     skill_level: number // 0 to 10
     learning_pace: "slow" | "medium" | "fast"

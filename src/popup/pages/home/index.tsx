@@ -80,7 +80,7 @@ function LanguageSelector({lang}: LanguageSelectorProps) {
 }
 
 export default function HomePage() {
-    const {meta: {app_loading}, data: {languages}, modal: {openModal}} = useAppContext()
+    const {meta: {progress}, data: {languages}, modal: {openModal}} = useAppContext()
 
     console.log("languages are ", languages);
 
@@ -95,9 +95,9 @@ export default function HomePage() {
             <div className={"flex justify-center items-center h-2/5 w-full"}>
                 <img src={"./icons/icon128.png"} alt={"LingoLucid Logo"} className={"h-30 w-30"}/>
             </div>
-            {app_loading ? (
+            {progress < 1 ? (
                 <div className={"flex justify-center items-center h-2/3 w-full"}>
-                    <p>Loading...</p>
+                    <p>Loading... {(progress * 100).toFixed(2)}%</p>
                 </div>
             ) : (
                 <div className={"flex flex-col justify-center items-center h-3/5 w-full"}>

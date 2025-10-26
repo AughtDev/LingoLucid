@@ -5,22 +5,37 @@ export enum PopupType {
 // 1. Define the shape of your state
 export interface PopupState {
     type: PopupType;
-    // isVisible: boolean;
-    text: string;
-    changeText: (newText: string) => void;
-    onSave: () => void;
-    top: number;
-    left: number;
+    content: {
+        focus_text: string;
+        focus_range: Range | null;
+        focus_text_node: Text | null;
+    }
+    actions: {
+        changeFocusText: (newText: string) => void;
+        onSaveCard: () => void;
+    }
+    position: {
+        top: number;
+        left: number;
+    }
 }
 
 // 2. Initial state
 let state: PopupState = {
     type: PopupType.NONE,
-    text: '',
-    changeText: (_txt: string) => null,
-    onSave: () => null,
-    top: 0,
-    left: 0,
+    content: {
+        focus_text: '',
+        focus_range: null,
+        focus_text_node: null
+    },
+    actions: {
+        changeFocusText: (_txt: string) => null,
+        onSaveCard: () => null,
+    },
+    position: {
+        top: 0,
+        left: 0,
+    }
 };
 
 // 3. Simple list of subscribers (for force-updating the React component)

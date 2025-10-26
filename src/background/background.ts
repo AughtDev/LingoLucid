@@ -30,7 +30,7 @@ chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (r
                     sendResponse({is_success: false, error_message: `Language ${payload.lang_code} not found`});
                     return;
                 }
-                sendResponse({is_success: true, data: lang.cards[payload.type]});
+                sendResponse({is_success: true, data: lang.cards});
             }).catch((error) => {
                 console.error("Background: Error getting cards:", error);
                 sendResponse({is_success: false, error_message: error.message});
