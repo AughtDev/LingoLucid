@@ -1,3 +1,8 @@
+import {LanguageCards} from "../../types/core.ts";
+
+// region POPUP STATE
+// ? ........................
+
 export enum PopupType {
     NONE, FULL, HOVER
 }
@@ -48,7 +53,7 @@ export function getPopupState(): PopupState {
 
 // 5. Setter
 export function updatePopupState(newState: Partial<PopupState>) {
-    state = { ...state, ...newState };
+    state = {...state, ...newState};
     // Notify all listeners that the state has changed
     listeners.forEach(listener => listener());
 }
@@ -61,4 +66,23 @@ export function subscribe(listener: () => void) {
         const index = listeners.indexOf(listener);
         if (index > -1) listeners.splice(index, 1);
     };
+}
+
+// ? ........................
+// endregion ........................
+
+
+let cached_cards: LanguageCards = {
+    saved: [],
+    recent: []
+}
+
+export function getCachedCards(): LanguageCards {
+    console.log("fetching cached cards:", cached_cards);
+    return cached_cards;
+}
+
+export function updateCachedCards(new_cards: LanguageCards) {
+    console.log("updating cached cards to ", new_cards);
+    cached_cards = new_cards;
 }

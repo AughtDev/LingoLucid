@@ -3,6 +3,7 @@ import {translateToTargetLanguage} from "../../ai/translation.ts";
 import {GetCardsPayload, MessageResponse, MessageType} from "../../types/comms.ts";
 import {LanguageCards, ProficiencyLevel} from "../../types/core.ts";
 import {simplifyTranslatedText} from "../../ai/simplify.ts";
+import {updateCachedCards} from "../inspect/store.ts";
 
 export async function translatePage(tgt_lang_code: string, tgt_level: ProficiencyLevel): Promise<boolean> {
     // convert all text nodes within any article tags to the target language
@@ -79,6 +80,7 @@ export async function highlightPage(): Promise<void> {
     }).then((response: MessageResponse<LanguageCards>) => {
         console.log("response is ", response);
         if (response.is_success && response.data) {
+            updateCachedCards(response.data)
             return cardsToHighlightMap(response.data)
         }
         return null

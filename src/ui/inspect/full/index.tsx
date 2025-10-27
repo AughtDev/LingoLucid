@@ -6,6 +6,7 @@ import {CloseIcon, SaveIcon} from "../../../constants/icons.tsx";
 import {saveCardToLocalStorage} from "../utils.ts";
 import {translateFromTargetLanguage} from "../../../ai/translation.ts";
 import {highlightPage} from "../../content/page_actions.ts";
+// import {simplifyText} from "../index.tsx";
 
 interface FullInspectPopupProps {
     state: PopupState
@@ -39,6 +40,14 @@ export default function FullInspectPopup({state} : FullInspectPopupProps) {
             console.error("Error saving card:", error);
         });
     }, [text, state.content.focus_text]);
+
+    // const onClickSimplify = React.useCallback(() => {
+    //     simplifyText(
+    //         state.content.focus_text,
+    //         state.content.focus_text_node,
+    //         state.content.focus_range
+    //     )
+    // }, [state.content.focus_range, state.content.focus_text]);
 
 
     React.useEffect(() => {
@@ -112,7 +121,8 @@ export default function FullInspectPopup({state} : FullInspectPopupProps) {
                 <Button variant={"icon"} onClick={closePopup} icon={CloseIcon} size={12}/>
             </div>
             {/* save button */}
-            <div className={"absolute top-0 right-0 m-2"}>
+            <div className={"absolute top-0 right-0 m-2 flex flex-row justify-center items-center gap-2"}>
+                {/*<Button variant={"icon"} onClick={onClickSimplify} icon={SimplifyIcon} size={24}/>*/}
                 <Button variant={"icon"} onClick={saveCard} icon={SaveIcon} size={24}/>
             </div>
 

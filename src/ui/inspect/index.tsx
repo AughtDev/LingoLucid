@@ -2,14 +2,28 @@ import React from "react";
 import {getPopupState, PopupState, PopupType, subscribe} from "./store.ts";
 import FullInspectPopup from "./full";
 import HoverInspectPopup from "./hover";
+import {highlightPage} from "../content/page_actions.ts";
 
-// interface InspectTextPopupProps {
-//     text: string;
-//     top: number;
-//     left: number;
-//     closePopup: () => void;
-// }
+export function simplifyText(
+    _text: string, text_node: Text | null, range: Range | null,
+){
+    // get the text node and range from state and simplify the text
+    // const text = state.content.focus_text
+    const simplified_text = "cheese"
 
+    if (!simplified_text || !text_node || !range) return;
+
+    // replace the matching text in the text node with the simplified text
+    const full_text = text_node.textContent || "";
+    const start_offset = range.startOffset;
+    const end_offset = range.endOffset;
+
+    const before_text = full_text.slice(0, start_offset);
+    const after_text = full_text.slice(end_offset);
+
+    text_node.textContent = before_text + simplified_text + after_text;
+    highlightPage().then()
+}
 
 export function InspectTextPopup() {
     const [state, setState] = React.useState<PopupState>(getPopupState())

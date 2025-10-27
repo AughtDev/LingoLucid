@@ -16,9 +16,12 @@ body {
     background-color: #FFFAF0;
 }
 
-/*button:hover svg, button:hover svg path {*/
-/*    stroke: #FF9C66 !important;*/
-/*}*/
+button:hover svg, button:hover svg path,circle {
+    /* darken the svg */
+    /*filter: brightness(0.7);*/
+    /*stroke: #FF9C66 !important;*/
+    /*fill: #FF9C66 !important;*/
+}
 
 button svg {
     stroke: #333;
@@ -116,4 +119,29 @@ button svg {
 .slider-track:hover ~ .slider-labels .slider-label {
     color: #333;
     font-weight: 500;
+}
+
+
+
+/* better scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    /*height: 8px;*/
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d28357;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #5ab45a;
+}
+
+::-webkit-scrollbar-button {
+    display: none;
 }

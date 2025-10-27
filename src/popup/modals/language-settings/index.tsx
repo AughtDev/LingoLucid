@@ -1,10 +1,11 @@
 import React from 'react';
 import {Language, LanguageSettings} from "../../../types/core.ts";
 import {Slider} from "../../../components/Slider.tsx";
-import {BACKGROUND_COLOR, PRIMARY_COLOR} from "../../../constants/styling.ts";
-import {saveLanguageSettingsService} from "../../../utils/data/services.ts";
-import {CloseIcon} from "../../../constants/icons.tsx";
+import {BACKGROUND_COLOR} from "../../../constants/styling.ts";
+import {clearLanguageDataService, saveLanguageSettingsService} from "../../../utils/data/services.ts";
+import {CloseIcon, SaveIcon} from "../../../constants/icons.tsx";
 import useAppContext from "../../context.tsx";
+import Button from "../../../components/Button.tsx";
 
 interface LanguageSettingsModalProps {
     language: Language
@@ -20,8 +21,12 @@ export default function LanguageSettingsModal({language}: LanguageSettingsModalP
         saveLanguageSettingsService(language.code, {
             skill_level: mastery,
             learning_pace: pace,
-        }).finally( closeModal )
+        }).finally(closeModal)
     }, [language.code, mastery, pace, closeModal]);
+
+    const wipeLanguageData = React.useCallback(async () => {
+        await clearLanguageDataService(language.code)
+    }, [language.code]);
 
 
     const mastery_options = React.useMemo(() => {
@@ -42,7 +47,7 @@ export default function LanguageSettingsModal({language}: LanguageSettingsModalP
                 backgroundColor: BACKGROUND_COLOR,
                 borderRadius: "12px"
             }}
-            className={"w-80 flex flex-col items-center p-4"}>
+            className={"w-80 flex flex-col items-center p-2"}>
             <div className={"absolute top-0 right-0 m-4"}>
                 <button
                     className={"text-sm text-gray-500 hover:text-gray-700"}
@@ -50,10 +55,13 @@ export default function LanguageSettingsModal({language}: LanguageSettingsModalP
                     <CloseIcon size={16}/>
                 </button>
             </div>
-            <h1 className={"font-semibold text-lg mb-4"}>{language.label} Language Settings</h1>
-            <div className={"flex-1 w-full flex flex-col items-center justify-center gap-4"}>
+            <div className={"w-full flex flex-row justify-between items-start mb-4"}>
+                <h1 className={"font-semibold text-lg ml-2"}>{language.label} Language Settings</h1>
+                <Button icon={SaveIcon} size={24} variant={"icon"} onClick={saveSettings}/>
+            </div>
+            <div className={"flex-1 w-full flex flex-col items-center justify-center gap-4 px-2 pt-1"}>
                 <div className={"w-65 mb-4 flex flex-col items-start justify-center"}>
-                    <p className={"text-md"}>Baseline Mastery</p>
+                    <p className={"text-md"}>Baseline Proficiency</p>
                     <Slider val={mastery}
                             setVal={setMastery} options={mastery_options}
                             visible_options={mastery_options.map((_, i) => i)}/>
@@ -68,18 +76,17 @@ export default function LanguageSettingsModal({language}: LanguageSettingsModalP
                             ]}/>
                 </div>
             </div>
-            <div className={"w-full flex flex-row justify-end items-center"}>
-                <button
-                    style={{
-                        backgroundColor: PRIMARY_COLOR
-                    }}
-                    onClick={saveSettings}
-                    className={"mt-4 px-2 py-1 text-white rounded-lg hover:brightness-50"}>
-                    <div className={"flex flex-row justify-center items-center"}>
-                        Save
-                        {/*<SaveIcon size={20} color={"white"}/>*/}
-                    </div>
-                </button>
+            <div className={"w-full pb-2 pt-1 flex flex-row justify-center items-center"}>
+                <Button
+                    variant={"solid"}
+                    onClick={wipeLanguageData}
+                    size={16}
+                    confirmation_prompt={
+                        "Are you sure you want to wipe all data for " + language.label + "? All your progress will be lost forever."
+                    }
+                    label={`Wipe ${language.label} Data`}
+                    class_name={"mt-4 px-2 py-1 text-white rounded-lg bg-red-900 hover:bg-red-600"}>
+                </Button>
             </div>
         </div>
     )

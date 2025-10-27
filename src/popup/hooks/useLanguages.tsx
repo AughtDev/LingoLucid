@@ -1,6 +1,6 @@
 import {Language} from "../../types/core.ts";
 import React from "react";
-import {getLanguageService} from "../../utils/data/services.ts";
+import {initializeService} from "../../utils/data/services.ts";
 import {INITIAL_LANGUAGES} from "../../constants/languages.ts";
 import {downloadRewriterModel} from "../../ai/simplify.ts";
 import {InitLog} from "../context.tsx";
@@ -63,10 +63,7 @@ export function useLanguages(): LanguagesHookReturn {
         })
 
         const map = new Map<string, Language>();
-        await Promise.all(
-            Object.values(INITIAL_LANGUAGES)
-                .map(l => getLanguageService(l.code))
-        ).then(res => {
+        await initializeService().then(res => {
             res.forEach(lang => {
                 if (lang) {
                     map.set(lang.code, lang)

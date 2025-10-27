@@ -1,5 +1,5 @@
 import React from 'react';
-import {IconProps} from "../constants/icons.tsx";
+import { IconProps} from "../constants/icons.tsx";
 import useAppContext from "../popup/context.tsx";
 import ConfirmationModal from "../popup/modals/confirmation";
 import SpinLoader from "./SpinLoader.tsx";
@@ -36,13 +36,14 @@ interface ButtonStyling {
     br: number,
     // icon size
     is: number,
+    ic: string
 }
 
 export default function Button({
                                    label,
                                    icon: Icon,
-                                   size = 16,
-    tooltip_label,
+                                   size = 14,
+                                   tooltip_label,
                                    variant,
                                    confirmation_prompt,
                                    onClick,
@@ -98,18 +99,19 @@ export default function Button({
     }, [button_ref, setHovering]);
 
     const {
-        bg, b, bc, tc, py, px, fs, br,is
+        bg, b, bc, tc, py, px, fs, br, is, ic
     }: ButtonStyling = React.useMemo(() => {
         const default_styling: ButtonStyling = {
             bg: SECONDARY_COLOR,
             b: 0,
             bc: 'transparent',
             tc: '#fff',
-            py: 2,
-            px: 4,
+            py: size / 2,
+            px: size,
             fs: size,
-            br: 8,
+            br: size,
             is: size,
+            ic: hovering ? SECONDARY_COLOR : '#323',
         }
 
         switch (variant) {
@@ -131,7 +133,7 @@ export default function Button({
                     ...default_styling,
                     bg: 'transparent',
                     tc: hovering ? PRIMARY_COLOR : SECONDARY_COLOR,
-                    px: 2,
+                    px: 2, py: 2,
                 };
             case "ghost":
                 return {
@@ -170,7 +172,9 @@ export default function Button({
                     }}>
                     {label}
                 </p>}
-                {loading ? <SpinLoader size={`${is}px`}/> : Icon ? <Icon color={tc} size={`${is}px`}/> : null}
+                {loading ? <SpinLoader size={`${is}px`}/> : Icon ? (
+                    <Icon color={ic} size={`${is}px`}/>
+                ) : null}
             </div>
         </button>
     )

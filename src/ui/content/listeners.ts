@@ -3,6 +3,7 @@ import {getPopupState, PopupType, updatePopupState} from "../inspect/store.ts";
 
 let popup_delay_timer: number | null = null;
 const HOVER_DELAY = 1000; // milliseconds
+const HOVER_DETECT_PADDING = 3 // 5px
 
 export function wordHoverListener(e: MouseEvent) {
     if (popup_delay_timer) {
@@ -33,7 +34,8 @@ export function wordHoverListener(e: MouseEvent) {
             console.log("No visible rects for hovered text");
             return;
         }
-        const hit = rects.find(r => coords.x >= r.left - 1 && coords.x <= r.right + 1 && coords.y >= r.top - 1 && coords.y <= r.bottom + 1);
+        const pd = HOVER_DETECT_PADDING
+        const hit = rects.find(r => coords.x >= r.left - pd && coords.x <= r.right + pd && coords.y >= r.top - pd && coords.y <= r.bottom + pd);
 
         if (!hit) {
             console.log("Not actually hovering over visible text");

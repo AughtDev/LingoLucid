@@ -18,7 +18,7 @@ export default function ConfirmationModal({prompt, onAccept, onReject}: Confirma
             style={{
                 backgroundColor: BACKGROUND_COLOR,
                 borderRadius: "12px"
-            }} className={"w-80 flex flex-col items-center justify-center gap-2 p-4"}>
+            }} className={"w-80 flex flex-col items-center justify-center gap-2 px-4 py-6"}>
             <div className={"absolute top-0 right-0 m-4"}>
                 <button
                     className={"text-sm text-gray-500 hover:text-gray-700"}
@@ -31,7 +31,7 @@ export default function ConfirmationModal({prompt, onAccept, onReject}: Confirma
                     style={{fontSize: "14px"}}
                     className={"text-center text-gray-800 font-semibold"}>{prompt}</p>
             </div>
-            <div className={"w-full flex flex-row justify-around items-center gap-4"}>
+            <div className={"w-full flex flex-row justify-around items-center"}>
                 <Button variant={"outline"} onClick={() => {
                     onReject()
                     closeModal()

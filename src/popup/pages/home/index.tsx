@@ -3,7 +3,9 @@ import useAppContext from "../../context.tsx";
 import LanguageSetupModal from "../../modals/language-setup";
 import {Language} from "../../../types/core.ts";
 import AppInfoModal from "../../modals/app-info";
-import {InfoIcon, PlayIcon} from "../../../constants/icons.tsx";
+import {FilledPlayIcon, InfoIcon} from "../../../constants/icons.tsx";
+import {SECONDARY_COLOR} from "../../../constants/styling.ts";
+import {WarningsButton} from "../../modals/warning";
 
 interface LanguageSelectorProps {
     lang: Language
@@ -53,7 +55,7 @@ function LanguageSelector({lang}: LanguageSelectorProps) {
                             {Math.round((lang.progress.mastery || 0) * 100)}%
                         </span>
                     ) : (
-                        <PlayIcon size={24} color={"#9f9"}/>
+                        <FilledPlayIcon size={20} color={"#9f9"}/>
                     )
                 )}
             </div>
@@ -80,17 +82,22 @@ function LanguageSelector({lang}: LanguageSelectorProps) {
 }
 
 export default function HomePage() {
-    const {meta: {progress}, data: {languages}, modal: {openModal}} = useAppContext()
+    const {meta: {progress, warnings}, data: {languages}, modal: {openModal}} = useAppContext()
 
     console.log("languages are ", languages);
 
     return (
         <div className={"flex flex-col w-full h-full"}>
             <div className={"absolute top-4 right-4"}>
-                <button
-                    onClick={() => openModal(<AppInfoModal/>)}>
-                    <InfoIcon size={24} color={"#333"}/>
-                </button>
+                <div className={"flex flex-col justify-center items-center gap-4"}>
+                    <button
+                        onClick={() => openModal(<AppInfoModal/>)}>
+                        <InfoIcon size={24} color={SECONDARY_COLOR}/>
+                    </button>
+                    {warnings && (
+                        <WarningsButton warnings={warnings} size={24}/>
+                    )}
+                </div>
             </div>
             <div className={"flex justify-center items-center h-2/5 w-full"}>
                 <img src={"./icons/icon128.png"} alt={"LingoLucid Logo"} className={"h-30 w-30"}/>

@@ -22,11 +22,15 @@ export interface SaveCardPayload {
     type: keyof LanguageCards
 }
 
+export interface CheckIfTranslatedPayload {
+    lang_code: string
+}
+
 export interface GetCardsPayload {
     lang_code: string;
 }
 
-export interface Message<T = TranslationPayload | SaveCardPayload> {
+export interface Message<T = TranslationPayload | SaveCardPayload | CheckIfTranslatedPayload> {
     type: MessageType;
     payload?: T
 }

@@ -1,4 +1,4 @@
-import {Message, MessageResponse, MessageType, TranslationPayload} from "./types/comms.ts";
+import {CheckIfTranslatedPayload, Message, MessageResponse, MessageType, TranslationPayload} from "./types/comms.ts";
 import {createRoot} from "react-dom/client";
 import {InspectTextPopup} from "./ui/inspect";
 import tailwind from "./popup/main.css?inline"
@@ -73,7 +73,8 @@ chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (r
             return true
 
         case MessageType.CHECK_IF_TRANSLATED:
-            const is_translated = document.body.getAttribute('data-target-lang') !== null;
+            payload = message.payload as CheckIfTranslatedPayload
+            const is_translated = document.body.getAttribute('data-target-lang') === payload.lang_code;
             sendResponse({is_success: true, data: is_translated});
             break;
 

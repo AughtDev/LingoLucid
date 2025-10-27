@@ -1,23 +1,55 @@
 import {INITIAL_LANGUAGES} from "../../constants/languages.ts";
 import {getLanguageFromLocalStorage, saveLanguageToLocalStorage} from "./core.ts";
-import {AppConfig, Card, LanguageSettings} from "../../types/core.ts";
+import {AppConfig, Card, Language, LanguageSettings} from "../../types/core.ts";
 
 // region STORAGE
 // ? ........................
 
-export async function initializeService() {
+const RECENT_CARDS_EXPIRY_DAYS = 7
+
+export async function initializeService(): Promise<Language[]> {
+    const langs: Language[] = []
     // for each language, check if it's there, if not, create it with default settings
     for (const lang of Object.values(INITIAL_LANGUAGES)) {
         const storedLang = await getLanguageFromLocalStorage(lang.code)
         if (!storedLang) {
             await saveLanguageToLocalStorage(lang.code, lang)
+            langs.push(lang)
             console.log("service", `Language ${lang.label} initialized`)
         } else {
+            // check if any of recent cards are expired, if so, remove them and save the new language data
+            const now = Date.now()
+            const expiry_time = RECENT_CARDS_EXPIRY_DAYS * 24 * 60 * 60 * 1000
+            const filtered_recent_cards = storedLang.cards.recent.filter(card => {
+                if (card.reviews.length === 0) return true
+                const last_review_date = card.reviews[card.reviews.length - 1].dateT
+                return (now - last_review_date) <= expiry_time
+            })
+            if (filtered_recent_cards.length !== storedLang.cards.recent.length) {
+                const updated_lang: Language = {
+                    ...storedLang,
+                    cards: {
+                        ...storedLang.cards,
+                        recent: filtered_recent_cards
+                    }
+                }
+                const success = await saveLanguageToLocalStorage(lang.code, updated_lang)
+                console.log("service", `Language ${lang.label} recent cards cleaned up`)
+                if (success) {
+                    langs.push(updated_lang)
+                } else {
+                    console.warn("service", `Language ${lang.label} could not be updated after cleaning recent cards`)
+                    langs.push(storedLang)
+                }
+            } else {
+                langs.push(storedLang)
+            }
             console.log("service", `Language ${lang.label} already initialized`)
         }
     }
     // check if app config exists, if not, create it
     await getAppConfigService()
+    return langs
 }
 
 export async function getLanguageService(code: string) {
@@ -30,6 +62,10 @@ export async function saveLanguageSettingsService(code: string, data: LanguageSe
     if (lang) {
         return await saveLanguageToLocalStorage(code, {
             ...lang,
+            progress: {
+                ...lang.progress,
+                started: true
+            },
             settings: {
                 ...lang.settings,
                 ...data
@@ -127,6 +163,21 @@ export async function setCurrentLanguageService(code: string) {
     console.log('service', 'Current language set to', code, 'in app config');
 }
 
+export async function clearLanguageDataService(code: string) {
+    const init_lang = Object.values(INITIAL_LANGUAGES).find(lang => lang.code === code)
+    if (!init_lang) {
+        console.error('service', `Language with code ${code} not found in INITIAL_LANGUAGES`);
+        return false;
+    }
+
+   return await saveLanguageToLocalStorage(code, init_lang).then(() => {
+        console.log('service', `Language data for ${code} reset to initial state`);
+        return true;
+    }).catch((error) => {
+        console.error('service', `Error resetting language data for ${code}:`, error);
+        return false;
+    });
+}
 
 export async function clearAppDataService() {
     return chrome.storage.local.clear().then(() => {

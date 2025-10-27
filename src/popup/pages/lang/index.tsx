@@ -2,12 +2,13 @@ import React from 'react';
 import {getActiveTabId, setCurrentLanguageService} from "../../../utils/data/services.ts";
 import useAppContext from "../../context.tsx";
 import CardsView from "./CardsView.tsx";
-import {HomeIcon, SettingsIcon, TranslateIcon} from "../../../constants/icons.tsx";
+import {HomeIcon, IconHoverEffects, SettingsIcon, TranslateIcon} from "../../../constants/icons.tsx";
 import LanguageSettingsModal from "../../modals/language-settings";
-import {MessageResponse, MessageType, TranslationPayload} from "../../../types/comms.ts";
+import {CheckIfTranslatedPayload, MessageResponse, MessageType, TranslationPayload} from "../../../types/comms.ts";
 import Button from "../../../components/Button.tsx";
 import {Language, ProficiencyLevel} from "../../../types/core.ts";
 import {SnippetHighlightType} from "../../../ai/highlight.ts";
+import {WarningsButton} from "../../modals/warning";
 
 interface LangPageProps {
     code: string
@@ -91,7 +92,7 @@ export function highlightPageService(): Promise<void> {
     })
 }
 
-async function checkIfPageTranslatedService(): Promise<boolean> {
+async function checkIfPageTranslatedService(code: string): Promise<boolean> {
     return new Promise((resolve) => {
         getActiveTabId().then((activeTabId) => {
             if (activeTabId === null) {
@@ -100,7 +101,10 @@ async function checkIfPageTranslatedService(): Promise<boolean> {
             }
             console.log("service", `Checking if page is already translated`);
             chrome.tabs.sendMessage(activeTabId, {
-                type: MessageType.CHECK_IF_TRANSLATED
+                type: MessageType.CHECK_IF_TRANSLATED,
+                payload: {
+                    lang_code: code
+                } satisfies CheckIfTranslatedPayload
             }, (res: MessageResponse<boolean>) => {
                 if (res.is_success && res.data !== undefined) {
                     console.log('service', `Page translation status: ${res.data}`);
@@ -118,12 +122,12 @@ async function checkIfPageTranslatedService(): Promise<boolean> {
 export default function LangPage({code}: LangPageProps) {
     const [page_status, setPageStatus] = React.useState<PageStatus>(PageStatus.Loading)
 
-    const {nav: {goToPage}, modal: {openModal}, data: {languages}} = useAppContext()
+    const {meta: {warnings}, nav: {goToPage}, modal: {openModal}, data: {languages}} = useAppContext()
     const lang = languages.get(code)
 
     React.useEffect(() => {
         // check if page is already translated
-        checkIfPageTranslatedService().then((is_translated) => {
+        checkIfPageTranslatedService(code).then((is_translated) => {
             if (is_translated) {
                 setPageStatus(PageStatus.Ready);
             } else {
@@ -150,8 +154,13 @@ export default function LangPage({code}: LangPageProps) {
 
     return (
         <div className={"relative flex flex-col w-full h-full"}>
-            <div className={"absolute top-0 left-0 p-2"}>
-                <img src={"./icons/icon128.png"} alt={"LingoLucid Logo"} className={"h-14 w-14"}/>
+            <div className={"absolute top-0 left-0 p-2 flex flex-row justify-center items-start gap-4"}>
+                <img src={"./icons/icon128.png"} alt={"LingoLucid Logo"} className={"h-10 w-10"}/>
+                <div className={"pt-1"}>
+                {warnings && (
+                    <WarningsButton warnings={warnings} size={24}/>
+                )}
+                </div>
             </div>
             <div className={"absolute flex flex-row gap-4 items-center justify-center top-0 right-0 p-2"}>
                 <Button variant={"icon"} onClick={onClickSettings} icon={SettingsIcon} size={20}/>
@@ -171,7 +180,8 @@ export default function LangPage({code}: LangPageProps) {
                             <div className={"flex flex-grow w-full items-center justify-center"}>
                                 <button onClick={translatePage}>
                                     <div className={"flex flex-col items-center justify-center"}>
-                                        <TranslateIcon size={64} color={"black"}/>
+                                        <IconHoverEffects icon={TranslateIcon} size={64}/>
+                                        {/*<TranslateIcon size={64} color={"black"}/>*/}
                                         <p className={"text-gray-500 text-lg text-center mt-2"}>
                                             Translate Page
                                         </p>
