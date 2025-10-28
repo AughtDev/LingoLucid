@@ -1,5 +1,22 @@
 import {GetCardsPayload, Message, MessageResponse, MessageType, SaveCardPayload} from "../types/comms.ts";
-import {getLanguageService, saveLanguageCardService} from "../utils/data/services.ts";
+import {
+    getLanguageProficiencyLevelService,
+    getLanguageService,
+    saveLanguageCardService
+} from "../utils/data/services.ts";
+
+
+async function saveCard(payload: SaveCardPayload) {
+    const proficiency_level = await getLanguageProficiencyLevelService(payload.lang_code) ?? "a1"
+    return saveLanguageCardService(payload.lang_code, {
+        text: payload.text,
+        translation: payload.translation,
+        difficulty: proficiency_level,
+        reviews: [],
+        created_at_t: Date.now()
+    }, payload.type)
+
+}
 
 chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (response?: MessageResponse) => void) => {
     console.log("Background: Received message:", message, "from", sender);
@@ -8,19 +25,15 @@ chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (r
     switch (message.type) {
         case MessageType.SAVE_CARD:
             payload = message.payload as SaveCardPayload
-            saveLanguageCardService(payload.lang_code, {
-                text: payload.text,
-                translation: payload.translation,
-                reviews: [],
-                created_at_t: Date.now()
-            }, payload.type).then(() => {
-                console.log("Background: Card saved successfully");
-                sendResponse({is_success: true});
-            }).catch((error) => {
+            saveCard(payload)
+                .then(() => {
+                    console.log("Background: Card saved successfully");
+                    sendResponse({is_success: true});
+                }).catch((error) => {
                 console.error("Background: Error saving card:", error);
                 sendResponse({is_success: false, error_message: error.message});
             });
-            break;
+            return true
 
         case MessageType.GET_CARDS:
             payload = message.payload as GetCardsPayload

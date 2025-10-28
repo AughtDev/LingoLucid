@@ -1,6 +1,6 @@
 import {INITIAL_LANGUAGES} from "../../constants/languages.ts";
 import {getLanguageFromLocalStorage, saveLanguageToLocalStorage} from "./core.ts";
-import {AppConfig, Card, Language, LanguageSettings} from "../../types/core.ts";
+import {AppConfig, Card, CardReview, Language, LanguageSettings, ProficiencyLevel} from "../../types/core.ts";
 
 // region STORAGE
 // ? ........................
@@ -57,6 +57,9 @@ export async function getLanguageService(code: string) {
 }
 
 
+// region SETTINGS
+// ? ........................
+
 export async function saveLanguageSettingsService(code: string, data: LanguageSettings) {
     const lang = await getLanguageFromLocalStorage(code)
     if (lang) {
@@ -75,6 +78,20 @@ export async function saveLanguageSettingsService(code: string, data: LanguageSe
     return false
 }
 
+export async function getLanguageProficiencyLevelService(code: string): Promise<ProficiencyLevel | null> {
+    const lang = await getLanguageFromLocalStorage(code)
+    if (lang) {
+        return lang.settings.skill_level
+    }
+    return null
+}
+
+// ? ........................
+// endregion ........................
+
+
+// region CARDS
+// ? ........................
 
 export async function saveLanguageCardService(code: string, data: Card, type: 'saved' | 'recent') {
     const lang = await getLanguageFromLocalStorage(code)
@@ -96,7 +113,7 @@ export async function saveLanguageCardService(code: string, data: Card, type: 's
     return false
 }
 
-export async function recordCardReviewService(code: string, cardText: string, review: "easy" | "medium" | "hard") {
+export async function recordCardReviewService(code: string, cardText: string, review: CardReview["review"]) {
     const lang = await getLanguageFromLocalStorage(code)
     if (lang) {
         for (const type of ['saved', 'recent'] as ('saved' | 'recent')[]) {
@@ -134,6 +151,10 @@ export async function deleteLanguageCardService(code: string, cardText: string, 
     }
     return false
 }
+
+// ? ........................
+// endregion ........................
+
 
 export async function getAppConfigService(): Promise<AppConfig> {
     const result = await chrome.storage.local.get('app_config');

@@ -1,10 +1,15 @@
 import React from "react";
 import {Language} from "../types/core.ts";
 
+export interface Log {
+    title: string;
+    details: string;
+}
+
 export interface InitLog {
     progress: number;
-    warnings: string[];
-    errors: string[];
+    warnings: Log[];
+    errors: Log[];
 }
 
 export interface AppContextProps {

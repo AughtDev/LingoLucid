@@ -8,7 +8,7 @@ import {CheckIfTranslatedPayload, MessageResponse, MessageType, TranslationPaylo
 import Button from "../../../components/Button.tsx";
 import {Language, ProficiencyLevel} from "../../../types/core.ts";
 import {SnippetHighlightType} from "../../../ai/highlight.ts";
-import {WarningsButton} from "../../modals/warning";
+import {LogsButton} from "../../modals/logs";
 
 interface LangPageProps {
     code: string
@@ -122,7 +122,7 @@ async function checkIfPageTranslatedService(code: string): Promise<boolean> {
 export default function LangPage({code}: LangPageProps) {
     const [page_status, setPageStatus] = React.useState<PageStatus>(PageStatus.Loading)
 
-    const {meta: {warnings}, nav: {goToPage}, modal: {openModal}, data: {languages}} = useAppContext()
+    const {meta: {warnings, errors}, nav: {goToPage}, modal: {openModal}, data: {languages}} = useAppContext()
     const lang = languages.get(code)
 
     React.useEffect(() => {
@@ -157,9 +157,9 @@ export default function LangPage({code}: LangPageProps) {
             <div className={"absolute top-0 left-0 p-2 flex flex-row justify-center items-start gap-4"}>
                 <img src={"./icons/icon128.png"} alt={"LingoLucid Logo"} className={"h-10 w-10"}/>
                 <div className={"pt-1"}>
-                {warnings && (
-                    <WarningsButton warnings={warnings} size={24}/>
-                )}
+                    {warnings && (
+                        <LogsButton warnings={warnings} errors={errors} size={24}/>
+                    )}
                 </div>
             </div>
             <div className={"absolute flex flex-row gap-4 items-center justify-center top-0 right-0 p-2"}>
@@ -183,7 +183,8 @@ export default function LangPage({code}: LangPageProps) {
                                         <IconHoverEffects icon={TranslateIcon} size={64}/>
                                         {/*<TranslateIcon size={64} color={"black"}/>*/}
                                         <p className={"text-gray-500 text-lg text-center mt-2"}>
-                                            Translate Page
+                                            {/*Translate Page*/}
+                                            Begin
                                         </p>
                                     </div>
                                 </button>

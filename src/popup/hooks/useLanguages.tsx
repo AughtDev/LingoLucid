@@ -25,16 +25,16 @@ export function useLanguages(): LanguagesHookReturn {
         changes: { [p: string]: chrome.storage.StorageChange },
         areaName: chrome.storage.AreaName
     ) => void = React.useCallback((changes, area_name) => {
-            if (area_name === 'local') {
-                for (const key of Object.values(INITIAL_LANGUAGES).map(l => l.code)) {
-                    if (changes[key]) {
-                        const newData = changes[key].newValue as Language;
-                        setLanguages(prev => new Map(prev).set(key, newData));
-                        console.log("service", `Language ${key} updated from storage change`)
-                    }
+        if (area_name === 'local') {
+            for (const key of Object.values(INITIAL_LANGUAGES).map(l => l.code)) {
+                if (changes[key]) {
+                    const newData = changes[key].newValue as Language;
+                    setLanguages(prev => new Map(prev).set(key, newData));
+                    console.log("service", `Language ${key} updated from storage change`)
                 }
             }
-        }, [setLanguages]);
+        }
+    }, [setLanguages]);
 
     // Setup function to initialize extension
     const setupExtension = React.useCallback(async () => {
@@ -45,7 +45,11 @@ export function useLanguages(): LanguagesHookReturn {
                 setInitLog(prev => ({
                     ...prev,
                     progress: 0.9,
-                    warnings: [...prev.warnings, "Rewriter model could not be downloaded."]
+                    warnings: [...prev.warnings, {
+                        title: "Rewriter model could not be downloaded.",
+                        details: "The text will not be able to be simplified based on your proficiency level but if the translation models are available," +
+                            "you may still translate text, save cards and review them."
+                    }]
                 }))
             } else {
                 console.log("Rewriter model downloaded successfully.")
@@ -58,7 +62,11 @@ export function useLanguages(): LanguagesHookReturn {
             setInitLog(prev => ({
                 ...prev,
                 progress: 0.9,
-                warnings: [...prev.warnings, `Error downloading Rewriter model: ${err.message}`]
+                warnings: [...prev.warnings, {
+                    title: `Error downloading Rewriter model: ${err.message}`,
+                    details: "The text will not be able to be simplified based on your proficiency level but if the translation models are available," +
+                        "you may still translate text, save cards and review them."
+                }]
             }))
         })
 

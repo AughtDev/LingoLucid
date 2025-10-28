@@ -1,7 +1,7 @@
 export type ProficiencyLevel = "a1" | "a2" | "b1" | "b2" | "c1" | "c2"
 
 export interface LanguageSettings {
-    skill_level: number // 0 to 10
+    skill_level: ProficiencyLevel // 0 to 10
     learning_pace: "slow" | "medium" | "fast"
 }
 
@@ -12,7 +12,12 @@ export interface LanguageCards {
 
 export interface LanguageProgress {
     started: boolean
-    mastery: number // 0 - 1
+    mastery: number // 0-5: 0 is a1, 5 is c2
+    delta_queue: {
+        id: string,
+        datetime_t: number,
+        delta: number
+    }[]
 }
 
 
@@ -28,6 +33,7 @@ export interface Language {
 export interface Card {
     text: string
     translation: string
+    difficulty: ProficiencyLevel
     created_at_t: number
     reviews: CardReview[]
 }
@@ -35,7 +41,7 @@ export interface Card {
 
 export interface CardReview {
     dateT: number
-    review: "easy" | "medium" | "hard"
+    review: "easy" | "medium" | "hard" | "fail"
 }
 
 export interface AppConfig {

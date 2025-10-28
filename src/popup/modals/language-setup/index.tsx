@@ -1,9 +1,8 @@
 import React from 'react';
 import {Slider} from "../../../components/Slider.tsx";
-import {Language, LanguageSettings} from "../../../types/core.ts";
+import {Language, LanguageSettings, ProficiencyLevel} from "../../../types/core.ts";
 import {BACKGROUND_COLOR, PRIMARY_COLOR} from "../../../constants/styling.ts";
 import {saveLanguageSettingsService} from "../../../utils/data/services.ts";
-import {CloseIcon} from "../../../constants/icons.tsx";
 import useAppContext from "../../context.tsx";
 import {downloadTranslationModel} from "../../../ai/translation.ts";
 
@@ -16,13 +15,13 @@ export default function LanguageSetupModal({language}: LanguageSetupModalProps) 
 
     const [downloading_model_progress, setDownloadingModelProgress] = React.useState<number | null>(null)
 
-    const [mastery, setMastery] = React.useState<number>(1)
+    const [proficiency, setProficiency] = React.useState<ProficiencyLevel>("a1")
     const [pace, setPace] = React.useState<LanguageSettings["learning_pace"]>("medium")
 
 
     const onProceed = React.useCallback(() => {
         saveLanguageSettingsService(language.code, {
-            skill_level: mastery,
+            skill_level: proficiency,
             learning_pace: pace,
         }).then(() => {
             downloadTranslationModel(language.code, (progress) => {
@@ -34,7 +33,18 @@ export default function LanguageSetupModal({language}: LanguageSetupModalProps) 
                 closeModal();
             })
         })
-    }, [mastery, pace, language.code, closeModal, goToPage, setDownloadingModelProgress]);
+    }, [proficiency, pace, language.code, closeModal, goToPage, setDownloadingModelProgress]);
+
+    const proficiency_levels: {label: string, value: ProficiencyLevel}[] = React.useMemo(() => {
+        return [
+            {label: "A1", value: "a1"},
+            {label: "A2", value: "a2"},
+            {label: "B1", value: "b1"},
+            {label: "B2", value: "b2"},
+            {label: "C1", value: "c1"},
+            {label: "C2", value: "c2"},
+        ]
+    }, []);
 
     return (
         <div
@@ -43,23 +53,16 @@ export default function LanguageSetupModal({language}: LanguageSetupModalProps) 
                 borderRadius: "12px"
             }}
             className={"w-80 flex flex-col items-center p-4"}>
-            <div className={"absolute top-0 right-0 m-4"}>
-                <button
-                    className={"text-sm text-gray-500 hover:text-gray-700"}
-                    onClick={closeModal}>
-                    <CloseIcon size={16}/>
-                </button>
-            </div>
             <h1 className={"font-semibold text-lg mb-4"}>Set up {language.label}</h1>
             {downloading_model_progress === null ? (
                 <>
                     <div className={"flex-1 w-full flex flex-col items-center justify-center gap-4"}>
                         <div className={"w-65 mb-4 flex flex-col items-center justify-center"}>
                             <p className={"text-md"}>What is your level of mastery in {language.label}?</p>
-                            <Slider val={mastery} setVal={setMastery} options={
-                                Array.from({length: 10}, (_, i) => ({label: `${i + 1}`, value: i + 1}))
+                            <Slider val={proficiency} setVal={setProficiency} options={
+                                proficiency_levels
                             } visible_options={
-                                Array.from({length: 10}, (_, i) => i).filter(idx => idx % 1 === 0)
+                                [0, 1, 2, 3, 4, 5]
                             }/>
                         </div>
                         <div className={"w-65 mb-4 flex flex-col items-center justify-center"}>

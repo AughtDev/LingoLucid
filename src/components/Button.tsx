@@ -3,7 +3,7 @@ import { IconProps} from "../constants/icons.tsx";
 import useAppContext from "../popup/context.tsx";
 import ConfirmationModal from "../popup/modals/confirmation";
 import SpinLoader from "./SpinLoader.tsx";
-import {PRIMARY_COLOR, SECONDARY_COLOR} from "../constants/styling.ts";
+import {ICON_COLOR, ICON_HOVER_COLOR, PRIMARY_COLOR, SECONDARY_COLOR} from "../constants/styling.ts";
 
 interface ButtonProps {
     label?: string
@@ -15,6 +15,7 @@ interface ButtonProps {
     tooltip_label?: string
     style?: React.CSSProperties
     class_name?: string
+    disabled?: boolean
 }
 
 interface ButtonStyling {
@@ -48,7 +49,8 @@ export default function Button({
                                    confirmation_prompt,
                                    onClick,
                                    style,
-                                   class_name
+                                   class_name,
+    disabled
                                }: ButtonProps) {
     if (!Icon && !label) {
         throw new Error("Button component requires at least an icon or a label.");
@@ -111,7 +113,7 @@ export default function Button({
             fs: size,
             br: size,
             is: size,
-            ic: hovering ? SECONDARY_COLOR : '#323',
+            ic: hovering ? ICON_HOVER_COLOR : ICON_COLOR,
         }
 
         switch (variant) {
@@ -119,6 +121,8 @@ export default function Button({
                 return {
                     ...default_styling,
                     bg: hovering ? PRIMARY_COLOR : SECONDARY_COLOR,
+                    py: size / 2 + 4,
+                    px: size + 4,
                 };
             case "outline":
                 return {
@@ -133,7 +137,7 @@ export default function Button({
                     ...default_styling,
                     bg: 'transparent',
                     tc: hovering ? PRIMARY_COLOR : SECONDARY_COLOR,
-                    px: 2, py: 2,
+                    px: 1, py: 1,
                 };
             case "ghost":
                 return {
@@ -152,6 +156,7 @@ export default function Button({
             onClick={onClickHandler}
             className={class_name}
             title={tooltip_label}
+            disabled={disabled}
             style={{
                 backgroundColor: bg,
                 borderWidth: `${b}px`,

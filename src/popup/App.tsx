@@ -5,6 +5,8 @@ import {AppContext, AppContextProps} from "./context.tsx";
 import {INITIAL_LANGUAGES} from "../constants/languages.ts";
 import LangPage from "./pages/lang";
 import {useLanguages} from "./hooks/useLanguages.tsx";
+import Button from "../components/Button.tsx";
+import {CloseIcon} from "../constants/icons.tsx";
 
 
 const PAGES: { id: string, content: () => React.ReactElement }[] = [
@@ -75,11 +77,18 @@ export default function App() {
         <AppContext.Provider value={app_context}>
             <div style={{height: '590px'}} className={"relative w-full"}>
                 {modal ? (
-                    <div style={{height: '600px', zIndex: 40}}
-                         onClick={onClickModalBackground}
-                         className={"absolute w-full flex flex-col justify-center items-center backdrop-blur-sm bg-black/10"}>
-                        {modal}
-                    </div>
+                    <>
+                        <div style={{height: '600px', zIndex: 40}}
+                             onClick={onClickModalBackground}
+                             className={"absolute w-full flex flex-col justify-center items-center backdrop-blur-sm bg-black/10"}>
+                            <div className={"absolute top-0 right-0 m-4"}>
+                                <Button variant={"icon"} onClick={() => {
+                                    setModal(null)
+                                }} size={16} icon={CloseIcon}/>
+                            </div>
+                            {modal}
+                        </div>
+                    </>
                 ) : null}
                 {PAGES.map((page) => {
                     if (page.id === curr_page) {
@@ -87,8 +96,7 @@ export default function App() {
                         return <PageComponent key={page.id}/>;
                     }
                     return null;
-                })
-                }
+                })}
             </div>
         </AppContext.Provider>
     )

@@ -1,4 +1,5 @@
 import {LanguageCards} from "../../types/core.ts";
+import {textToEvalStats} from "../../ai/evaluate.ts";
 
 // region POPUP STATE
 // ? ........................
@@ -72,6 +73,9 @@ export function subscribe(listener: () => void) {
 // endregion ........................
 
 
+// region CARDS
+// ? ........................
+
 let cached_cards: LanguageCards = {
     saved: [],
     recent: []
@@ -86,3 +90,69 @@ export function updateCachedCards(new_cards: LanguageCards) {
     console.log("updating cached cards to ", new_cards);
     cached_cards = new_cards;
 }
+
+// ? ........................
+// endregion ........................
+
+
+// region PERFORMANCE
+// ? ........................
+
+interface TextComprehensionStats {
+    engagement_time_ms: number // in ms
+    text_difficulty: number // 0-6
+    num_words: number
+    translations: {
+        text_difficulty: number // 0-5
+        num_words: number
+    }[]
+}
+
+let performance: Map<string, TextComprehensionStats> = new Map()
+
+export function instantiateTextNode(id: string, text: string, lang_code: string): boolean {
+    // get the difficulty and num words
+    const eval_stats = textToEvalStats(text, lang_code)
+    if (!eval_stats) {
+        console.error("Could not evaluate text for comprehension stats:", text);
+        return false;
+    }
+    performance.set(id, {
+        engagement_time_ms: 0,
+        text_difficulty: eval_stats.difficulty,
+        num_words: eval_stats.word_count,
+        translations: []
+    })
+    return true;
+}
+
+export function recordTextEngagement(text_id: string, engagement_time_ms: number) {
+    const stats = performance.get(text_id)
+    if (!stats) {
+        console.error("No performance stats found for text id:", text_id);
+        return;
+    }
+    stats.engagement_time_ms += engagement_time_ms;
+    performance.set(text_id, stats);
+}
+
+export function recordTextTranslation(text_id: string, text: string, lang_code: string) {
+    const stats = performance.get(text_id)
+    if (!stats) {
+        console.error("No performance stats found for text id:", text_id);
+        return;
+    }
+    const eval_stats = textToEvalStats(text, lang_code)
+    if (!eval_stats) {
+        console.error("Could not evaluate translated text for comprehension stats:", text);
+        return;
+    }
+    stats.translations.push({
+        text_difficulty: eval_stats.difficulty,
+        num_words: eval_stats.word_count
+    })
+    performance.set(text_id, stats);
+}
+
+// ? ........................
+// endregion ........................

@@ -1,12 +1,12 @@
 import React from 'react';
 import {Card, LanguageCards} from "../../../types/core.ts";
-import useAppContext from "../../context.tsx";
-import CardReviewModal from "../../modals/card-review";
+import CardReviewButton from "../../modals/card-review";
 import {PRIMARY_COLOR} from "../../../constants/styling.ts";
-import {BookIcon, DeleteIcon, SaveIcon} from "../../../constants/icons.tsx";
+import {DeleteIcon, SaveIcon, ShuffleIcon} from "../../../constants/icons.tsx";
 import {deleteLanguageCardService, saveLanguageCardService} from "../../../utils/data/services.ts";
 import Button from "../../../components/Button.tsx";
 import {highlightPageService} from "./index.tsx";
+import ProficiencyBadge from "../../../components/ProficiencyBadge.tsx";
 
 interface CardsViewProps {
     lang_code: string
@@ -38,36 +38,36 @@ function TabSelector({active_tab, setTab}: TabSelectorProps) {
         <div className={"w-full h-8 flex flex-row items-center justify-center gap-4"}>
             <p
                 style={{
-                    ...(active_tab === "recent" ? active_styling : inactive_styling),
-                    cursor: "pointer"
-                }}
-                onClick={() => setTab("recent")}> RECENT </p>
-            <p
-                style={{
                     ...(active_tab === "saved" ? active_styling : inactive_styling),
                     cursor: "pointer"
                 }}
                 onClick={() => setTab("saved")}> SAVED </p>
+            <p
+                style={{
+                    ...(active_tab === "recent" ? active_styling : inactive_styling),
+                    cursor: "pointer"
+                }}
+                onClick={() => setTab("recent")}> RECENT </p>
         </div>
     )
 }
 
 interface CardActionsProps {
-    actions: { label: string, icon: React.ReactNode, onClick: () => void }[]
+    code: string
+    cards: Card[]
+    shuffleCards: () => void
 }
 
-function CardActions({actions}: CardActionsProps) {
+function CardActions({code, cards, shuffleCards}: CardActionsProps) {
     return (
         <div className={"w-full h-6 flex flex-row items-center justify-center gap-4"}>
-            {actions.map((action, idx) => (
-                <button
-                    key={idx}
-                    style={{cursor: "pointer"}}
-                    title={action.label}
-                    onClick={action.onClick}>
-                    {action.icon}
-                </button>
-            ))}
+            <CardReviewButton
+                size={20} lang_code={code}
+                cards={cards}/>
+            <Button
+                size={20}
+                icon={ShuffleIcon}
+                variant={"icon"} onClick={shuffleCards}/>
         </div>
     )
 }
@@ -87,6 +87,7 @@ function CardPane({code, card, type}: CardPaneProps) {
             code, {
                 text: card.text,
                 translation: card.translation,
+                difficulty: card.difficulty,
                 reviews: [],
                 created_at_t: Date.now()
             }, "saved"
@@ -95,7 +96,7 @@ function CardPane({code, card, type}: CardPaneProps) {
         }).catch((error) => {
             console.error("Error saving card:", error);
         })
-    }, [code, card.text, card.translation]);
+    }, [code, card.text, card.translation, card.difficulty]);
 
     React.useEffect(() => {
         const card_elem = card_ref.current;
@@ -121,6 +122,11 @@ function CardPane({code, card, type}: CardPaneProps) {
                 width: '300px'
             }}
             className={"relative flex flex-col justify-center p-4 mb-2 mt-2 rounded-2xl"}>
+            {/* cefr level badge */}
+
+            <div className={"absolute top-0 left-0 flex flex-row gap-2 justify-center items-center m-2"}>
+                <ProficiencyBadge proficiency={card.difficulty} size={16}/>
+            </div>
             {/* delete button */}
             <div className={"absolute top-0 right-0 flex flex-row gap-2 justify-center items-center m-2"}>
                 {is_hovered && (
@@ -151,52 +157,39 @@ function CardPane({code, card, type}: CardPaneProps) {
 }
 
 export default function CardsView({lang_code, cards}: CardsViewProps) {
-    const {modal: {openModal}} = useAppContext()
-
+    // const {modal: {openModal}} = useAppContext()
+    const [shuffle_count, setShuffleCount] = React.useState<number>(0)
     const [active_tab, setActiveTab] = React.useState<"saved" | "recent">("recent")
 
-    const reviewCards = React.useCallback(() => {
-        openModal(
-            <CardReviewModal
-                lang_code={lang_code}
-                cards={active_tab === "recent" ? cards.recent : cards.saved}
-                limit={10}/>
-        )
-    }, [openModal, lang_code, active_tab, cards.recent, cards.saved]);
-
     const active_cards = React.useMemo(() => {
-        return (active_tab === "recent" ? cards.recent : cards.saved)
-            // sort by created date, latest to earliest
-            .sort((a, b) => b.created_at_t - a.created_at_t)
-    }, [active_tab, cards.recent, cards.saved]);
+        if (shuffle_count === 0) {
+            return (active_tab === "recent" ? cards.recent : cards.saved)
+                // sort by created date, latest to earliest
+                .sort((a, b) => b.created_at_t - a.created_at_t)
+        } else {
+            return (active_tab === "recent" ? cards.recent : cards.saved)
+                .sort(() => Math.random() - 0.5)
+        }
+    }, [active_tab, cards.recent, cards.saved, shuffle_count]);
 
     return (
         <div className={"w-full h-full flex flex-col items-center"}>
             <TabSelector active_tab={active_tab} setTab={setActiveTab}/>
-            {active_cards.length > 0 ? (
+            {active_cards.length > 0 && active_tab === "saved" ? (
                 <CardActions
-                    actions={[
-                        {
-                            label: "Review",
-                            icon: <BookIcon size={20}/>,
-                            onClick: reviewCards
-                        },
-                        // {
-                        //     label: "Shuffle", icon: "r", onClick: () => {
-                        //     }
-                        // },
-                    ]}/>
+                    code={lang_code}
+                    cards={active_cards}
+                    shuffleCards={() => setShuffleCount(shuffle_count + 1)}
+                />
             ) : null}
             <div
                 style={{
-                    height: "calc(590px - 108px)"
+                    height: `calc(590px - ${active_tab == "saved" ? "108px" : "132px"})`
                 }}
                 className={"w-full flex flex-col items-center overflow-y-auto"}>
                 {active_cards.length > 0 ? active_cards.map(card => (
                     <CardPane
-                        key={card.text}
-                        card={card}
-                        code={lang_code}
+                        key={card.text} card={card} code={lang_code}
                         type={active_tab === "recent" ? "recent" : "saved"}
                     />
                 )) : (

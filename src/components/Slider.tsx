@@ -75,8 +75,7 @@ export function Slider<T>({val, setVal, options, visible_options}: ValueSliderPr
                 onMouseLeave={() => setIsHovering(false)}
                 style={{
                     backgroundColor: SECONDARY_COLOR,
-                }}
-            >
+                }}>
                 {/* Markers for each option */}
                 {options.map((_, index) => {
                     const position = totalOptions > 1 ? (index / (totalOptions - 1)) * 100 : 50;

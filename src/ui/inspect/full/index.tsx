@@ -1,5 +1,5 @@
 import React from 'react';
-import {PopupState, PopupType, updatePopupState} from "../store.ts";
+import {PopupState, PopupType, recordTextTranslation, updatePopupState} from "../store.ts";
 import {BACKGROUND_COLOR} from "../../../constants/styling.ts";
 import Button from "../../../components/Button.tsx";
 import {CloseIcon, SaveIcon} from "../../../constants/icons.tsx";
@@ -34,12 +34,14 @@ export default function FullInspectPopup({state} : FullInspectPopupProps) {
         if (!target_lang) return;
         saveCardToLocalStorage(target_lang, state.content.focus_text, text, "saved").then(() => {
             // state.actions.onSaveCard()
-            highlightPage().then()
+            highlightPage().finally(() => {
+                closePopup();
+            })
             console.log("Saved Card saved successfully");
         }).catch((error) => {
             console.error("Error saving card:", error);
         });
-    }, [text, state.content.focus_text]);
+    }, [text, state.content.focus_text, closePopup]);
 
     // const onClickSimplify = React.useCallback(() => {
     //     simplifyText(
@@ -65,6 +67,10 @@ export default function FullInspectPopup({state} : FullInspectPopupProps) {
                 }).catch((error) => {
                     console.error("Error saving card:", error);
                 });
+            }
+            const text_node_id = state.content.focus_text_node?.parentElement?.getAttribute('ll_id');
+            if (text_node_id) {
+                recordTextTranslation(text_node_id, state.content.focus_text, target_lang);
             }
         }).finally(() => {
             setTranslationLoading(false)

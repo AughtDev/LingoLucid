@@ -19,8 +19,8 @@ export default function HoverInspectPopup({state}: HoverInspectPopupProps) {
         })
     }, []);
 
-    const onClickSimplify = React.useCallback(() => {
-        simplifyText(
+    const onClickSimplify = React.useCallback(async () => {
+        await simplifyText(
             state.content.focus_text,
             state.content.focus_text_node,
             state.content.focus_range
@@ -87,24 +87,28 @@ export default function HoverInspectPopup({state}: HoverInspectPopupProps) {
         <div
             ref={popup_ref}
             id={"hover-inspect-popup-container"}
-            className={"flex flex-col justify-center items-start gap-1"}
+            className={"flex flex-col justify-center items-start gap-2 rounded-md p-1"}
             style={{
                 position: "absolute",
                 backgroundColor: BACKGROUND_COLOR,
                 top: state.position.top,
                 left: state.position.left,
+                border: "1px solid rgba(0,0,0,0.1)",
             }}>
             {hover_type && (
                 <div
                     style={{
-                        fontSize: '6px'
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        letterSpacing: '0.5px',
+                        padding: "2px 4px"
                     }}
-                    className={"p-0.5 bg-amber-600 text-white rounded-md"}>
+                    className={"bg-amber-600 text-white rounded-md"}>
                     {hover_type}
                 </div>
             )}
             <div
-                className={"flex flex-row justify-center items-center gap-2"}>
+                className={"flex flex-row justify-center items-center gap-1.5"}>
 
                 <Button variant={"icon"} onClick={onClickSimplify}
                         tooltip_label={"Simplify"} icon={SimplifyIcon} size={18}/>

@@ -25,3 +25,16 @@ declare const Rewriter: {
         }): Promise<any>;
     }>;
 };
+
+declare const LanguageDetector: {
+    availability(): Promise<any>;
+    create(options: {
+        monitor?: (m: any) => void;
+    }): Promise<{
+        detect(text: string): Promise<{
+            detectedLanguage: string,
+            confidence: number
+        }[]>;
+    }>;
+};
+

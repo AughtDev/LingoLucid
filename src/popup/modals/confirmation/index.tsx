@@ -1,6 +1,5 @@
 import React from 'react';
 import {BACKGROUND_COLOR} from "../../../constants/styling.ts";
-import {CloseIcon} from "../../../constants/icons.tsx";
 import useAppContext from "../../context.tsx";
 import Button from "../../../components/Button.tsx";
 
@@ -19,13 +18,6 @@ export default function ConfirmationModal({prompt, onAccept, onReject}: Confirma
                 backgroundColor: BACKGROUND_COLOR,
                 borderRadius: "12px"
             }} className={"w-80 flex flex-col items-center justify-center gap-2 px-4 py-6"}>
-            <div className={"absolute top-0 right-0 m-4"}>
-                <button
-                    className={"text-sm text-gray-500 hover:text-gray-700"}
-                    onClick={closeModal}>
-                    <CloseIcon size={16}/>
-                </button>
-            </div>
             <div className={"w-full flex flex-col justify-center items-center pb-4"}>
                 <p
                     style={{fontSize: "14px"}}

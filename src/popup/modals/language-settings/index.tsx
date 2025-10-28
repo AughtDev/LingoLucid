@@ -1,9 +1,9 @@
 import React from 'react';
-import {Language, LanguageSettings} from "../../../types/core.ts";
+import {Language, LanguageSettings, ProficiencyLevel} from "../../../types/core.ts";
 import {Slider} from "../../../components/Slider.tsx";
 import {BACKGROUND_COLOR} from "../../../constants/styling.ts";
 import {clearLanguageDataService, saveLanguageSettingsService} from "../../../utils/data/services.ts";
-import {CloseIcon, SaveIcon} from "../../../constants/icons.tsx";
+import {SaveIcon} from "../../../constants/icons.tsx";
 import useAppContext from "../../context.tsx";
 import Button from "../../../components/Button.tsx";
 
@@ -14,23 +14,30 @@ interface LanguageSettingsModalProps {
 export default function LanguageSettingsModal({language}: LanguageSettingsModalProps) {
     const {modal: {closeModal}} = useAppContext()
 
-    const [mastery, setMastery] = React.useState<number>(language.settings.skill_level)
+    const [proficiency, setProficiency] = React.useState<ProficiencyLevel>(language.settings.skill_level)
     const [pace, setPace] = React.useState<LanguageSettings["learning_pace"]>(language.settings.learning_pace)
 
     const saveSettings = React.useCallback(() => {
         saveLanguageSettingsService(language.code, {
-            skill_level: mastery,
+            skill_level: proficiency,
             learning_pace: pace,
         }).finally(closeModal)
-    }, [language.code, mastery, pace, closeModal]);
+    }, [language.code, proficiency, pace, closeModal]);
 
     const wipeLanguageData = React.useCallback(async () => {
         await clearLanguageDataService(language.code)
     }, [language.code]);
 
 
-    const mastery_options = React.useMemo(() => {
-        return Array.from({length: 10}, (_, i) => ({label: `${i + 1}`, value: i + 1}));
+    const mastery_options: { label: string, value: ProficiencyLevel }[] = React.useMemo(() => {
+        return [
+            {label: "A1", value: "a1"},
+            {label: "A2", value: "a2"},
+            {label: "B1", value: "b1"},
+            {label: "B2", value: "b2"},
+            {label: "C1", value: "c1"},
+            {label: "C2", value: "c2"},
+        ]
     }, []);
 
     const pace_options: { label: string, value: LanguageSettings["learning_pace"] }[] = React.useMemo(() => {
@@ -48,13 +55,6 @@ export default function LanguageSettingsModal({language}: LanguageSettingsModalP
                 borderRadius: "12px"
             }}
             className={"w-80 flex flex-col items-center p-2"}>
-            <div className={"absolute top-0 right-0 m-4"}>
-                <button
-                    className={"text-sm text-gray-500 hover:text-gray-700"}
-                    onClick={closeModal}>
-                    <CloseIcon size={16}/>
-                </button>
-            </div>
             <div className={"w-full flex flex-row justify-between items-start mb-4"}>
                 <h1 className={"font-semibold text-lg ml-2"}>{language.label} Language Settings</h1>
                 <Button icon={SaveIcon} size={24} variant={"icon"} onClick={saveSettings}/>
@@ -62,8 +62,8 @@ export default function LanguageSettingsModal({language}: LanguageSettingsModalP
             <div className={"flex-1 w-full flex flex-col items-center justify-center gap-4 px-2 pt-1"}>
                 <div className={"w-65 mb-4 flex flex-col items-start justify-center"}>
                     <p className={"text-md"}>Baseline Proficiency</p>
-                    <Slider val={mastery}
-                            setVal={setMastery} options={mastery_options}
+                    <Slider val={proficiency}
+                            setVal={setProficiency} options={mastery_options}
                             visible_options={mastery_options.map((_, i) => i)}/>
                 </div>
                 <div className={"w-65 mb-4 flex flex-col items-start justify-center"}>

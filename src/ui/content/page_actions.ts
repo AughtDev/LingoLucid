@@ -3,7 +3,10 @@ import {translateToTargetLanguage} from "../../ai/translation.ts";
 import {GetCardsPayload, MessageResponse, MessageType} from "../../types/comms.ts";
 import {LanguageCards, ProficiencyLevel} from "../../types/core.ts";
 import {simplifyTranslatedText} from "../../ai/simplify.ts";
-import {updateCachedCards} from "../inspect/store.ts";
+import {instantiateTextNode, updateCachedCards} from "../inspect/store.ts";
+import {detectLanguage} from "../../ai/detect.ts";
+import {generateUniqueId} from "../../helpers/strings.ts";
+import {initEngagementTracking} from "./engagement.ts";
 
 export async function translatePage(tgt_lang_code: string, tgt_level: ProficiencyLevel): Promise<boolean> {
     // convert all text nodes within any article tags to the target language
@@ -33,9 +36,27 @@ export async function translatePage(tgt_lang_code: string, tgt_level: Proficienc
             if (og_text.trim().length === 0) continue;
 
             try {
-                const translation = await translateToTargetLanguage(og_text, tgt_lang_code);
-                if (translation && translation.trim().length > 0) {
+                // confirm that text is either in english or in the target language already
+                const detected_lang = await detectLanguage(og_text)
+                if (!detected_lang) {
+                    console.error("Could not detect language for text:", og_text, "skipping translation");
+                    continue
+                }
+                let translation: string | null = null;
+                if (detected_lang === tgt_lang_code) {
+                    console.warn("Text already in target language:", og_text, "skipping translation");
+                    translation = og_text
+                } else if (detected_lang === 'en') {
+                    console.log("Text detected as English, translating to target language:", og_text);
+                    translation = await translateToTargetLanguage(og_text, tgt_lang_code);
                     console.log("Translating text:", og_text, "to", translation);
+                } else {
+                    console.error("Text detected in unsupported language:", detected_lang, "for text:", og_text, "skipping this article");
+                    continue
+                }
+
+
+                if (translation && translation.trim().length > 0) {
                     // simplify
                     const simplified = await simplifyTranslatedText(translation, {
                         level: tgt_level
@@ -49,6 +70,13 @@ export async function translatePage(tgt_lang_code: string, tgt_level: Proficienc
                         text_node.nodeValue = translation;
                     }
                 }
+
+                // add unique id to text node attributes for later tracking
+                if (text_node.parentElement && text_node.nodeValue?.trim() && !text_node.parentElement.getAttribute('ll_id')) {
+                    const node_id = generateUniqueId();
+                    text_node.parentElement?.setAttribute('ll_id', node_id);
+                    instantiateTextNode(node_id, text_node.nodeValue ?? "", tgt_lang_code)
+                }
             } catch (error) {
                 console.error("Translation error for text:", og_text, error);
             }
@@ -59,6 +87,7 @@ export async function translatePage(tgt_lang_code: string, tgt_level: Proficienc
         article.classList.add('lingolucid-translated');
     }
     document.body.setAttribute("data-target-lang", tgt_lang_code);
+    initEngagementTracking()
     return true
 }
 
