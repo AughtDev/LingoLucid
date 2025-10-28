@@ -5,7 +5,8 @@ export enum MessageType {
     HIGHLIGHT_PAGE,
     CHECK_IF_TRANSLATED,
     SAVE_CARD,
-    GET_CARDS
+    GET_CARDS,
+    UPDATE_PROGRESS
 }
 
 
@@ -30,7 +31,12 @@ export interface GetCardsPayload {
     lang_code: string;
 }
 
-export interface Message<T = TranslationPayload | SaveCardPayload | CheckIfTranslatedPayload> {
+export interface UpdateProgressPayload {
+    lang_code: string;
+    deltas: [string,number][]
+}
+
+export interface Message<T = TranslationPayload | SaveCardPayload | CheckIfTranslatedPayload | UpdateProgressPayload> {
     type: MessageType;
     payload?: T
 }

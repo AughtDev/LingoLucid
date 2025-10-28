@@ -13,11 +13,10 @@ export interface LanguageCards {
 export interface LanguageProgress {
     started: boolean
     mastery: number // 0-5: 0 is a1, 5 is c2
-    delta_queue: {
-        id: string,
+    delta_queue: Record<string, {
         datetime_t: number,
         delta: number
-    }[]
+    }>
 }
 
 

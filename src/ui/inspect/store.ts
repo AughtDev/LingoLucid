@@ -1,5 +1,6 @@
 import {LanguageCards} from "../../types/core.ts";
 import {textToEvalStats} from "../../ai/evaluate.ts";
+import {MessageType, UpdateProgressPayload} from "../../types/comms.ts";
 
 // region POPUP STATE
 // ? ........................
@@ -126,14 +127,15 @@ export function instantiateTextNode(id: string, text: string, lang_code: string)
     return true;
 }
 
-export function recordTextEngagement(text_id: string, engagement_time_ms: number) {
+export function recordTextEngagement(text_id: string, engagement_time_ms: number, lang_code: string) {
     const stats = performance.get(text_id)
     if (!stats) {
         console.error("No performance stats found for text id:", text_id);
         return;
     }
     stats.engagement_time_ms += engagement_time_ms;
-    performance.set(text_id, stats);
+    // performance.set(text_id, stats);
+    updateProgressInLocalStorage(lang_code, text_id, stats)
 }
 
 export function recordTextTranslation(text_id: string, text: string, lang_code: string) {
@@ -151,7 +153,33 @@ export function recordTextTranslation(text_id: string, text: string, lang_code: 
         text_difficulty: eval_stats.difficulty,
         num_words: eval_stats.word_count
     })
+    // performance.set(text_id, stats);
+    updateProgressInLocalStorage(lang_code, text_id, stats)
+}
+
+function statsToDelta(stats: TextComprehensionStats): number {
+    // Simple heuristic: mastery delta is proportional to engagement time and inversely proportional to text difficulty
+    const base_delta = stats.engagement_time_ms / 60000; // 1 point per minute of engagement
+    const difficulty_modifier = Math.max(1, 6 - stats.text_difficulty); // harder texts give more points
+    return base_delta * difficulty_modifier;
+}
+
+export function updateProgressInLocalStorage(lang_code: string, text_id: string, stats: TextComprehensionStats) {
     performance.set(text_id, stats);
+    chrome.runtime.sendMessage({
+        type: MessageType.UPDATE_PROGRESS,
+        payload: {
+            lang_code,
+            deltas: [[text_id, statsToDelta(stats)]]
+        } satisfies UpdateProgressPayload
+    }).then(res => {
+        if (!res.is_success) {
+            console.error("Failed to update progress in local storage:", res.error_message);
+        } else {
+            console.log("Successfully updated progress in local storage for language:", lang_code);
+        }
+    })
+
 }
 
 // ? ........................

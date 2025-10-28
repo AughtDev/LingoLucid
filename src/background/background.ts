@@ -1,8 +1,15 @@
-import {GetCardsPayload, Message, MessageResponse, MessageType, SaveCardPayload} from "../types/comms.ts";
+import {
+    GetCardsPayload,
+    Message,
+    MessageResponse,
+    MessageType,
+    SaveCardPayload,
+    UpdateProgressPayload
+} from "../types/comms.ts";
 import {
     getLanguageProficiencyLevelService,
     getLanguageService,
-    saveLanguageCardService
+    saveLanguageCardService, updateLanguageProgressService
 } from "../utils/data/services.ts";
 
 
@@ -49,6 +56,19 @@ chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (r
                 sendResponse({is_success: false, error_message: error.message});
             });
             return true;
+
+        case MessageType.UPDATE_PROGRESS:
+            payload = message.payload as UpdateProgressPayload
+            updateLanguageProgressService(payload.lang_code, new Map(payload.deltas)).then(res => {
+                payload = message.payload as UpdateProgressPayload
+                if (!res) {
+                    sendResponse({is_success: false, error_message: `Language ${payload.lang_code} not found`});
+                    return;
+                }
+                // also update local storage
+                sendResponse({is_success: true});
+            })
+            return true
 
         default:
             console.warn('Background: Unknown message type:', message.type);

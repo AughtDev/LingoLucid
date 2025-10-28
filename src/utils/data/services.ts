@@ -174,6 +174,19 @@ export async function getAppConfigService(): Promise<AppConfig> {
     }
 }
 
+export async function clearAppDataService() {
+    return chrome.storage.local.clear().then(() => {
+        console.log('service', 'All app data cleared from local storage');
+        return true;
+    }).catch((error) => {
+        console.error('service', 'Error clearing app data from local storage:', error);
+        return false;
+    });
+}
+
+// region LANGUAGE
+// ? ........................
+
 export async function setCurrentLanguageService(code: string) {
     const app_config_result = await chrome.storage.local.get('app_config');
     const app_config = app_config_result['app_config'] as AppConfig | undefined || {
@@ -191,7 +204,7 @@ export async function clearLanguageDataService(code: string) {
         return false;
     }
 
-   return await saveLanguageToLocalStorage(code, init_lang).then(() => {
+    return await saveLanguageToLocalStorage(code, init_lang).then(() => {
         console.log('service', `Language data for ${code} reset to initial state`);
         return true;
     }).catch((error) => {
@@ -200,15 +213,63 @@ export async function clearLanguageDataService(code: string) {
     });
 }
 
-export async function clearAppDataService() {
-    return chrome.storage.local.clear().then(() => {
-        console.log('service', 'All app data cleared from local storage');
-        return true;
-    }).catch((error) => {
-        console.error('service', 'Error clearing app data from local storage:', error);
-        return false;
-    });
+// ? ........................
+// endregion ........................
+
+
+// region PROGRESS
+// ? ........................
+
+export async function updateLanguageProgressService(code: string, deltas: Map<string, number>) {
+    const lang = await getLanguageFromLocalStorage(code)
+    if (lang) {
+        const updated_progress = {...lang.progress}
+        deltas.forEach((value, key) => {
+            updated_progress.delta_queue[key] = {
+                datetime_t: Date.now(),
+                delta: value
+            }
+        })
+        return await saveLanguageToLocalStorage(code, {
+            ...lang,
+            progress: updated_progress
+        })
+    }
+    return false
 }
+
+export async function updateLanguageMasteryService(code: string) {
+    // use any deltas in the queue saved more than 2 hours ago to update mastery then delete them
+    const lang = await getLanguageFromLocalStorage(code)
+    if (lang) {
+        const updated_progress = {...lang.progress}
+        const now = Date.now()
+        let total_delta = 0
+        for (const [text_id, entry] of Object.entries(updated_progress.delta_queue)) {
+            if ((now - entry.datetime_t) >= 2 * 60 * 60 * 1000) {
+                total_delta += entry.delta
+                delete updated_progress.delta_queue[text_id]
+            }
+        }
+        if (Math.abs(total_delta) > 0) {
+            updated_progress.mastery += total_delta
+            updated_progress.mastery = Math.min(Math.max(updated_progress.mastery, 0), 5)
+            console.log("service", `Language ${code} mastery updated by ${total_delta} to ${updated_progress.mastery}`)
+            return await saveLanguageToLocalStorage(code, {
+                ...lang,
+                progress: updated_progress
+            })
+        } else {
+            console.log("service", `No mastery update needed for language ${code}`)
+            return true;
+        }
+    }
+    return false
+}
+
+// ? ........................
+// endregion ........................
+
 
 // ? ........................
 // endregion ........................
@@ -225,7 +286,6 @@ export async function getActiveTabId(): Promise<number | null> {
     console.log('service', 'Active tab ID:', tabs[0].id);
     return tabs[0].id;
 }
-
 
 
 // ? ........................

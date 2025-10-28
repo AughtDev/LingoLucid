@@ -1,5 +1,5 @@
 import React from 'react';
-import {getActiveTabId, setCurrentLanguageService} from "../../../utils/data/services.ts";
+import {getActiveTabId, setCurrentLanguageService, updateLanguageMasteryService} from "../../../utils/data/services.ts";
 import useAppContext from "../../context.tsx";
 import CardsView from "./CardsView.tsx";
 import {HomeIcon, IconHoverEffects, SettingsIcon, TranslateIcon} from "../../../constants/icons.tsx";
@@ -127,6 +127,7 @@ export default function LangPage({code}: LangPageProps) {
 
     React.useEffect(() => {
         // check if page is already translated
+        updateLanguageMasteryService(code).then()
         checkIfPageTranslatedService(code).then((is_translated) => {
             if (is_translated) {
                 setPageStatus(PageStatus.Ready);

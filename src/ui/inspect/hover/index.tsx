@@ -4,6 +4,7 @@ import {BACKGROUND_COLOR} from "../../../constants/styling.ts";
 import Button from "../../../components/Button.tsx";
 import {SimplifyIcon, TranslateIcon} from "../../../constants/icons.tsx";
 import {simplifyText} from "../index.tsx";
+import {rewriterIsAvailable} from "../../../ai/simplify.ts";
 
 interface HoverInspectPopupProps {
     state: PopupState
@@ -12,7 +13,9 @@ interface HoverInspectPopupProps {
 const RANGE_HOVER_PADDING = 5; // pixels
 
 export default function HoverInspectPopup({state}: HoverInspectPopupProps) {
+    const [can_simplify, setCanSimplify] = React.useState<boolean>(false)
     const popup_ref = React.useRef<HTMLDivElement | null>(null);
+
     const closePopup = React.useCallback(() => {
         updatePopupState({
             type: PopupType.NONE
@@ -35,6 +38,10 @@ export default function HoverInspectPopup({state}: HoverInspectPopupProps) {
     }, [state]);
 
     React.useEffect(() => {
+        // check if the simplification model is available
+        rewriterIsAvailable().then((available) => {
+            setCanSimplify(available)
+        })
         const handleMoveOutsidePopupAndRange = (event: MouseEvent) => {
             if (!popup_ref.current) return;
 
@@ -111,7 +118,7 @@ export default function HoverInspectPopup({state}: HoverInspectPopupProps) {
                 className={"flex flex-row justify-center items-center gap-1.5"}>
 
                 <Button variant={"icon"} onClick={onClickSimplify}
-                        tooltip_label={"Simplify"} icon={SimplifyIcon} size={18}/>
+                        tooltip_label={"Simplify"} icon={SimplifyIcon} size={18} disabled={!can_simplify}/>
 
                 <Button variant={"icon"} onClick={onClickTranslate}
                         tooltip_label={"Translate"} icon={TranslateIcon} size={18}/>
