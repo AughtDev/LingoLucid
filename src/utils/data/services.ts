@@ -238,6 +238,20 @@ export async function updateLanguageProgressService(code: string, deltas: Map<st
     return false
 }
 
+const MASTERY_UPDATE_DELAY = 2 * 60 * 60 * 1000 // 2 hours in milliseconds
+
+function learningPaceToMultiplier(learning_pace: LanguageSettings["learning_pace"]): number {
+    switch (learning_pace) {
+        case 'slow':
+            return 0.8
+        case 'medium':
+            return 1.0
+        case 'fast':
+            return 1.2
+        default:
+            return 1.0
+    }
+}
 export async function updateLanguageMasteryService(code: string) {
     // use any deltas in the queue saved more than 2 hours ago to update mastery then delete them
     const lang = await getLanguageFromLocalStorage(code)
@@ -246,13 +260,13 @@ export async function updateLanguageMasteryService(code: string) {
         const now = Date.now()
         let total_delta = 0
         for (const [text_id, entry] of Object.entries(updated_progress.delta_queue)) {
-            if ((now - entry.datetime_t) >= 2 * 60 * 60 * 1000) {
+            if ((now - entry.datetime_t) >= MASTERY_UPDATE_DELAY) {
                 total_delta += entry.delta
                 delete updated_progress.delta_queue[text_id]
             }
         }
         if (Math.abs(total_delta) > 0) {
-            updated_progress.mastery += total_delta
+            updated_progress.mastery += total_delta * learningPaceToMultiplier(lang.settings.learning_pace)
             updated_progress.mastery = Math.min(Math.max(updated_progress.mastery, 0), 5)
             console.log("service", `Language ${code} mastery updated by ${total_delta} to ${updated_progress.mastery}`)
             return await saveLanguageToLocalStorage(code, {

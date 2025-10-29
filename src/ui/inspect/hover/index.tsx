@@ -1,10 +1,11 @@
 import React from 'react';
-import {getCachedCards, PopupState, PopupType, updatePopupState} from "../store.ts";
 import {BACKGROUND_COLOR} from "../../../constants/styling.ts";
 import Button from "../../../components/Button.tsx";
 import {SimplifyIcon, TranslateIcon} from "../../../constants/icons.tsx";
 import {simplifyText} from "../index.tsx";
 import {rewriterIsAvailable} from "../../../ai/simplify.ts";
+import {PopupState, PopupType, updatePopupState} from "../../store/popup.ts";
+import {getCachedCards} from "../../store/cards.ts";
 
 interface HoverInspectPopupProps {
     state: PopupState

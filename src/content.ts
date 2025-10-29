@@ -40,7 +40,7 @@ chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (r
             console.log("Translating page to", payload.tgt_lang_code)
 
             // make sure that model is downloaded, if it is, this will return immediately
-            downloadTranslationModel(payload.tgt_lang_code, () => null).then((res) => {
+            downloadTranslationModel(payload.tgt_lang_code, () => null,() => null).then((res) => {
                 if (!res) {
                     sendResponse({is_success: false, error_message: "Failed to download translation model"})
                     return

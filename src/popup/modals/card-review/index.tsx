@@ -42,7 +42,7 @@ function CardReviewModal({lang_code, cards}: CardReviewModalProps) {
     const [card_flipped, setCardFlipped] = React.useState<boolean>(false)
 
     const [counts, setCounts] = React.useState<Map<CardReview["review"], number>>(new Map(
-        [["easy", 0], ["medium", 0], ["hard", 0]]
+        [["easy", 0], ["medium", 0], ["hard", 0], ["fail", 0]]
     ))
 
 
@@ -75,7 +75,7 @@ function CardReviewModal({lang_code, cards}: CardReviewModalProps) {
                         <p className={"text-lg font-semibold"}>Review Complete!</p>
                         <div className={"grow flex justify-center items-center"}>
                             <p className={"text-md font-normal text-gray-800"}>
-                                {counts.get("easy")} Easy. {counts.get("medium")} Medium. {counts.get("hard")} Hard.
+                                {counts.get("easy")} Easy. {counts.get("medium")} Medium. {counts.get("hard")} Hard. {counts.get("fail")} Failed.
                             </p>
                         </div>
                         <div className={"w-80 flex flex-row justify-around items-center"}>
@@ -131,9 +131,10 @@ function CardReviewModal({lang_code, cards}: CardReviewModalProps) {
                     style={{
                         backgroundColor: BACKGROUND_COLOR,
                         borderRadius: "12px",
-                        cursor: "pointer"
+                        cursor: "pointer",
+                        bottom: "10%"
                     }}
-                    className={"w-4/5 absolute bottom-1/5 flex p-4 flex-col justify-center items-center"}>
+                    className={"w-4/5 absolute flex p-4 flex-col justify-center items-center"}>
                     <div
                         className={"w-full flex flex-row justify-between items-center"} >
                     <button
@@ -150,8 +151,8 @@ function CardReviewModal({lang_code, cards}: CardReviewModalProps) {
                     </button>
                     </div>
                     <button
-                        className={"px-2 py-1 my-1 bg-gray-900 text-white rounded-lg hover:bg-black"}
-                        onClick={() => onReviewCard("fail")}>Hard
+                        className={"px-8 py-1 mt-2 bg-gray-900 text-white rounded-lg hover:bg-black"}
+                        onClick={() => onReviewCard("fail")}>Fail
                     </button>
                 </div>
             )}

@@ -14,50 +14,57 @@ export async function translatorIsAvailable(tgt_lang_code: string): Promise<bool
     return to && from
 }
 
-export async function downloadTranslationModel(tgt_lang_code: string, onProgress: (progress: number) => void): Promise<boolean> {
+export async function downloadTranslationModel(
+    tgt_lang_code: string,
+    onToProgress: (progress: number) => void,
+    onFromProgress: (progress: number) => void
+): Promise<boolean> {
     if (!chromeHasTranslator()) {
         console.warn("Cannot Download, Translator not available in this Chrome version");
-        onProgress(1)
+        onToProgress(1)
+        onFromProgress(1)
         return false
     }
 
     if (await translatorIsAvailable(tgt_lang_code)) {
         console.log("Cannot download, Translator models already available for", tgt_lang_code);
-        onProgress(1)
+        onToProgress(1)
+        onFromProgress(1)
         return true
     }
 
-    let success = true;
 
-    await Translator.create({
+    return Promise.all([Translator.create({
         sourceLanguage: "en", // english by default
         targetLanguage: tgt_lang_code,
         monitor(m: any) {
             m.addEventListener('downloadprogress', (e: { loaded: number }) => {
-                console.log(`Downloaded ${e.loaded * 100}%`);
-                onProgress(e.loaded * 0.5)
+                console.log(`Downloaded to ${e.loaded * 100}%`);
+                onToProgress(e.loaded)
             });
         },
+    }).then(() => {
+        return true
     }).catch(err => {
         console.error("Error downloading translator model to", tgt_lang_code, ":", err);
-        success = false;
-    });
-
-    await Translator.create({
+        return false
+    }), Translator.create({
         sourceLanguage: tgt_lang_code,
         targetLanguage: "en",
         monitor(m: any) {
             m.addEventListener('downloadprogress', (e: { loaded: number }) => {
-                console.log(`Downloaded ${e.loaded * 100}%`);
-                onProgress(e.loaded * 0.5 + 0.5)
+                console.log(`Downloaded from ${e.loaded * 100}%`);
+                onFromProgress(e.loaded)
             });
         },
+    }).then(() => {
+        return true
     }).catch(err => {
         console.error("Error downloading translator model from", tgt_lang_code, ":", err);
-        success = false;
-    });
-
-    return success;
+        return false
+    })]).then(results => {
+        return results.every(res => res)
+    })
 }
 
 

@@ -3,10 +3,11 @@ import {translateToTargetLanguage} from "../../ai/translation.ts";
 import {GetCardsPayload, MessageResponse, MessageType} from "../../types/comms.ts";
 import {LanguageCards, ProficiencyLevel} from "../../types/core.ts";
 import {simplifyTranslatedText} from "../../ai/simplify.ts";
-import {instantiateTextNode, updateCachedCards} from "../inspect/store.ts";
 import {detectLanguage} from "../../ai/detect.ts";
 import {generateUniqueId} from "../../helpers/strings.ts";
 import {initEngagementTracking} from "./engagement.ts";
+import {updateCachedCards} from "../store/cards.ts";
+import {instantiateTextNode} from "../store/performance.ts";
 
 export async function translatePage(tgt_lang_code: string, tgt_level: ProficiencyLevel): Promise<boolean> {
     // convert all text nodes within any article tags to the target language
@@ -75,7 +76,7 @@ export async function translatePage(tgt_lang_code: string, tgt_level: Proficienc
                 if (text_node.parentElement && text_node.nodeValue?.trim() && !text_node.parentElement.getAttribute('ll_id')) {
                     const node_id = generateUniqueId();
                     text_node.parentElement?.setAttribute('ll_id', node_id);
-                    instantiateTextNode(node_id, text_node.nodeValue ?? "", tgt_lang_code)
+                    instantiateTextNode(node_id, text_node.nodeValue ?? "", tgt_lang_code).then()
                 }
             } catch (error) {
                 console.error("Translation error for text:", og_text, error);

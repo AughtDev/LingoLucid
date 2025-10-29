@@ -3,7 +3,8 @@
  * This system tracks how long elements with the attribute 'll_id' are
  * visible in the active browser tab.
  */
-import {recordTextEngagement} from "../inspect/store.ts";
+
+import {recordTextEngagement} from "../store/performance.ts";
 
 // --- DUMMY TRACKING FUNCTIONS & STATE (Replace with your actual logic) ---
 

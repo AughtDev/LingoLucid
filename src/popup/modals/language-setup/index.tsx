@@ -13,7 +13,8 @@ interface LanguageSetupModalProps {
 export default function LanguageSetupModal({language}: LanguageSetupModalProps) {
     const {modal: {closeModal}, nav: {goToPage}} = useAppContext()
 
-    const [downloading_model_progress, setDownloadingModelProgress] = React.useState<number | null>(null)
+    const [downloading_to_model_progress, setDownloadingToModelProgress] = React.useState<number | null>(null)
+    const [downloading_from_modal_progress, setDownloadingFromModalProgress] = React.useState<number | null>(null)
 
     const [proficiency, setProficiency] = React.useState<ProficiencyLevel>("a1")
     const [pace, setPace] = React.useState<LanguageSettings["learning_pace"]>("medium")
@@ -24,18 +25,20 @@ export default function LanguageSetupModal({language}: LanguageSetupModalProps) 
             skill_level: proficiency,
             learning_pace: pace,
         }).then(() => {
-            downloadTranslationModel(language.code, (progress) => {
-                setDownloadingModelProgress(progress);
+            downloadTranslationModel(language.code, (to_progress) => {
+                setDownloadingToModelProgress(to_progress);
+            }, (from_progress) => {
+                setDownloadingFromModalProgress(from_progress);
             }).then(() => {
-                setDownloadingModelProgress(null);
+                setDownloadingToModelProgress(null);
             }).then(() => {
                 goToPage(`lang/${language.code}`);
                 closeModal();
             })
         })
-    }, [proficiency, pace, language.code, closeModal, goToPage, setDownloadingModelProgress]);
+    }, [proficiency, pace, language.code, closeModal, goToPage, setDownloadingToModelProgress, setDownloadingFromModalProgress]);
 
-    const proficiency_levels: {label: string, value: ProficiencyLevel}[] = React.useMemo(() => {
+    const proficiency_levels: { label: string, value: ProficiencyLevel }[] = React.useMemo(() => {
         return [
             {label: "A1", value: "a1"},
             {label: "A2", value: "a2"},
@@ -46,6 +49,15 @@ export default function LanguageSetupModal({language}: LanguageSetupModalProps) 
         ]
     }, []);
 
+    const model_download_progress = React.useMemo(() => {
+        if (downloading_from_modal_progress === null && downloading_to_model_progress === null) {
+            return null;
+        }
+        const to_progress = downloading_to_model_progress ?? 0;
+        const from_progress = downloading_from_modal_progress ?? 0;
+        return (to_progress + from_progress) / 2;
+    }, [downloading_from_modal_progress, downloading_to_model_progress]);
+
     return (
         <div
             style={{
@@ -54,7 +66,7 @@ export default function LanguageSetupModal({language}: LanguageSetupModalProps) 
             }}
             className={"w-80 flex flex-col items-center p-4"}>
             <h1 className={"font-semibold text-lg mb-4"}>Set up {language.label}</h1>
-            {downloading_model_progress === null ? (
+            {model_download_progress === null ? (
                 <>
                     <div className={"flex-1 w-full flex flex-col items-center justify-center gap-4"}>
                         <div className={"w-65 mb-4 flex flex-col items-center justify-center"}>
@@ -94,9 +106,9 @@ export default function LanguageSetupModal({language}: LanguageSetupModalProps) 
                     <div className={"w-64 h-4 bg-gray-300 rounded-full mt-4"}>
                         <div
                             className={"h-4 bg-green-500 rounded-full"}
-                            style={{width: `${downloading_model_progress * 100}%`}}></div>
+                            style={{width: `${model_download_progress * 100}%`}}></div>
                     </div>
-                    <p className={"text-sm mt-2"}>{Math.round(downloading_model_progress * 100)}%</p>
+                    <p className={"text-sm mt-2"}>{Math.round(model_download_progress * 100)}%</p>
                 </div>
             )}
         </div>

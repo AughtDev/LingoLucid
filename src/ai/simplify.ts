@@ -51,6 +51,7 @@ export async function simplifyTranslatedText(translation: string, specs: Simplif
         console.error("Rewriter not available in this Chrome version");
         return null
     }
+    console.log("Rewriter is available in this Chrome version");
 
     if (!await rewriterIsAvailable()) {
         console.error("Rewriter model not available");

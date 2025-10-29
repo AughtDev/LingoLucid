@@ -7,18 +7,18 @@ import {
     UpdateProgressPayload
 } from "../types/comms.ts";
 import {
-    getLanguageProficiencyLevelService,
     getLanguageService,
     saveLanguageCardService, updateLanguageProgressService
 } from "../utils/data/services.ts";
+import {textToEvalStats} from "../ai/evaluate.ts";
 
 
 async function saveCard(payload: SaveCardPayload) {
-    const proficiency_level = await getLanguageProficiencyLevelService(payload.lang_code) ?? "a1"
+    const proficiency_level = await textToEvalStats(payload.text, payload.lang_code)
     return saveLanguageCardService(payload.lang_code, {
         text: payload.text,
         translation: payload.translation,
-        difficulty: proficiency_level,
+        difficulty: proficiency_level?.cefr_level ?? "a1",
         reviews: [],
         created_at_t: Date.now()
     }, payload.type)

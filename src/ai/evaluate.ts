@@ -1,10 +1,26 @@
 import {PROFICIENCY_LEVELS, ProficiencyLevel} from "../types/core.ts";
-// import freqMapES from "./word_freqs/es.json";
-// import freqMapFR from "./word_freqs/fr.json";
-// import freqMapDE from "./word_freqs/de.json";
-// import freqMapIT from "./word_freqs/it.json";
-// import freqMapPT from "./word_freqs/pt.json";
 
+const FREQ_MAP_CACHE: Map<string,Record<string,number>> = new Map();
+
+async function getFrequencyMap(lang_code: string): Promise<Record<string,number> | null> {
+    if (FREQ_MAP_CACHE.has(lang_code)) {
+        return FREQ_MAP_CACHE.get(lang_code)!;
+    }
+    const url = chrome.runtime.getURL(`word_freqs/${lang_code}.json`)
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            console.error("Failed to fetch frequency map for language code:", lang_code);
+            return null;
+        }
+        const freqMap: Record<string,number> = await response.json();
+        FREQ_MAP_CACHE.set(lang_code, freqMap);
+        return freqMap;
+    } catch (error) {
+        console.error("Error fetching frequency map for language code:", lang_code, error);
+        return null;
+    }
+}
 
 function normalizeTextToTokens(raw: string): string[] {
     if (!raw) return [];
@@ -40,41 +56,26 @@ export interface TextEvalStats {
     difficulty: number;
 }
 
-export function textToEvalStats(text: string, _lang_code: string): TextEvalStats | null {
-    // let freqMap: Record<string,number> | null = null;
-    // switch (lang_code) {
-    //     case 'es':
-    //         freqMap = freqMapES;
-    //         break;
-    //     case 'fr':
-    //         freqMap = freqMapFR;
-    //         break;
-    //     case 'de':
-    //         freqMap = freqMapDE;
-    //         break;
-    //     case 'it':
-    //         freqMap = freqMapIT;
-    //         break;
-    //     case 'pt':
-    //         freqMap = freqMapPT;
-    //         break;
-    //     default:
-    //         console.error("No frequency map available for language code:", lang_code);
-    //         return null;
-    // }
+export async function textToEvalStats(text: string, lang_code: string): Promise<TextEvalStats | null> {
+    const freq_map = await getFrequencyMap(lang_code);
+
+    if (!freq_map) {
+        console.error("Frequency map not found for language code:", lang_code);
+        return null;
+    }
 
     const words = normalizeTextToTokens(text)
     if (!words || words.length === 0) {
         console.error("No words found in text for CEFR evaluation");
         return null;
     }
+    console.log(`tokens of text: ${text} are `, words);
 
     let max_rank = 0;
     let valid_word_count = 0;
 
-    for (const _word of words) {
-        // const rank = freqMap[word];
-        const rank = 1
+    for (const word of words) {
+        const rank = freq_map[word];
         if (rank) {
             valid_word_count++;
             if (rank > max_rank) {

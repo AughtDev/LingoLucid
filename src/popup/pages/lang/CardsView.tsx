@@ -159,7 +159,7 @@ function CardPane({code, card, type}: CardPaneProps) {
 export default function CardsView({lang_code, cards}: CardsViewProps) {
     // const {modal: {openModal}} = useAppContext()
     const [shuffle_count, setShuffleCount] = React.useState<number>(0)
-    const [active_tab, setActiveTab] = React.useState<"saved" | "recent">("recent")
+    const [active_tab, setActiveTab] = React.useState<"saved" | "recent">("saved")
 
     const active_cards = React.useMemo(() => {
         if (shuffle_count === 0) {

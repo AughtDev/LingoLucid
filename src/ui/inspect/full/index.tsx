@@ -1,11 +1,12 @@
 import React from 'react';
-import {PopupState, PopupType, recordTextTranslation, updatePopupState} from "../store.ts";
 import {BACKGROUND_COLOR} from "../../../constants/styling.ts";
 import Button from "../../../components/Button.tsx";
 import {CloseIcon, SaveIcon} from "../../../constants/icons.tsx";
 import {saveCardToLocalStorage} from "../utils.ts";
 import {translateFromTargetLanguage} from "../../../ai/translation.ts";
 import {highlightPage} from "../../content/page_actions.ts";
+import {PopupState, PopupType, updatePopupState} from "../../store/popup.ts";
+import {recordTextTranslation} from "../../store/performance.ts";
 // import {simplifyText} from "../index.tsx";
 
 interface FullInspectPopupProps {
@@ -70,7 +71,7 @@ export default function FullInspectPopup({state} : FullInspectPopupProps) {
             }
             const text_node_id = state.content.focus_text_node?.parentElement?.getAttribute('ll_id');
             if (text_node_id) {
-                recordTextTranslation(text_node_id, state.content.focus_text, target_lang);
+                recordTextTranslation(text_node_id, state.content.focus_text, target_lang).then();
             }
         }).finally(() => {
             setTranslationLoading(false)

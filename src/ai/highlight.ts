@@ -41,9 +41,9 @@ export function cardsToHighlightMap(cards: LanguageCards): Map<string, SnippetHi
         map.set(card.text, SnippetHighlightType.SAVED);
     })
 
-    cards.recent.forEach(card => {
-        map.set(card.text, SnippetHighlightType.NEW);
-    })
+    // cards.recent.forEach(card => {
+    //     map.set(card.text, SnippetHighlightType.NEW);
+    // })
 
     return map;
 }

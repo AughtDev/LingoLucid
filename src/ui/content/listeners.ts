@@ -1,4 +1,5 @@
-import {getPopupState, PopupType, updatePopupState} from "../inspect/store.ts";
+
+import {getPopupState, PopupType, updatePopupState} from "../store/popup.ts";
 
 
 let popup_delay_timer: number | null = null;

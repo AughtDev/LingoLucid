@@ -1,9 +1,9 @@
 import React from "react";
-import {getPopupState, PopupState, PopupType, subscribe} from "./store.ts";
 import FullInspectPopup from "./full";
 import HoverInspectPopup from "./hover";
 import {highlightPage} from "../content/page_actions.ts";
 import {simplifyTranslatedText} from "../../ai/simplify.ts";
+import {getPopupState, PopupState, PopupType, subscribe} from "../store/popup.ts";
 
 export async function simplifyText(
     text: string, text_node: Text | null, range: Range | null,

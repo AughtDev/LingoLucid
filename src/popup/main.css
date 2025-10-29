@@ -128,7 +128,8 @@ button svg {
 
 /* better scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
+    margin-right: 2px;
     /*height: 8px;*/
 }
 
@@ -137,12 +138,12 @@ button svg {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #d28357;
-    border-radius: 4px;
+    background: rgba(210, 131, 87, 0.40);
+    border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #5ab45a;
+    background: rgba(90, 180, 90, 0.40);
 }
 
 ::-webkit-scrollbar-button {
