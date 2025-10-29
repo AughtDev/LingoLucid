@@ -35,7 +35,7 @@ function TabSelector({active_tab, setTab}: TabSelectorProps) {
     }, []);
 
     return (
-        <div className={"w-full h-8 flex flex-row items-center justify-center gap-4"}>
+        <div className={"relative w-full h-8 flex flex-row items-center justify-center gap-4"}>
             <p
                 style={{
                     ...(active_tab === "saved" ? active_styling : inactive_styling),

@@ -29,13 +29,20 @@ function startEngagement(id: string): void {
  * @param id The unique identifier from the 'll_id' attribute.
  */
 function endEngagement(id: string): void {
+    const target_lang = document.body.getAttribute('data-target-lang') || undefined;
+
+    if (!target_lang) {
+        console.log("No target language set; skipping update recording.");
+        return
+    }
+
     const startTime = activeEngagements.get(id);
     if (startTime) {
         const durationMs = Date.now() - startTime;
         console.log(`[ENGAGE] ENDED tracking: ${id}. Duration: ${durationMs / 1000} seconds.`);
         activeEngagements.delete(id);
 
-        recordTextEngagement(id, durationMs)
+        recordTextEngagement(id, durationMs, target_lang)
     }
 }
 

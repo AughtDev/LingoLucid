@@ -15,6 +15,7 @@ const createDefaultLang = (): Language => ({
     },
     progress: {
         started: false,
+        delta_queue: {},
         mastery: 0
     }
 })

@@ -6,9 +6,10 @@ import {HomeIcon, IconHoverEffects, SettingsIcon, TranslateIcon} from "../../../
 import LanguageSettingsModal from "../../modals/language-settings";
 import {CheckIfTranslatedPayload, MessageResponse, MessageType, TranslationPayload} from "../../../types/comms.ts";
 import Button from "../../../components/Button.tsx";
-import {Language, ProficiencyLevel} from "../../../types/core.ts";
+import {Language, PROFICIENCY_LEVELS, ProficiencyLevel} from "../../../types/core.ts";
 import {SnippetHighlightType} from "../../../ai/highlight.ts";
 import {LogsButton} from "../../modals/logs";
+import ProficiencyBadge from "../../../components/ProficiencyBadge.tsx";
 
 interface LangPageProps {
     code: string
@@ -134,6 +135,8 @@ export default function LangPage({code}: LangPageProps) {
             } else {
                 setPageStatus(PageStatus.Untranslated);
             }
+        }).catch(() => {
+            setPageStatus(PageStatus.Error);
         })
     }, []);
     const translatePage = React.useCallback(() => {
@@ -162,6 +165,13 @@ export default function LangPage({code}: LangPageProps) {
                         <LogsButton warnings={warnings} errors={errors} size={24}/>
                     )}
                 </div>
+            </div>
+            {lang && <div className={"absolute top-10 left-0 p-2 flex flex-row"}>
+                <ProficiencyBadge proficiency={
+                    PROFICIENCY_LEVELS[Math.floor(lang.progress.mastery)]
+                } size={24}/>
+            </div>}
+            <div className={"absolute left-0 top-0 p-1"}>
             </div>
             <div className={"absolute flex flex-row gap-4 items-center justify-center top-0 right-0 p-2"}>
                 <Button variant={"icon"} onClick={onClickSettings} icon={SettingsIcon} size={20}/>

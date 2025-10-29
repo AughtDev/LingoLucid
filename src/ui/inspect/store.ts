@@ -2,6 +2,7 @@ import {LanguageCards} from "../../types/core.ts";
 import {textToEvalStats} from "../../ai/evaluate.ts";
 import {MessageType, UpdateProgressPayload} from "../../types/comms.ts";
 
+
 // region POPUP STATE
 // ? ........................
 
@@ -98,6 +99,7 @@ export function updateCachedCards(new_cards: LanguageCards) {
 
 // region PERFORMANCE
 // ? ........................
+
 
 interface TextComprehensionStats {
     engagement_time_ms: number // in ms

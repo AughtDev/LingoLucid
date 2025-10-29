@@ -1,9 +1,9 @@
-import {ProficiencyLevel} from "../types/core.ts";
-import freqMapES from "./word_freqs/es.json";
-import freqMapFR from "./word_freqs/fr.json";
-import freqMapDE from "./word_freqs/de.json";
-import freqMapIT from "./word_freqs/it.json";
-import freqMapPT from "./word_freqs/pt.json";
+import {PROFICIENCY_LEVELS, ProficiencyLevel} from "../types/core.ts";
+// import freqMapES from "./word_freqs/es.json";
+// import freqMapFR from "./word_freqs/fr.json";
+// import freqMapDE from "./word_freqs/de.json";
+// import freqMapIT from "./word_freqs/it.json";
+// import freqMapPT from "./word_freqs/pt.json";
 
 
 function normalizeTextToTokens(raw: string): string[] {
@@ -40,28 +40,28 @@ export interface TextEvalStats {
     difficulty: number;
 }
 
-export function textToEvalStats(text: string, lang_code: string): TextEvalStats | null {
-    let freqMap: Record<string,number> | null = null;
-    switch (lang_code) {
-        case 'es':
-            freqMap = freqMapES;
-            break;
-        case 'fr':
-            freqMap = freqMapFR;
-            break;
-        case 'de':
-            freqMap = freqMapDE;
-            break;
-        case 'it':
-            freqMap = freqMapIT;
-            break;
-        case 'pt':
-            freqMap = freqMapPT;
-            break;
-        default:
-            console.error("No frequency map available for language code:", lang_code);
-            return null;
-    }
+export function textToEvalStats(text: string, _lang_code: string): TextEvalStats | null {
+    // let freqMap: Record<string,number> | null = null;
+    // switch (lang_code) {
+    //     case 'es':
+    //         freqMap = freqMapES;
+    //         break;
+    //     case 'fr':
+    //         freqMap = freqMapFR;
+    //         break;
+    //     case 'de':
+    //         freqMap = freqMapDE;
+    //         break;
+    //     case 'it':
+    //         freqMap = freqMapIT;
+    //         break;
+    //     case 'pt':
+    //         freqMap = freqMapPT;
+    //         break;
+    //     default:
+    //         console.error("No frequency map available for language code:", lang_code);
+    //         return null;
+    // }
 
     const words = normalizeTextToTokens(text)
     if (!words || words.length === 0) {
@@ -72,8 +72,9 @@ export function textToEvalStats(text: string, lang_code: string): TextEvalStats 
     let max_rank = 0;
     let valid_word_count = 0;
 
-    for (const word of words) {
-        const rank = freqMap[word];
+    for (const _word of words) {
+        // const rank = freqMap[word];
+        const rank = 1
         if (rank) {
             valid_word_count++;
             if (rank > max_rank) {
@@ -90,7 +91,7 @@ export function textToEvalStats(text: string, lang_code: string): TextEvalStats 
         max_rank: max_rank,
         word_count: words.length,
         cefr_level: getCefrFromRank(max_rank),
-        difficulty: ["a1","a2","b1","b2","c1","c2"].indexOf(getCefrFromRank(max_rank))
+        difficulty: PROFICIENCY_LEVELS.indexOf(getCefrFromRank(max_rank))
     };
 }
 
