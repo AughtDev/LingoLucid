@@ -1,25 +1,12 @@
 <div align="center">
-<p align="center">
- <img src="public/icons/icon128.png"/>
- </p>
 
-# LingoLucid
+**GOOGLE CHROME BUILT-IN AI JUDGES: PLEASE READ FIRST**
 
-*Learn a language passively by browsing the web.*
-
-</div>
-
----
-
-<div align="center">
-  
-**JUDGES: PLEASE READ FIRST**
-  
 ### How to Install & Test (v1.0)
 
 This extension is **not yet** on the Chrome Web Store. Please use the following steps to install the app for review:
 
-1.  **Download:** Go to the **[Latest Release Page](https://github.com/AughtDev/LingoLucid/releases/latest)** and 
+1.  **Download:** Go to the **[Latest Release Page](https://github.com/AughtDev/LingoLucid/releases/latest)** and
     download the `LingoLucid-v1.0.zip` file.
 2.  **Unzip:** Unzip the downloaded file. You will have a folder named `dist`.
 3.  **Open Chrome:** Navigate to `chrome://extensions` in your browser.
@@ -28,6 +15,21 @@ This extension is **not yet** on the Chrome Web Store. Please use the following 
 6.  **Select Folder:** In the file-picker, select the unzipped `dist` folder.
 
 The LingoLucid icon will appear in your extension bar, and it is now active. Please visit a Substack article to begin testing.
+
+To build the extension from source, please refer to the "Getting Started (For Developers)" at the bottom.
+
+</div>
+
+---
+
+<div align="center">
+<p align="center">
+ <img src="public/icons/icon128.png"/>
+ </p>
+
+# LingoLucid
+
+*Learn a language passively by browsing the web.*
 
 </div>
 
