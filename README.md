@@ -10,7 +10,7 @@
 
 LingoLucid is an open-source Chrome extension that transforms your regular browsing into a passive language-learning experience. It assumes you are an English speaker and supports learning French, German, Spanish, Italian, and Portuguese.
 
-It works by translating the text on your favorite sites (optimized for Substack and Wikipedia) into your target language and then simplifying it to your exact proficiency level. As you read, study, and improve, the extension automatically increases the difficulty, forcing you to learn more complex vocabulary and grammar to keep up.
+It works by translating the text on your favorite blogs and websites (optimized for Substack at the moment) into your target language and then simplifying it to your exact proficiency level. As you read, study, and improve, the extension automatically increases the difficulty, forcing you to learn more complex vocabulary and grammar to keep up.
 
 
 
@@ -18,7 +18,7 @@ It works by translating the text on your favorite sites (optimized for Substack 
 
 ## Key Features
 
-- Adaptive Translation: Automatically translates text within <article> tags into your target language.
+- Adaptive Translation: Automatically translates text within ```<article>``` tags into your target language.
 
 - AI-Powered Simplification: Uses the Chrome Rewriter API to simplify the translated text to your selected CEFR proficiency level (A1 to C2).
 
@@ -137,5 +137,3 @@ Feel free to open an issue to report a bug, suggest a feature, or make a pull re
 ## License
 
 This project is licensed under the [MIT License](http://docs.google.com/LICENSE).
-
-**
