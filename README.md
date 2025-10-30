@@ -33,7 +33,8 @@ To build the extension from source, please refer to the "Getting Started (For De
 
 </div>
 
----
+
+
 
 LingoLucid is an open-source Chrome extension that transforms your regular browsing into a passive language-learning experience. It assumes you are an English speaker and supports learning French, German, Spanish, Italian, and Portuguese.
 
