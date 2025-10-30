@@ -5,14 +5,38 @@
 
 # LingoLucid
 
-*Learn a language passively just by browsing the web.*
+*Learn a language passively by browsing the web.*
+
 </div>
+
+---
+
+<div align="center">
+  
+**JUDGES: PLEASE READ FIRST**
+  
+### How to Install & Test (v1.0)
+
+This extension is **not yet** on the Chrome Web Store. Please use the following steps to install the app for review:
+
+1.  **Download:** Go to the **[Latest Release Page](https://github.com/AughtDev/LingoLucid/releases/latest)** and 
+    download the `LingoLucid-v1.0.zip` file.
+2.  **Unzip:** Unzip the downloaded file. You will have a folder named `dist`.
+3.  **Open Chrome:** Navigate to `chrome://extensions` in your browser.
+4.  **Enable Developer Mode:** Ensure the **"Developer mode"** toggle in the top-right corner is **ON**.
+5.  **Load the Extension:** Click the **"Load unpacked"** button.
+6.  **Select Folder:** In the file-picker, select the unzipped `dist` folder.
+
+The LingoLucid icon will appear in your extension bar, and it is now active. Please visit a Substack article to begin testing.
+
+</div>
+
+---
 
 LingoLucid is an open-source Chrome extension that transforms your regular browsing into a passive language-learning experience. It assumes you are an English speaker and supports learning French, German, Spanish, Italian, and Portuguese.
 
-It works by translating the text on your favorite blogs and websites (optimized for Substack at the moment) into your target language and then simplifying it to your exact proficiency level. As you read, study, and improve, the extension automatically increases the difficulty, forcing you to learn more complex vocabulary and grammar to keep up.
-
-
+It works by translating the text on your favorite blogs and websites (optimized for **Substack** at the moment) into 
+your target language and then simplifying it to your exact proficiency level. As you read, study, and improve, the extension automatically increases the difficulty, forcing you to learn more complex vocabulary and grammar to keep up.
 
 ![Screenshot 2025-10-30 150323.png](./media/screenshots/Screenshot%202025-10-30%20150323.png)
 
@@ -26,13 +50,21 @@ It works by translating the text on your favorite blogs and websites (optimized 
 
 - Hover over any word for quick options.
 
+| ![](./media/screenshots/Screenshot%202025-10-30%20150706.png) | ![](./media/screenshots/Screenshot%202025-10-30%20150755.png) |
+|---------------------------------------------------------------|---------------------------------------------------------------|
+
 - Simplify: Simplify the word further in the target language.
 
 - Translate: Get an instant English translation in a pop-up.
 
 - Select longer phrases to get the same translation pop-up.
 
+![](./media/screenshots/Screenshot%202025-10-30%20150844.png)
+
 - Flashcard System: Save any word or phrase translation as a "card" with a single click. Saved words are underlined on the page to track what you've learned.
+
+| ![](./media/screenshots/Screenshot%202025-10-30%20150426.png) | ![](./media/screenshots/Screenshot%202025-10-30%20151810.png) |
+| ------------------------------------------------------------- | ------------------------------------------------------------- |
 
 - Spaced Repetition:
 
@@ -44,14 +76,9 @@ It works by translating the text on your favorite blogs and websites (optimized 
 
 - Automatic Proficiency Tracking: This is the core feature. You don't need to manually update your level. The extension automatically adjusts your proficiency score based on your reading and translation habits.
 
-| ![](./media/screenshots/Screenshot%202025-10-30%20150426.png) | ![](./media/screenshots/Screenshot%202025-10-30%20151810.png) |
-|---------------------------------------------------------------|---------------------------------------------------------------|
-
 ## How It Works: The Passive Learning Engine
 
 LingoLucid's goal is to make learning invisible. This is achieved through a continuous feedback loop.
-
-<!-- [YOUR FLOWCHART HERE: A diagram showing the proficiency update loop] -->
 
 1. Translate & Simplify: When you open an article, the text is first translated and then "rewritten" (simplified) to match your B1 level.
 
@@ -70,7 +97,7 @@ LingoLucid's goal is to make learning invisible. This is achieved through a cont
 ## The Extension Popup
 
 | ![](./media/screenshots/Screenshot%202025-10-30%20151311.png) | ![](./media/screenshots/Screenshot%202025-10-30%20151247.png) |
-|---------------------------------------------------------------|---------------------------------------------------------------|
+| ------------------------------------------------------------- | ------------------------------------------------------------- |
 
 - Home: A central hub with flags for each language. It shows your progress on started languages or a "play" button to begin a new one.
 
@@ -136,4 +163,4 @@ Feel free to open an issue to report a bug, suggest a feature, or make a pull re
 
 ## License
 
-This project is licensed under the [MIT License](http://docs.google.com/LICENSE).
+This project is licensed under the [MIT License](./LICENSE).
