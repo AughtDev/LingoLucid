@@ -1,9 +1,11 @@
 <div align="center">
-![icon128.png](.\public\icons\icon128.png)
+<p align="center">
+ <img src="public/icons/icon128.png"/>
+ </p>
 
 # LingoLucid
 
-Learn a language passively just by browsing the web.
+*Learn a language passively just by browsing the web.*
 </div>
 
 LingoLucid is an open-source Chrome extension that transforms your regular browsing into a passive language-learning experience. It assumes you are an English speaker and supports learning French, German, Spanish, Italian, and Portuguese.
@@ -12,7 +14,7 @@ It works by translating the text on your favorite sites (optimized for Substack 
 
 
 
-![Screenshot 2025-10-30 150323.png](.\media\screenshots\Screenshot%202025-10-30%20150323.png)
+![Screenshot 2025-10-30 150323.png](./media/screenshots/Screenshot%202025-10-30%20150323.png)
 
 ## Key Features
 
@@ -42,7 +44,7 @@ It works by translating the text on your favorite sites (optimized for Substack 
 
 - Automatic Proficiency Tracking: This is the core feature. You don't need to manually update your level. The extension automatically adjusts your proficiency score based on your reading and translation habits.
 
-| ![](.\media\screenshots\Screenshot%202025-10-30%20150426.png) | ![](.\media\screenshots\Screenshot%202025-10-30%20151810.png) |
+| ![](./media/screenshots/Screenshot%202025-10-30%20150426.png) | ![](./media/screenshots/Screenshot%202025-10-30%20151810.png) |
 |---------------------------------------------------------------|---------------------------------------------------------------|
 
 ## How It Works: The Passive Learning Engine
@@ -67,7 +69,7 @@ LingoLucid's goal is to make learning invisible. This is achieved through a cont
 
 ## The Extension Popup
 
-| ![](.\media\screenshots\Screenshot%202025-10-30%20151311.png) | ![](.\media\screenshots\Screenshot%202025-10-30%20151247.png) |
+| ![](./media/screenshots/Screenshot%202025-10-30%20151311.png) | ![](./media/screenshots/Screenshot%202025-10-30%20151247.png) |
 |---------------------------------------------------------------|---------------------------------------------------------------|
 
 - Home: A central hub with flags for each language. It shows your progress on started languages or a "play" button to begin a new one.
