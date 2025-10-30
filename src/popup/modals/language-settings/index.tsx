@@ -46,7 +46,7 @@ export default function LanguageSettingsModal({language}: LanguageSettingsModalP
     const pace_options: { label: string, value: LanguageSettings["learning_pace"] }[] = React.useMemo(() => {
         return [
             {label: "Slow", value: "slow"},
-            {label: "Medium", value: "medium"},
+            {label: "Moderate", value: "medium"},
             {label: "Fast", value: "fast"},
         ];
     }, []);

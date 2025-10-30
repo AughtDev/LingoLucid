@@ -44,13 +44,15 @@ interface WarningsButtonProps {
 export function LogsButton({warnings, errors, size}: WarningsButtonProps) {
     const {modal: {openModal}} = useAppContext()
 
+    const count = warnings.length + errors.length;
+
     return (
-        <button
+        count > 0 && <button
             onClick={() => {
                 openModal(<LogsModal warnings={warnings} errors={errors}/>)
             }}>
             <NumberedIcon
-                num={warnings.length + errors.length}
+                num={count}
                 color={"#f78554"} icon={WarningIcon} size={size}/>
         </button>
     )

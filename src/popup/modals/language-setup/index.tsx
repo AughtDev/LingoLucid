@@ -2,9 +2,9 @@ import React from 'react';
 import {Slider} from "../../../components/Slider.tsx";
 import {Language, LanguageSettings, ProficiencyLevel} from "../../../types/core.ts";
 import {BACKGROUND_COLOR, PRIMARY_COLOR} from "../../../constants/styling.ts";
-import {saveLanguageSettingsService} from "../../../utils/data/services.ts";
+// import {saveLanguageSettingsService} from "../../../utils/data/services.ts";
 import useAppContext from "../../context.tsx";
-import {downloadTranslationModel} from "../../../ai/translation.ts";
+// import {downloadTranslationModel} from "../../../ai/translation.ts";
 
 interface LanguageSetupModalProps {
     language: Language
@@ -13,30 +13,30 @@ interface LanguageSetupModalProps {
 export default function LanguageSetupModal({language}: LanguageSetupModalProps) {
     const {modal: {closeModal}, nav: {goToPage}} = useAppContext()
 
-    const [downloading_to_model_progress, setDownloadingToModelProgress] = React.useState<number | null>(null)
-    const [downloading_from_modal_progress, setDownloadingFromModalProgress] = React.useState<number | null>(null)
+    const [downloading_to_model_progress, _setDownloadingToModelProgress] = React.useState<number | null>(null)
+    const [downloading_from_modal_progress, _setDownloadingFromModalProgress] = React.useState<number | null>(null)
 
     const [proficiency, setProficiency] = React.useState<ProficiencyLevel>("a1")
     const [pace, setPace] = React.useState<LanguageSettings["learning_pace"]>("medium")
 
 
     const onProceed = React.useCallback(() => {
-        saveLanguageSettingsService(language.code, {
-            skill_level: proficiency,
-            learning_pace: pace,
-        }).then(() => {
-            downloadTranslationModel(language.code, (to_progress) => {
-                setDownloadingToModelProgress(to_progress);
-            }, (from_progress) => {
-                setDownloadingFromModalProgress(from_progress);
-            }).then(() => {
-                setDownloadingToModelProgress(null);
-            }).then(() => {
-                goToPage(`lang/${language.code}`);
-                closeModal();
-            })
-        })
-    }, [proficiency, pace, language.code, closeModal, goToPage, setDownloadingToModelProgress, setDownloadingFromModalProgress]);
+        goToPage(`lang/${language.code}`);
+        closeModal();
+        // saveLanguageSettingsService(language.code, {
+        //     skill_level: proficiency,
+        //     learning_pace: pace,
+        // }).then(() => {
+        //     downloadTranslationModel(language.code, (to_progress) => {
+        //         setDownloadingToModelProgress(to_progress);
+        //     }, (from_progress) => {
+        //         setDownloadingFromModalProgress(from_progress);
+        //     }).then(() => {
+        //         setDownloadingToModelProgress(null);
+        //     }).then(() => {
+        //     })
+        // })
+    }, [language.code, closeModal, goToPage]);
 
     const proficiency_levels: { label: string, value: ProficiencyLevel }[] = React.useMemo(() => {
         return [
@@ -81,7 +81,7 @@ export default function LanguageSetupModal({language}: LanguageSetupModalProps) 
                             <p>At what pace would you like to learn {language.label}?</p>
                             <Slider val={pace} setVal={setPace} options={[
                                 {label: "Slow", value: "slow"},
-                                {label: "Medium", value: "medium"},
+                                {label: "Moderate", value: "medium"},
                                 {label: "Fast", value: "fast"},
                             ]} visible_options={[
                                 0, 1, 2

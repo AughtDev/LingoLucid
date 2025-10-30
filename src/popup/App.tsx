@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    getActiveTabId,
+    getActiveTabId, getAppConfigService,
 } from "../utils/data/services.ts";
 import HomePage from "./pages/home";
 import {AppContext, AppContextProps} from "./context.tsx";
@@ -9,8 +9,10 @@ import LangPage from "./pages/lang";
 import {useLanguages} from "./hooks/useLanguages.tsx";
 import Button from "../components/Button.tsx";
 import {CloseIcon} from "../constants/icons.tsx";
-import LogsModal from "./modals/logs";
+// import LogsModal from "./modals/logs";
 import {MessageResponse, MessageType} from "../types/comms.ts";
+import {downloadRewriterModel, rewriterIsAvailable} from "../ai/simplify.ts";
+import DownloadModelModal from "./modals/download-model";
 
 
 const PAGES: { id: string, content: () => React.ReactElement }[] = [
@@ -60,7 +62,7 @@ const SUPPORTED_SITES = [
     "substack.com"
 ]
 export default function App() {
-    const {languages, init_log, makeLog} = useLanguages()
+    const {languages, init_log, makeLog,removeLog} = useLanguages()
 
     const [curr_page, setCurrPage] = React.useState<string>(PAGES[0].id);
     const [modal, setModal] = React.useState<React.ReactElement | null>(null)
@@ -83,24 +85,66 @@ export default function App() {
         getPageLangCodeService().then(lang_code => {
             if (lang_code) {
                 setCurrPage(`lang/${lang_code}`)
+            } else {
+                getAppConfigService().then(config => {
+                    if (config.curr_language) {
+                        setCurrPage(`lang/${config.curr_language}`)
+                    }
+                })
             }
         })
+
 
     }, []);
 
     // when progress is 1, display errors and warnings, if there are any
+    // React.useEffect(() => {
+    //     if (init_log.progress >= 1) {
+    //         if (init_log.errors.length > 0 || init_log.warnings.length > 0) {
+    //             // if the page has not yet been translated
+    //             getPageLangCodeService().then(lang_code => {
+    //                 if (!lang_code) {
+    //                     setModal(<LogsModal warnings={init_log.warnings} errors={init_log.errors}/>)
+    //                 }
+    //             })
+    //         }
+    //     }
+    // }, [init_log.progress, init_log.errors, init_log.warnings]);
+
     React.useEffect(() => {
-        if (init_log.progress >= 1) {
-            if (init_log.errors.length > 0 || init_log.warnings.length > 0) {
-                // if the page has not yet been translated
-                getPageLangCodeService().then(lang_code => {
-                    if (!lang_code) {
-                        setModal(<LogsModal warnings={init_log.warnings} errors={init_log.errors}/>)
-                    }
-                })
+        rewriterIsAvailable().then(res => {
+            if (!res) {
+                makeLog("warning", "Rewriter Model Unavailable",
+                    "The AI rewriter model is not available. Text simplification based on your proficiency level will be disabled.");
+                setModal(
+                    <DownloadModelModal
+                        title={"Download Rewriter Model"}
+                        details={[
+                            "To enable text simplification based on your proficiency level, you'll need to download the Rewriter model. The requirements and size of this model can be found in the chrome api docs. Kindly click on the download button to proceed. ",
+                            "Note: Currently, due to model constraints only Spanish language simplification is supported."
+                    ]}
+                        downloadFunc={async (setProgress) => {
+                            try {
+                                const res = await downloadRewriterModel((progress) => {
+                                    setProgress(progress);
+                                });
+                                if (res) {
+                                    console.log("Rewriter model downloaded successfully.");
+                                    removeLog("Rewriter Model Unavailable");
+                                } else {
+                                    console.error("Rewriter model could not be downloaded.");
+                                }
+                                return res;
+                            } catch (err) {
+                                console.error("Error downloading Rewriter model:", err);
+                                return false;
+                            }
+                        }}/>
+                )
             }
-        }
-    }, [init_log.progress, init_log.errors, init_log.warnings]);
+        })
+
+    }, []);
 
     const app_context: AppContextProps = React.useMemo(() => ({
         meta: init_log,

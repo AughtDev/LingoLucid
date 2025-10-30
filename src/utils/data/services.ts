@@ -56,7 +56,7 @@ export async function initializeService(): Promise<Language[]> {
         }
     }
     // check if app config exists, if not, create it
-    // await getAppConfigService()
+    await getAppConfigService()
     return langs
 }
 

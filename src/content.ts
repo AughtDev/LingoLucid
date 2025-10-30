@@ -1,4 +1,4 @@
-import { Message, MessageResponse, MessageType, TranslationPayload} from "./types/comms.ts";
+import {Message, MessageResponse, MessageType, TranslationPayload} from "./types/comms.ts";
 import {createRoot} from "react-dom/client";
 import {InspectTextPopup} from "./ui/inspect";
 import tailwind from "./popup/main.css?inline"
@@ -40,13 +40,13 @@ chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (r
             console.log("Translating page to", payload.tgt_lang_code)
 
             // make sure that model is downloaded, if it is, this will return immediately
-            downloadTranslationModel(payload.tgt_lang_code, () => null,() => null).then((res) => {
+            downloadTranslationModel("en", payload.tgt_lang_code, () => null).then((res) => {
                 if (!res) {
                     sendResponse({is_success: false, error_message: "Failed to download translation model"})
                     return
                 }
                 payload = message.payload as TranslationPayload
-                translatePage(payload.tgt_lang_code,payload.tgt_proficiency).then((result) => {
+                translatePage(payload.tgt_lang_code, payload.tgt_proficiency,() => null).then((result) => {
                     if (result) {
                         console.log("Page translated successfully");
                         highlightPage().then(() => {

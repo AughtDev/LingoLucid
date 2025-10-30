@@ -15,6 +15,19 @@ export async function rewriterIsAvailable(): Promise<boolean> {
     return status == "available";
 }
 
+const SUPPORTED_LANGUAGES = ["en", "jp", "es"]
+
+const REWRITER_OPTIONS: RewriterOptions = {
+    sharedContext: "This is translated text for language learners meant to be adapted to their CEFR proficiency level. Only simplify the text without changing its meaning even if it is only a single word. Do not question it. Return the normal simplified plain text as is, no additional formatting or clarifications needed.",
+    expectedContextLanguages: ["en"],
+    expectedInputLanguages: Object.values(INITIAL_LANGUAGES)
+        .map(lang => lang.code)
+        .filter(code => SUPPORTED_LANGUAGES.includes(code)),
+    tone: "as-is",
+    format: "as-is",
+    length: "as-is",
+}
+
 export async function downloadRewriterModel(onProgress: (progress: number) => void): Promise<boolean> {
     if (!('Rewriter' in self)) {
         console.warn("Cannot download, Rewriter not available in this Chrome version");
@@ -31,6 +44,7 @@ export async function downloadRewriterModel(onProgress: (progress: number) => vo
     let success = true;
 
     await Rewriter.create({
+        ...REWRITER_OPTIONS,
         monitor(m: any) {
             m.addEventListener('downloadprogress', (e: { loaded: number }) => {
                 console.log(`Downloaded ${e.loaded * 100}%`);
@@ -46,7 +60,7 @@ export async function downloadRewriterModel(onProgress: (progress: number) => vo
 }
 
 
-export async function simplifyTranslatedText(translation: string, specs: SimplifySpecs): Promise<string | null> {
+export async function simplifyTranslatedText(lang_code: string, translation: string, specs: SimplifySpecs): Promise<string | null> {
     if (!chromeHasRewriter()) {
         console.error("Rewriter not available in this Chrome version");
         return null
@@ -58,16 +72,15 @@ export async function simplifyTranslatedText(translation: string, specs: Simplif
         return null
     }
 
-    const rewriter = await Rewriter.create({
-        sharedContext: "These are meant to take translated texts and adapt them to a language learner's proficiency level.",
-        expectedContextLanguages: ["en"],
-        expectedInputLanguages: Object.values(INITIAL_LANGUAGES).map(lang => lang.code),
-        tone: "as-is",
-        format: "as-is",
-        length: "as-is",
-    });
+    if (!SUPPORTED_LANGUAGES.includes(lang_code)) {
+        console.error("Rewriter does not support language code:", lang_code);
+        return null
+    }
 
-    return await rewriter.rewrite(translation,{
+    const rewriter = await Rewriter.create({...REWRITER_OPTIONS, outputLanguage: lang_code});
+
+    console.log(`attempting to simplify text ${translation} to level:`, specs.level);
+    return await rewriter.rewrite(translation, {
         context: `Simplify the following text to the ${specs.level.toUpperCase()} proficiency level according to the Common European Framework of Reference for Languages (CEFR): ${translation}`
     })
 }

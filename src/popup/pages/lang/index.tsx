@@ -1,5 +1,5 @@
 import React from 'react';
-import {getActiveTabId, updateLanguageMasteryService} from "../../../utils/data/services.ts";
+import {getActiveTabId, setCurrentLanguageService, updateLanguageMasteryService} from "../../../utils/data/services.ts";
 import useAppContext from "../../context.tsx";
 import CardsView from "./CardsView.tsx";
 import {HomeIcon, IconHoverEffects, SettingsIcon, TranslateIcon} from "../../../constants/icons.tsx";
@@ -11,6 +11,8 @@ import {SnippetHighlightType} from "../../../ai/highlight.ts";
 import {LogsButton} from "../../modals/logs";
 import ProficiencyBadge from "../../../components/ProficiencyBadge.tsx";
 import {getPageLangCodeService} from "../../App.tsx";
+import {downloadTranslationModel, translatorIsAvailable} from "../../../ai/translation.ts";
+import DownloadModelModal from "../../modals/download-model";
 
 interface LangPageProps {
     code: string
@@ -21,7 +23,8 @@ enum PageStatus {
     Untranslated,
     Translating,
     Ready,
-    Error
+    Error,
+    DownloadError
 }
 
 function masteryToProficiencyLevel(mastery: number): ProficiencyLevel {
@@ -98,10 +101,79 @@ export function highlightPageService(): Promise<void> {
 export default function LangPage({code}: LangPageProps) {
     const [page_status, setPageStatus] = React.useState<PageStatus>(PageStatus.Loading)
 
-    const {meta: {warnings, errors}, nav: {goToPage}, modal: {openModal}, data: {languages}} = useAppContext()
+    const {meta: {warnings, errors}, nav: {goToPage}, modal: {openModal,closeModal}, data: {languages}} = useAppContext()
     const lang = languages.get(code)
 
+    const [translator_availability, setTranslatorAvailability] = React.useState<[boolean, boolean]>([false, false]);
+
     React.useEffect(() => {
+        if (!translator_availability[0]) {
+            // check if the models are downloaded. if not, download both
+            translatorIsAvailable("en", code).then(async (is_available) => {
+                if (!is_available) {
+                    openModal(
+                        <DownloadModelModal
+                            title={`Download English To ${lang?.label ?? code} Model`}
+                            details={[
+                                `To translate pages to ${lang?.label ?? code}, the translation model needs to be downloaded first.`,
+                                `The model will be stored locally on your device and will be used to translate pages offline.`,
+                                `This may take a few minutes depending on your internet connection.`
+                            ]}
+                            downloadFunc={async (setProgress) => {
+                                return await downloadTranslationModel("en", code, setProgress).then(res => {
+                                    if (res) {
+                                        closeModal()
+                                        setTranslatorAvailability((prev) => [true, prev[1]]);
+                                    } else {
+                                        console.error("Failed to download translation model for", code);
+                                        setPageStatus(PageStatus.DownloadError);
+                                    }
+                                    return res
+                                });
+                            }}/>
+                    )
+                } else {
+                    console.log("Translation model already available for", code);
+                    setTranslatorAvailability((prev) => [true, prev[1]]);
+                }
+            })
+        } else if (!translator_availability[1]) {
+            translatorIsAvailable(code, "en").then(async (is_available) => {
+                console.log("Reverse translation model availability for", code, "is", is_available);
+                if (!is_available) {
+                    openModal(
+                        <DownloadModelModal
+                            title={`Download ${lang?.label ?? code} To English Model`}
+                            details={[
+                                `To simplify translated text back to English, the translation model needs to be downloaded first.`,
+                                `The model will be stored locally on your device and will be used to translate pages offline.`,
+                                `This may take a few minutes depending on your internet connection.`
+                            ]}
+                            downloadFunc={async (setProgress) => {
+                                return await downloadTranslationModel(code, "en", setProgress).then(res => {
+                                    if (res) {
+                                        closeModal()
+                                        setTranslatorAvailability((prev) => [prev[0], true]);
+                                    } else {
+                                        console.error("Failed to download reverse translation model for", code);
+                                        setPageStatus(PageStatus.DownloadError);
+                                    }
+                                    return res
+                                });
+                            }}/>
+                    )
+                } else {
+                    console.log("Translation model already available for", code);
+                    setTranslatorAvailability((prev) => [prev[0], true]);
+                }
+            })
+        }
+    }, [translator_availability]);
+    React.useEffect(() => {
+        if (!translator_availability[0] || !translator_availability[1]) {
+            return;
+        }
+
         // check if page is already translated
         updateLanguageMasteryService(code).then()
         getPageLangCodeService().then((page_code) => {
@@ -113,13 +185,14 @@ export default function LangPage({code}: LangPageProps) {
         }).catch(() => {
             setPageStatus(PageStatus.Error);
         })
-    }, []);
+    }, [translator_availability]);
     const translatePage = React.useCallback(() => {
         // set lang as current language
         if (!lang) return;
         setPageStatus(PageStatus.Translating)
         translatePageService(lang, async () => {
             setPageStatus(PageStatus.Ready);
+            setCurrentLanguageService(lang.code).then()
         }, () => {
             setPageStatus(PageStatus.Error);
         })
@@ -194,6 +267,12 @@ export default function LangPage({code}: LangPageProps) {
                                 <div className={"flex flex-grow w-full items-center justify-center"}>
                                     <p className={"text-gray-500 text-lg text-center"}>
                                         Error translating page. Please try again later.
+                                    </p>
+                                </div>
+                            ) : page_status === PageStatus.DownloadError ? (
+                                <div className={"flex flex-grow w-full items-center justify-center"}>
+                                    <p className={"text-gray-500 text-lg text-center"}>
+                                        Error downloading translation model. Please try again later.
                                     </p>
                                 </div>
                             ) : (

@@ -24,7 +24,11 @@ export default function HoverInspectPopup({state}: HoverInspectPopupProps) {
     }, []);
 
     const onClickSimplify = React.useCallback(async () => {
+        const target_lang = document.body.getAttribute('data-target-lang') || undefined;
+        if (!target_lang) return;
+
         await simplifyText(
+            target_lang,
             state.content.focus_text,
             state.content.focus_text_node,
             state.content.focus_range

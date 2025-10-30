@@ -6,11 +6,12 @@ import {simplifyTranslatedText} from "../../ai/simplify.ts";
 import {getPopupState, PopupState, PopupType, subscribe} from "../store/popup.ts";
 
 export async function simplifyText(
+    lang_code: string,
     text: string, text_node: Text | null, range: Range | null,
 ) {
     // get the text node and range from state and simplify the text
     // const text = state.content.focus_text
-    const simplified_text = await simplifyTranslatedText(text, {
+    const simplified_text = await simplifyTranslatedText(lang_code,text, {
         level: "a1"
     })
 

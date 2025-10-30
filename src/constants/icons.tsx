@@ -8,7 +8,7 @@ export interface IconProps {
 }
 
 
-export function HomeIcon({size,color}: IconProps) {
+export function HomeIcon({size, color}: IconProps) {
     return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -23,7 +23,7 @@ export function HomeIcon({size,color}: IconProps) {
     )
 }
 
-export function SettingsIcon({size,color}: IconProps) {
+export function SettingsIcon({size, color}: IconProps) {
     return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -38,7 +38,7 @@ export function SettingsIcon({size,color}: IconProps) {
     )
 }
 
-export function BookIcon({size,color}: IconProps) {
+export function BookIcon({size, color}: IconProps) {
     return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -57,7 +57,7 @@ export function BookIcon({size,color}: IconProps) {
     )
 }
 
-export function ShuffleIcon({size,color}: IconProps) {
+export function ShuffleIcon({size, color}: IconProps) {
     return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -77,7 +77,7 @@ export function ShuffleIcon({size,color}: IconProps) {
 }
 
 
-export function CloseIcon({size,color}: IconProps) {
+export function CloseIcon({size, color}: IconProps) {
     return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -239,13 +239,34 @@ export function WarningIcon({size, color}: IconProps) {
     )
 }
 
+export function DownloadIcon({size, color}: IconProps) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+            <g id="SVGRepo_iconCarrier">
+                <path d="M12 3V16M12 16L16 11.625M12 16L8 11.625" stroke={color} stroke-width="1.5"
+                      stroke-linecap="round" stroke-linejoin="round"></path>
+                <path
+                    d="M15 21H9C6.17157 21 4.75736 21 3.87868 20.1213C3 19.2426 3 17.8284 3 15M21 15C21 17.8284 21 19.2426 20.1213 20.1213C19.8215 20.4211 19.4594 20.6186 19 20.7487"
+                    stroke={color} stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </g>
+        </svg>
+    )
+}
+
 export interface IconHoverEffectsProps extends IconProps {
     hover_color?: string
     icon: React.ComponentType<IconProps>
 }
 
-export function IconHoverEffects({color = ICON_COLOR, size, hover_color = ICON_HOVER_COLOR, icon: Icon}: IconHoverEffectsProps) {
-    const {modal:{modal_open}} = useAppContext()
+export function IconHoverEffects({
+                                     color = ICON_COLOR,
+                                     size,
+                                     hover_color = ICON_HOVER_COLOR,
+                                     icon: Icon
+                                 }: IconHoverEffectsProps) {
+    const {modal: {modal_open}} = useAppContext()
     const [hovered, setHovered] = React.useState<boolean>(false)
 
     const icon_ref = React.useRef<HTMLDivElement | null>(null);

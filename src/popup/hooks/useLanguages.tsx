@@ -2,7 +2,7 @@ import {Language} from "../../types/core.ts";
 import React from "react";
 import {initializeService} from "../../utils/data/services.ts";
 import {INITIAL_LANGUAGES} from "../../constants/languages.ts";
-import {downloadRewriterModel} from "../../ai/simplify.ts";
+// import {downloadRewriterModel} from "../../ai/simplify.ts";
 import {InitLog} from "../context.tsx";
 
 
@@ -11,6 +11,7 @@ interface LanguagesHookReturn {
     languages: Map<string, Language>;
     loading: boolean;
     makeLog: (type: "error" | "warning", title: string, details: string) => void;
+    removeLog: (title: string) => void;
 }
 
 export function useLanguages(): LanguagesHookReturn {
@@ -39,37 +40,37 @@ export function useLanguages(): LanguagesHookReturn {
 
     // Setup function to initialize extension
     const setupExtension = React.useCallback(async () => {
-        await downloadRewriterModel((progress) => {
-            setInitLog(prev => ({...prev, progress: progress * 0.9}))
-        }).then(res => {
-            if (!res) {
-                setInitLog(prev => ({
-                    ...prev,
-                    progress: 0.9,
-                    warnings: [...prev.warnings, {
-                        title: "Rewriter model could not be downloaded.",
-                        details: "The text will not be able to be simplified based on your proficiency level but if the translation models are available," +
-                            "you may still translate text, save cards and review them."
-                    }]
-                }))
-            } else {
-                console.log("Rewriter model downloaded successfully.")
-                setInitLog(prev => ({
-                    ...prev,
-                }))
-            }
-        }).catch(err => {
-            console.error("Error downloading Rewriter model:", err);
-            setInitLog(prev => ({
-                ...prev,
-                progress: 0.9,
-                warnings: [...prev.warnings, {
-                    title: `Error downloading Rewriter model: ${err.message}`,
-                    details: "The text will not be able to be simplified based on your proficiency level but if the translation models are available," +
-                        "you may still translate text, save cards and review them."
-                }]
-            }))
-        })
+        // await downloadRewriterModel((progress) => {
+        //     setInitLog(prev => ({...prev, progress: progress * 0.9}))
+        // }).then(res => {
+        //     if (!res) {
+        //         setInitLog(prev => ({
+        //             ...prev,
+        //             progress: 0.9,
+        //             warnings: [...prev.warnings, {
+        //                 title: "Rewriter model could not be downloaded.",
+        //                 details: "The text will not be able to be simplified based on your proficiency level but if the translation models are available," +
+        //                     "you may still translate text, save cards and review them."
+        //             }]
+        //         }))
+        //     } else {
+        //         console.log("Rewriter model downloaded successfully.")
+        //         setInitLog(prev => ({
+        //             ...prev,
+        //         }))
+        //     }
+        // }).catch(err => {
+        //     console.error("Error downloading Rewriter model:", err);
+        //     setInitLog(prev => ({
+        //         ...prev,
+        //         progress: 0.9,
+        //         warnings: [...prev.warnings, {
+        //             title: `Error downloading Rewriter model: ${err.message}`,
+        //             details: "The text will not be able to be simplified based on your proficiency level but if the translation models are available," +
+        //                 "you may still translate text, save cards and review them."
+        //         }]
+        //     }))
+        // })
 
         const map = new Map<string, Language>();
         await initializeService().then(res => {
@@ -111,5 +112,13 @@ export function useLanguages(): LanguagesHookReturn {
         }
     }, [setInitLog]);
 
-    return {languages, init_log, loading, makeLog};
+    const removeLog = React.useCallback((title: string) => {
+        setInitLog(prev => ({
+            ...prev,
+            warnings: prev.warnings.filter(log => log.title !== title),
+            errors: prev.errors.filter(log => log.title !== title),
+        }))
+    }, [setInitLog]);
+
+    return {languages, init_log, loading, makeLog,removeLog};
 }

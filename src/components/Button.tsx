@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconProps} from "../constants/icons.tsx";
+import {IconProps} from "../constants/icons.tsx";
 import useAppContext from "../popup/context.tsx";
 import ConfirmationModal from "../popup/modals/confirmation";
 import SpinLoader from "./SpinLoader.tsx";
@@ -56,7 +56,7 @@ export default function Button({
                                    onClick,
                                    style,
                                    class_name,
-    disabled
+                                   disabled
                                }: ButtonProps) {
     if (!Icon && !label) {
         throw new Error("Button component requires at least an icon or a label.");
@@ -129,6 +129,7 @@ export default function Button({
                     ...default_styling,
                     py: size / 2 + 4,
                     px: size + 4,
+                    ic: !disabled ? '#fff' : ICON_DISABLED_COLOR,
                 };
             case "outline":
                 return {
@@ -137,6 +138,7 @@ export default function Button({
                     b: 2,
                     bc: base_color,
                     tc: base_color,
+                    ic: !disabled ? base_color : ICON_DISABLED_COLOR,
                 };
             case "icon":
                 return {
@@ -148,7 +150,8 @@ export default function Button({
                 return {
                     ...default_styling,
                     bg: 'transparent',
-                    tc: base_color
+                    tc: base_color,
+                    ic: !disabled ? base_color : ICON_DISABLED_COLOR,
                 };
             default:
                 return default_styling;

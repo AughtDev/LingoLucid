@@ -9,7 +9,7 @@ import {initEngagementTracking} from "./engagement.ts";
 import {updateCachedCards} from "../store/cards.ts";
 import {instantiateTextNode} from "../store/performance.ts";
 
-export async function translatePage(tgt_lang_code: string, tgt_level: ProficiencyLevel): Promise<boolean> {
+export async function translatePage(tgt_lang_code: string, tgt_level: ProficiencyLevel, setProgress: (progress: number) => void): Promise<boolean> {
     // convert all text nodes within any article tags to the target language
     const articles = document.getElementsByTagName('article');
     for (let article of articles) {
@@ -26,9 +26,13 @@ export async function translatePage(tgt_lang_code: string, tgt_level: Proficienc
             text_nodes.push(node as Text);
         }
 
-        for (let text_node of text_nodes) {
-            const og_text = text_node.nodeValue || '';
-            if (og_text.trim().length === 0) continue;
+        let i = 0
+        for (let text_node of text_nodes.slice(0, 5)) {
+            // save the start and ending whitespace,
+            const l_pad = text_node.nodeValue?.match(/^\s*/)?.[0] || '';
+            const r_pad = text_node.nodeValue?.match(/\s*$/)?.[0] || '';
+            const og_text = text_node.nodeValue?.trim() || '';
+            if (og_text.length === 0) continue;
 
             try {
                 // confirm that text is either in english or in the target language already
@@ -53,16 +57,16 @@ export async function translatePage(tgt_lang_code: string, tgt_level: Proficienc
 
                 if (translation && translation.trim().length > 0) {
                     // simplify
-                    const simplified = await simplifyTranslatedText(translation, {
+                    const simplified = await simplifyTranslatedText(tgt_lang_code, translation, {
                         level: tgt_level
                     })
 
                     if (simplified && simplified.trim().length > 0) {
                         console.log("Simplified translation:", translation, "to", simplified);
-                        text_node.nodeValue = simplified;
+                        text_node.nodeValue = l_pad + simplified + r_pad;
                     } else {
                         console.warn("Simplification failed or empty, using original translation");
-                        text_node.nodeValue = translation;
+                        text_node.nodeValue = l_pad + translation + r_pad;
                     }
                 }
 
@@ -75,6 +79,9 @@ export async function translatePage(tgt_lang_code: string, tgt_level: Proficienc
             } catch (error) {
                 console.error("Translation error for text:", og_text, error);
             }
+
+            i += 1;
+            setProgress((i / text_nodes.length) / articles.length);
         }
         // highlightArticleKeywords(article, word_map);
 
