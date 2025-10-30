@@ -1,10 +1,10 @@
 <div align="center">
 
-**GOOGLE CHROME BUILT-IN AI JUDGES: PLEASE READ FIRST**
+## **GOOGLE CHROME BUILT-IN AI JUDGES: PLEASE READ FIRST**
 
 ### How to Install & Test (v1.0)
 
-This extension is **not yet** on the Chrome Web Store. Please use the following steps to install the app for review:
+This extension is unfortunately **not yet** on the Chrome Web Store. Please use the following steps to install the app for review:
 
 1.  **Download:** Go to the **[Latest Release Page](https://github.com/AughtDev/LingoLucid/releases/latest)** and
     download the `LingoLucid-v1.0.zip` file.
@@ -33,7 +33,8 @@ To build the extension from source, please refer to the "Getting Started (For De
 
 </div>
 
----
+
+
 
 LingoLucid is an open-source Chrome extension that transforms your regular browsing into a passive language-learning experience. It assumes you are an English speaker and supports learning French, German, Spanish, Italian, and Portuguese.
 
