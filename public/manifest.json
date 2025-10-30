@@ -14,7 +14,7 @@
     "scripting"
   ],
   "host_permissions": [
-    "*://*.substack.com/*"
+    "<all_urls>"
   ],
   "action": {
     "default_popup": "index.html",
@@ -30,8 +30,7 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*.substack.com/*",
-        "*://*.f-droid.org/*"
+        "<all_urls>"
       ],
       "js": [
         "src/content.js"
