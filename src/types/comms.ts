@@ -3,7 +3,7 @@ import {LanguageCards, ProficiencyLevel} from "./core.ts";
 export enum MessageType {
     TRANSLATE_PAGE,
     HIGHLIGHT_PAGE,
-    CHECK_IF_TRANSLATED,
+    GET_PAGE_LANG_CODE,
     SAVE_CARD,
     GET_CARDS,
     UPDATE_PROGRESS
@@ -23,10 +23,6 @@ export interface SaveCardPayload {
     type: keyof LanguageCards
 }
 
-export interface CheckIfTranslatedPayload {
-    lang_code: string
-}
-
 export interface GetCardsPayload {
     lang_code: string;
 }
@@ -36,7 +32,7 @@ export interface UpdateProgressPayload {
     deltas: [string,number][]
 }
 
-export interface Message<T = TranslationPayload | SaveCardPayload | CheckIfTranslatedPayload | UpdateProgressPayload> {
+export interface Message<T = TranslationPayload | SaveCardPayload | UpdateProgressPayload> {
     type: MessageType;
     payload?: T
 }

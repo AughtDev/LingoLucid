@@ -1,5 +1,5 @@
 import {MessageType, UpdateProgressPayload} from "../../types/comms.ts";
-import {textToEvalStats} from "../../ai/evaluate.ts";
+import {TextEvalStats, textToEvalStats} from "../../ai/evaluate.ts";
 
 interface TextComprehensionStats {
     engagement_time_ms: number // in ms
@@ -40,23 +40,23 @@ export function recordTextEngagement(text_id: string, engagement_time_ms: number
     updateProgressInLocalStorage(lang_code, text_id, stats)
 }
 
-export async function recordTextTranslation(text_id: string, text: string, lang_code: string): Promise<boolean> {
+export async function recordTextTranslation(text_id: string, text: string, lang_code: string): Promise<TextEvalStats | null> {
     const stats = performance.get(text_id)
     if (!stats) {
         console.error("No performance stats found for text id:", text_id);
-        return false;
+        return null;
     }
     const eval_stats = await textToEvalStats(text, lang_code)
     if (!eval_stats) {
         console.error("Could not evaluate translated text for comprehension stats:", text);
-        return false;
+        return null;
     }
     stats.translations.push({
         text_difficulty: eval_stats.difficulty,
         num_words: eval_stats.word_count
     })
     updateProgressInLocalStorage(lang_code, text_id, stats)
-    return true
+    return eval_stats
 }
 
 export function updateProgressInLocalStorage(lang_code: string, text_id: string, stats: TextComprehensionStats) {

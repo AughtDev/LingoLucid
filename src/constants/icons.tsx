@@ -1,5 +1,6 @@
 import React from "react";
 import {ICON_COLOR, ICON_HOVER_COLOR} from "./styling.ts";
+import useAppContext from "../popup/context.tsx";
 
 export interface IconProps {
     size?: number | string;
@@ -244,10 +245,16 @@ export interface IconHoverEffectsProps extends IconProps {
 }
 
 export function IconHoverEffects({color = ICON_COLOR, size, hover_color = ICON_HOVER_COLOR, icon: Icon}: IconHoverEffectsProps) {
+    const {modal:{modal_open}} = useAppContext()
     const [hovered, setHovered] = React.useState<boolean>(false)
 
     const icon_ref = React.useRef<HTMLDivElement | null>(null);
 
+    React.useEffect(() => {
+        if (modal_open) {
+            setHovered(false);
+        }
+    }, [modal_open]);
     React.useEffect(() => {
         const handleMouseEnter = () => setHovered(true);
         const handleMouseLeave = () => setHovered(false);

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Language, LanguageSettings, ProficiencyLevel} from "../../../types/core.ts";
+import {Language, LanguageSettings, PROFICIENCY_LEVELS, ProficiencyLevel} from "../../../types/core.ts";
 import {Slider} from "../../../components/Slider.tsx";
 import {BACKGROUND_COLOR} from "../../../constants/styling.ts";
 import {clearLanguageDataService, saveLanguageSettingsService} from "../../../utils/data/services.ts";
@@ -14,12 +14,15 @@ interface LanguageSettingsModalProps {
 export default function LanguageSettingsModal({language}: LanguageSettingsModalProps) {
     const {modal: {closeModal}} = useAppContext()
 
-    const [proficiency, setProficiency] = React.useState<ProficiencyLevel>(language.settings.skill_level)
+    const og_proficiency_level = PROFICIENCY_LEVELS[Math.floor(language.progress.mastery)];
+    const [proficiency, setProficiency] = React.useState<ProficiencyLevel>(og_proficiency_level)
+
     const [pace, setPace] = React.useState<LanguageSettings["learning_pace"]>(language.settings.learning_pace)
 
     const saveSettings = React.useCallback(() => {
         saveLanguageSettingsService(language.code, {
-            skill_level: proficiency,
+            // do not change the mastery if the proficiency level is unchanged
+            skill_level:  proficiency === og_proficiency_level ? undefined : proficiency,
             learning_pace: pace,
         }).finally(closeModal)
     }, [language.code, proficiency, pace, closeModal]);
@@ -61,7 +64,7 @@ export default function LanguageSettingsModal({language}: LanguageSettingsModalP
             </div>
             <div className={"flex-1 w-full flex flex-col items-center justify-center gap-4 px-2 pt-1"}>
                 <div className={"w-65 mb-4 flex flex-col items-start justify-center"}>
-                    <p className={"text-md"}>Baseline Proficiency</p>
+                    <p className={"text-md"}>Proficiency Level</p>
                     <Slider val={proficiency}
                             setVal={setProficiency} options={mastery_options}
                             visible_options={mastery_options.map((_, i) => i)}/>

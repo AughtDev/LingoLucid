@@ -22,14 +22,8 @@ export async function translatePage(tgt_lang_code: string, tgt_level: Proficienc
         const walker = document.createTreeWalker(article, NodeFilter.SHOW_TEXT, null);
         let node;
         // only the first 200 words for testing
-        let word_count = 0;
         while (node = walker.nextNode()) {
             text_nodes.push(node as Text);
-            word_count += (node.nodeValue || '').split(' ').length;
-            if (word_count >= 200) {
-                console.log("Reached word limit for text, stopping");
-                break;
-            }
         }
 
         for (let text_node of text_nodes) {

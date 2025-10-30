@@ -30,7 +30,7 @@ function normalizeTextToTokens(raw: string): string[] {
     let clean = raw.toLowerCase();
 
     // 2. Separate Apostrophe-based Clitics (FR, IT)
-    clean = clean.replace(/(\w)'(\w)/g, '$1\' $2');
+    clean = clean.replace(/(\p{L})'(\p{L})/gu, '$1\' $2');
 
 
     // 3. Remove general punctuation, but KEEP hyphens (-) as they are now single tokens.

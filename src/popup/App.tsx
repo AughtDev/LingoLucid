@@ -1,5 +1,7 @@
 import React from 'react';
-import {getAppConfigService} from "../utils/data/services.ts";
+import {
+    getActiveTabId,
+} from "../utils/data/services.ts";
 import HomePage from "./pages/home";
 import {AppContext, AppContextProps} from "./context.tsx";
 import {INITIAL_LANGUAGES} from "../constants/languages.ts";
@@ -7,6 +9,8 @@ import LangPage from "./pages/lang";
 import {useLanguages} from "./hooks/useLanguages.tsx";
 import Button from "../components/Button.tsx";
 import {CloseIcon} from "../constants/icons.tsx";
+import LogsModal from "./modals/logs";
+import {MessageResponse, MessageType} from "../types/comms.ts";
 
 
 const PAGES: { id: string, content: () => React.ReactElement }[] = [
@@ -19,6 +23,29 @@ const PAGES: { id: string, content: () => React.ReactElement }[] = [
 
 console.log("PAGES:", PAGES);
 
+export async function getPageLangCodeService(): Promise<string | null> {
+    return new Promise((resolve) => {
+        getActiveTabId().then((activeTabId) => {
+            if (activeTabId === null) {
+                resolve(null);
+                return;
+            }
+            console.log("service", `Checking if page is already translated`);
+            chrome.tabs.sendMessage(activeTabId, {
+                type: MessageType.GET_PAGE_LANG_CODE,
+            }, (res: MessageResponse<string | null>) => {
+                if (res.is_success && res.data !== undefined) {
+                    console.log('service', `Page translation status: ${res.data}`);
+                    resolve(res.data);
+                } else {
+                    console.error('service', `Failed to check page translation status:`, res.error_message);
+                    resolve(null);
+                }
+            })
+        })
+    })
+}
+
 const getCurrentUrl = async (): Promise<string | null> => {
     try {
         const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
@@ -28,8 +55,12 @@ const getCurrentUrl = async (): Promise<string | null> => {
         return null;
     }
 };
+
+const SUPPORTED_SITES = [
+    "substack.com"
+]
 export default function App() {
-    const {languages, init_log} = useLanguages()
+    const {languages, init_log, makeLog} = useLanguages()
 
     const [curr_page, setCurrPage] = React.useState<string>(PAGES[0].id);
     const [modal, setModal] = React.useState<React.ReactElement | null>(null)
@@ -37,15 +68,39 @@ export default function App() {
     React.useEffect(() => {
         getCurrentUrl().then(url => {
             if (url) {
-                // confirm valid url
+                console.log("Current URL:", url);
+                // check using regex if the url matches any of the supported sites, if not, add a warning
+                const is_supported = SUPPORTED_SITES.some(site => {
+                    return url.includes(site)
+                });
+                if (!is_supported) {
+                    makeLog("warning", "Unsupported Site",
+                        `The current site (${url}) is not officially supported.
+                         Some features may not work as expected.`);
+                }
             }
         });
-        getAppConfigService().then(config => {
-            if (config.curr_language) {
-                setCurrPage(`lang/${config.curr_language}`)
+        getPageLangCodeService().then(lang_code => {
+            if (lang_code) {
+                setCurrPage(`lang/${lang_code}`)
             }
         })
+
     }, []);
+
+    // when progress is 1, display errors and warnings, if there are any
+    React.useEffect(() => {
+        if (init_log.progress >= 1) {
+            if (init_log.errors.length > 0 || init_log.warnings.length > 0) {
+                // if the page has not yet been translated
+                getPageLangCodeService().then(lang_code => {
+                    if (!lang_code) {
+                        setModal(<LogsModal warnings={init_log.warnings} errors={init_log.errors}/>)
+                    }
+                })
+            }
+        }
+    }, [init_log.progress, init_log.errors, init_log.warnings]);
 
     const app_context: AppContextProps = React.useMemo(() => ({
         meta: init_log,
@@ -56,6 +111,7 @@ export default function App() {
             }
         },
         modal: {
+            modal_open: modal !== null,
             openModal: (modal_element: React.ReactElement) => {
                 setModal(modal_element)
             },
@@ -64,7 +120,7 @@ export default function App() {
             }
         },
         data: {languages}
-    }), [curr_page, setCurrPage, setModal, languages, init_log]);
+    }), [curr_page, setCurrPage, setModal, languages, init_log, modal]);
 
     const onClickModalBackground = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         // make sure that it's not the modal being clicked

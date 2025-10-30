@@ -138,12 +138,12 @@ button svg {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(210, 131, 87, 0.40);
+    background: rgba(210, 131, 87, 0.70);
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(90, 180, 90, 0.40);
+    background: rgba(90, 180, 90, 0.70);
 }
 
 ::-webkit-scrollbar-button {

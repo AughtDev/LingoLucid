@@ -1,6 +1,14 @@
 import {INITIAL_LANGUAGES} from "../../constants/languages.ts";
 import {getLanguageFromLocalStorage, saveLanguageToLocalStorage} from "./core.ts";
-import {AppConfig, Card, CardReview, Language, LanguageSettings, ProficiencyLevel} from "../../types/core.ts";
+import {
+    AppConfig,
+    Card,
+    CardReview,
+    Language,
+    LanguageSettings,
+    PROFICIENCY_LEVELS,
+    ProficiencyLevel
+} from "../../types/core.ts";
 
 // region STORAGE
 // ? ........................
@@ -48,7 +56,7 @@ export async function initializeService(): Promise<Language[]> {
         }
     }
     // check if app config exists, if not, create it
-    await getAppConfigService()
+    // await getAppConfigService()
     return langs
 }
 
@@ -60,14 +68,15 @@ export async function getLanguageService(code: string) {
 // region SETTINGS
 // ? ........................
 
-export async function saveLanguageSettingsService(code: string, data: LanguageSettings) {
+export async function saveLanguageSettingsService(code: string, data: Partial<LanguageSettings>) {
     const lang = await getLanguageFromLocalStorage(code)
     if (lang) {
         return await saveLanguageToLocalStorage(code, {
             ...lang,
             progress: {
                 ...lang.progress,
-                started: true
+                started: true,
+                mastery: data.skill_level ? PROFICIENCY_LEVELS.indexOf(data.skill_level) : lang.progress.mastery
             },
             settings: {
                 ...lang.settings,

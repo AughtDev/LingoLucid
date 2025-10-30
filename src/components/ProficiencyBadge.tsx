@@ -4,9 +4,10 @@ import {ProficiencyLevel} from "../types/core.ts";
 interface ProficiencyBadgeProps {
     proficiency: ProficiencyLevel
     size: number
+    variant?: "solid" | "ghost"
 }
 
-export default function ProficiencyBadge({proficiency, size}: ProficiencyBadgeProps) {
+export default function ProficiencyBadge({proficiency, size, variant = "ghost"}: ProficiencyBadgeProps) {
     const {color, label} = React.useMemo(() => {
         switch (proficiency) {
             case "a1":
@@ -26,12 +27,30 @@ export default function ProficiencyBadge({proficiency, size}: ProficiencyBadgePr
         }
     }, [proficiency]);
 
+    const {bg, col} = React.useMemo(() => {
+        switch (variant) {
+            case "solid":
+                return {bg: color, col: "#FFFFFF"};
+            case "ghost":
+                return {bg: "transparent", col: color};
+            default:
+                return {bg: color, col: "#FFFFFF"};
+        }
+    }, [variant, color]);
+
     return (
-        <div className={"flex justify-center items-center"}>
+        <div
+            style={{
+                backgroundColor: bg,
+                padding: size / 4,
+                borderRadius: size / 2,
+                lineHeight: 1
+            }}
+            className={"flex justify-center items-center"}>
             <p className={"font-semibold"}
                style={{
                    fontSize: size,
-                   color: color,
+                   color: col,
                }}>
                 {label}
             </p>

@@ -4,9 +4,19 @@ import {getPopupState, PopupType, updatePopupState} from "../store/popup.ts";
 
 let popup_delay_timer: number | null = null;
 const HOVER_DELAY = 1000; // milliseconds
-const HOVER_DETECT_PADDING = 3 // 5px
+const HOVER_DETECT_PADDING = 2 // 2px
 
 export function wordHoverListener(e: MouseEvent) {
+    const article_elem = (e.target as Element)?.closest('article');
+
+    if (!article_elem) {
+        // Mouse is outside article, clear any pending popup
+        if (popup_delay_timer) {
+            clearTimeout(popup_delay_timer);
+            popup_delay_timer = null;
+        }
+        return;
+    }
     if (popup_delay_timer) {
         clearTimeout(popup_delay_timer);
         popup_delay_timer = null;

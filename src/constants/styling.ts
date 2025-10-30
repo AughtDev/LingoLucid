@@ -5,5 +5,6 @@ export const SECONDARY_COLOR = '#d28357';
 
 export const ICON_COLOR = '#210';
 export const ICON_HOVER_COLOR = '#e1753a';
+export const ICON_DISABLED_COLOR = "#999";
 
 export const BACKGROUND_COLOR = '#FFFAF0';

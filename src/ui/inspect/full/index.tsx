@@ -7,18 +7,20 @@ import {translateFromTargetLanguage} from "../../../ai/translation.ts";
 import {highlightPage} from "../../content/page_actions.ts";
 import {PopupState, PopupType, updatePopupState} from "../../store/popup.ts";
 import {recordTextTranslation} from "../../store/performance.ts";
-// import {simplifyText} from "../index.tsx";
+import {PROFICIENCY_LEVELS, ProficiencyLevel} from "../../../types/core.ts";
+import ProficiencyBadge from "../../../components/ProficiencyBadge.tsx";
 
 interface FullInspectPopupProps {
     state: PopupState
 }
 
 
-export default function FullInspectPopup({state} : FullInspectPopupProps) {
+export default function FullInspectPopup({state}: FullInspectPopupProps) {
     const popup_ref = React.useRef<HTMLDivElement | null>(null);
 
     const [translation_loading, setTranslationLoading] = React.useState<boolean>(true)
     const [text, setText] = React.useState<string>("")
+    const [cefr_level, setCefrLevel] = React.useState<ProficiencyLevel | null>(null)
     const closePopup = React.useCallback(() => {
         try {
             window.getSelection()?.removeAllRanges()
@@ -44,15 +46,6 @@ export default function FullInspectPopup({state} : FullInspectPopupProps) {
         });
     }, [text, state.content.focus_text, closePopup]);
 
-    // const onClickSimplify = React.useCallback(() => {
-    //     simplifyText(
-    //         state.content.focus_text,
-    //         state.content.focus_text_node,
-    //         state.content.focus_range
-    //     )
-    // }, [state.content.focus_range, state.content.focus_text]);
-
-
     React.useEffect(() => {
         if (state.type !== PopupType.FULL) return;
 
@@ -71,11 +64,18 @@ export default function FullInspectPopup({state} : FullInspectPopupProps) {
             }
             const text_node_id = state.content.focus_text_node?.parentElement?.getAttribute('ll_id');
             if (text_node_id) {
-                recordTextTranslation(text_node_id, state.content.focus_text, target_lang).then();
+                recordTextTranslation(text_node_id, state.content.focus_text, target_lang).then(stats => {
+                    if (!stats) {
+                        setCefrLevel("c2")
+                        return
+                    }
+                    setCefrLevel(PROFICIENCY_LEVELS[stats.difficulty]);
+                });
             }
         }).finally(() => {
             setTranslationLoading(false)
         });
+
     }, [state.type]);
 
     // add on click listeners to close the popup when clicking outside of it of scrolling the page
@@ -127,8 +127,15 @@ export default function FullInspectPopup({state} : FullInspectPopupProps) {
                 className={"absolute m-2.5"}>
                 <Button variant={"icon"} onClick={closePopup} icon={CloseIcon} size={12}/>
             </div>
+            {/* cefr level */}
+            {cefr_level ? (
+                <div className={"absolute bottom-0 right-0 m-2"}>
+                    <ProficiencyBadge proficiency={cefr_level} size={12} variant={"solid"}/>
+                </div>
+            ) : null}
+
             {/* save button */}
-            <div className={"absolute top-0 right-0 m-2 flex flex-row justify-center items-center gap-2"}>
+            <div className={"absolute top-0 right-0 m-2"}>
                 {/*<Button variant={"icon"} onClick={onClickSimplify} icon={SimplifyIcon} size={24}/>*/}
                 <Button variant={"icon"} onClick={saveCard} icon={SaveIcon} size={24}/>
             </div>
@@ -144,4 +151,4 @@ export default function FullInspectPopup({state} : FullInspectPopupProps) {
             ) : <p>...</p>}
         </div>
     )
- }
+}

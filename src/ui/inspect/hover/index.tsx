@@ -119,7 +119,8 @@ export default function HoverInspectPopup({state}: HoverInspectPopupProps) {
                 className={"flex flex-row justify-center items-center gap-1.5"}>
 
                 <Button variant={"icon"} onClick={onClickSimplify}
-                        tooltip_label={"Simplify"} icon={SimplifyIcon} size={18} disabled={!can_simplify}/>
+                        tooltip_label={can_simplify ? "Simplify" : "Rewriter model not available"}
+                        icon={SimplifyIcon} size={18} disabled={!can_simplify}/>
 
                 <Button variant={"icon"} onClick={onClickTranslate}
                         tooltip_label={"Translate"} icon={TranslateIcon} size={18}/>

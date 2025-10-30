@@ -3,7 +3,13 @@ import { IconProps} from "../constants/icons.tsx";
 import useAppContext from "../popup/context.tsx";
 import ConfirmationModal from "../popup/modals/confirmation";
 import SpinLoader from "./SpinLoader.tsx";
-import {ICON_COLOR, ICON_HOVER_COLOR, PRIMARY_COLOR, SECONDARY_COLOR} from "../constants/styling.ts";
+import {
+    ICON_COLOR,
+    ICON_DISABLED_COLOR,
+    ICON_HOVER_COLOR,
+    PRIMARY_COLOR,
+    SECONDARY_COLOR
+} from "../constants/styling.ts";
 
 interface ButtonProps {
     label?: string
@@ -103,8 +109,9 @@ export default function Button({
     const {
         bg, b, bc, tc, py, px, fs, br, is, ic
     }: ButtonStyling = React.useMemo(() => {
+        const base_color = !disabled ? (hovering ? PRIMARY_COLOR : SECONDARY_COLOR) : '#666';
         const default_styling: ButtonStyling = {
-            bg: SECONDARY_COLOR,
+            bg: base_color,
             b: 0,
             bc: 'transparent',
             tc: '#fff',
@@ -113,14 +120,13 @@ export default function Button({
             fs: size,
             br: size,
             is: size,
-            ic: hovering ? ICON_HOVER_COLOR : ICON_COLOR,
+            ic: !disabled ? hovering ? ICON_HOVER_COLOR : ICON_COLOR : ICON_DISABLED_COLOR,
         }
 
         switch (variant) {
             case "solid":
                 return {
                     ...default_styling,
-                    bg: hovering ? PRIMARY_COLOR : SECONDARY_COLOR,
                     py: size / 2 + 4,
                     px: size + 4,
                 };
@@ -129,26 +135,25 @@ export default function Button({
                     ...default_styling,
                     bg: 'transparent',
                     b: 2,
-                    bc: hovering ? PRIMARY_COLOR : SECONDARY_COLOR,
-                    tc: hovering ? PRIMARY_COLOR : SECONDARY_COLOR,
+                    bc: base_color,
+                    tc: base_color,
                 };
             case "icon":
                 return {
                     ...default_styling,
                     bg: 'transparent',
-                    tc: hovering ? PRIMARY_COLOR : SECONDARY_COLOR,
                     px: 1, py: 1,
                 };
             case "ghost":
                 return {
                     ...default_styling,
                     bg: 'transparent',
-                    tc: hovering ? PRIMARY_COLOR : SECONDARY_COLOR,
+                    tc: base_color
                 };
             default:
                 return default_styling;
         }
-    }, [variant, hovering, size]);
+    }, [variant, hovering, size, disabled]);
 
     return (
         <button

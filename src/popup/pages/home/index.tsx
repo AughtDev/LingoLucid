@@ -1,10 +1,11 @@
 import React from 'react';
 import useAppContext from "../../context.tsx";
 import LanguageSetupModal from "../../modals/language-setup";
-import {Language} from "../../../types/core.ts";
+import {Language, PROFICIENCY_LEVELS} from "../../../types/core.ts";
 import AppInfoModal from "../../modals/app-info";
 import {FilledPlayIcon, IconHoverEffects, InfoIcon} from "../../../constants/icons.tsx";
 import {LogsButton} from "../../modals/logs";
+import ProficiencyBadge from "../../../components/ProficiencyBadge.tsx";
 
 interface LanguageSelectorProps {
     lang: Language
@@ -50,9 +51,10 @@ function LanguageSelector({lang}: LanguageSelectorProps) {
                 className={"absolute top-0 z-10 w-full h-12 flex flex-col items-center justify-center"}>
                 {is_hovered && (
                     lang.progress.started ? (
-                        <span className={"text-md font-semibold text-green-300"}>
-                            {Math.round((lang.progress.mastery || 0) * 100)}%
-                        </span>
+                        <div className={"brightness-200"}>
+                            <ProficiencyBadge proficiency={PROFICIENCY_LEVELS[Math.floor(lang.progress.mastery)]}
+                                              size={18}/>
+                        </div>
                     ) : (
                         <FilledPlayIcon size={20} color={"#9f9"}/>
                     )
@@ -71,7 +73,7 @@ function LanguageSelector({lang}: LanguageSelectorProps) {
                 <div className={"w-12 h-2 bg-gray-300 rounded-full mt-1"}>
                     <div
                         className={"h-2 bg-green-500 rounded-full"}
-                        style={{width: `${(lang.progress.mastery || 0) * 100}%`}}></div>
+                        style={{width: `${(lang.progress.mastery || 0) * 20}%`}}></div>
                 </div>
             ) : (
                 <div className={"h-2"}/>
@@ -81,9 +83,8 @@ function LanguageSelector({lang}: LanguageSelectorProps) {
 }
 
 export default function HomePage() {
-    const {meta: {progress, warnings,errors}, data: {languages}, modal: {openModal}} = useAppContext()
+    const {meta: {progress, warnings, errors}, data: {languages}, modal: {openModal}} = useAppContext()
 
-    console.log("languages are ", languages);
 
     return (
         <div className={"flex flex-col w-full h-full"}>

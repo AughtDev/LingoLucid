@@ -10,6 +10,7 @@ interface LanguagesHookReturn {
     init_log: InitLog;
     languages: Map<string, Language>;
     loading: boolean;
+    makeLog: (type: "error" | "warning", title: string, details: string) => void;
 }
 
 export function useLanguages(): LanguagesHookReturn {
@@ -96,6 +97,19 @@ export function useLanguages(): LanguagesHookReturn {
         };
     }, []);
 
+    const makeLog = React.useCallback((type: "error" | "warning", title: string, details: string) => {
+        if (type === "error") {
+            setInitLog(prev => ({
+                ...prev,
+                errors: [...prev.errors, {title, details}]
+            }))
+        } else if (type === "warning") {
+            setInitLog(prev => ({
+                ...prev,
+                warnings: [...prev.warnings, {title, details}]
+            }))
+        }
+    }, [setInitLog]);
 
-    return {languages, init_log: init_log, loading};
+    return {languages, init_log, loading, makeLog};
 }

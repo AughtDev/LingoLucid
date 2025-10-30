@@ -25,11 +25,21 @@ export default function CardReviewButton({size, cards, ...props}: CardReviewButt
         return getReviewCards(cards)
     }, [cards, languages]);
 
+    const button_tooltip = React.useMemo(() => {
+        if (!cards.length) {
+            return "No cards available for review"
+        } else if (!review_cards.length) {
+            return "All Cards Reviewed, come back later for more"
+        } else {
+            return "Review Saved Cards"
+        }
+    }, [cards.length, review_cards.length]);
+
     return (
         <button
             onClick={() => {
                 openModal(<CardReviewModal cards={review_cards} {...props}/>)
-            }}>
+            }} title={button_tooltip} disabled={!cards.length}>
             <NumberedIcon num={review_cards.length} icon={BookIcon} size={size}/>
         </button>
     )
@@ -60,6 +70,28 @@ function CardReviewModal({lang_code, cards}: CardReviewModalProps) {
             setActiveCardIdx(prev => prev + 1)
         })
     }, [lang_code, setActiveCardIdx, setCardFlipped, cards, active_card_idx, setCounts]);
+
+
+    if (!cards.length) {
+
+        return (
+            <div className={"w-4/5"}>
+                <div
+                    style={{
+                        backgroundColor: BACKGROUND_COLOR,
+                        borderRadius: "12px",
+                        cursor: "pointer"
+                    }}
+                    className={"w-full h-32 flex flex-row items-center justify-center"}>
+                    <p className={"text-md font-semibold text-center p-4"}>
+                        Congratulations!! <br/>
+                        You have reviewed all available cards for today. <br/>
+                        Come back later when our spaced repetition algorithm has more cards for you to review.
+                    </p>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className={"w-4/5"}>
@@ -132,28 +164,28 @@ function CardReviewModal({lang_code, cards}: CardReviewModalProps) {
                         backgroundColor: BACKGROUND_COLOR,
                         borderRadius: "12px",
                         cursor: "pointer",
-                        bottom: "10%"
+                        bottom: "20%"
                     }}
                     className={"w-4/5 absolute flex p-4 flex-col justify-center items-center"}>
                     <div
-                        className={"w-full flex flex-row justify-between items-center"} >
-                    <button
-                        className={"px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600"}
-                        onClick={() => onReviewCard("easy")}>Easy
-                    </button>
-                    <button
-                        className={"px-2 py-1 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"}
-                        onClick={() => onReviewCard("medium")}>Medium
-                    </button>
-                    <button
-                        className={"px-2 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"}
-                        onClick={() => onReviewCard("hard")}>Hard
-                    </button>
+                        className={"w-full flex flex-row justify-between items-center"}>
+                        <button
+                            className={"px-2 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600"}
+                            onClick={() => onReviewCard("easy")}>Easy
+                        </button>
+                        <button
+                            className={"px-2 py-1 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"}
+                            onClick={() => onReviewCard("medium")}>Medium
+                        </button>
+                        <button
+                            className={"px-2 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"}
+                            onClick={() => onReviewCard("hard")}>Hard
+                        </button>
+                        <button
+                            className={"px-2 py-1 bg-gray-900 text-white rounded-lg hover:bg-black"}
+                            onClick={() => onReviewCard("fail")}>Failed
+                        </button>
                     </div>
-                    <button
-                        className={"px-8 py-1 mt-2 bg-gray-900 text-white rounded-lg hover:bg-black"}
-                        onClick={() => onReviewCard("fail")}>Fail
-                    </button>
                 </div>
             )}
         </div>

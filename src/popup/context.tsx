@@ -19,6 +19,7 @@ export interface AppContextProps {
         goToPage: (page: string) => void
     },
     modal: {
+        modal_open: boolean
         openModal: (modal: React.ReactElement) => void
         closeModal: () => void
     },
@@ -34,6 +35,7 @@ export const AppContext = React.createContext<AppContextProps>({
         errors: []
     },
     modal: {
+        modal_open: false,
         openModal: (_modal: React.ReactElement) => null,
         closeModal: () => null
     },

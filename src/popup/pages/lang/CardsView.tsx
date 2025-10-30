@@ -184,7 +184,7 @@ export default function CardsView({lang_code, cards}: CardsViewProps) {
             ) : null}
             <div
                 style={{
-                    height: `calc(590px - ${active_tab == "saved" ? "108px" : "132px"})`
+                    height: `calc(590px - ${active_tab == "saved" ? "108px" : "84px"})`
                 }}
                 className={"w-full flex flex-col items-center overflow-y-auto"}>
                 {active_cards.length > 0 ? active_cards.map(card => (

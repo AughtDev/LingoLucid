@@ -1,4 +1,4 @@
-import {CheckIfTranslatedPayload, Message, MessageResponse, MessageType, TranslationPayload} from "./types/comms.ts";
+import { Message, MessageResponse, MessageType, TranslationPayload} from "./types/comms.ts";
 import {createRoot} from "react-dom/client";
 import {InspectTextPopup} from "./ui/inspect";
 import tailwind from "./popup/main.css?inline"
@@ -72,10 +72,9 @@ chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (r
             })
             return true
 
-        case MessageType.CHECK_IF_TRANSLATED:
-            payload = message.payload as CheckIfTranslatedPayload
-            const is_translated = document.body.getAttribute('data-target-lang') === payload.lang_code;
-            sendResponse({is_success: true, data: is_translated});
+        case MessageType.GET_PAGE_LANG_CODE:
+            const code = document.body.getAttribute('data-target-lang');
+            sendResponse({is_success: true, data: code});
             break;
 
         default:
@@ -102,12 +101,15 @@ function debounce(func: Function, wait: number) {
 }
 
 function addListenersToArticles() {
-    const articles = document.getElementsByTagName('article');
-    for (let article of articles) {
-        article.addEventListener('mouseup', textSelectListener)
-        article.addEventListener("mouseover", debounce(wordHoverListener, 100));
-        article.addEventListener("mousemove", debounce(wordHoverListener, 100));
-    }
+    // const articles = document.getElementsByTagName('article');
+    // for (let article of articles) {
+    //     article.addEventListener('mouseup', textSelectListener)
+    //     article.addEventListener("mouseover", debounce(wordHoverListener, 50));
+    //     article.addEventListener("mousemove", debounce(wordHoverListener, 50));
+    // }
+    document.body.addEventListener('mouseup', textSelectListener)
+    document.body.addEventListener("mouseover", debounce(wordHoverListener, 100));
+    document.body.addEventListener("mousemove", debounce(wordHoverListener, 100));
 }
 
 
