@@ -1,4 +1,12 @@
-import {Message, MessageResponse, MessageType, TranslationPayload} from "./types/comms.ts";
+import {
+    Message,
+    MessageResponse,
+    MessageType,
+    PageTranslateProgressPayload,
+    Port,
+    PortMessage,
+    TranslationPayload
+} from "./types/comms.ts";
 import {createRoot} from "react-dom/client";
 import {InspectTextPopup} from "./ui/inspect";
 import tailwind from "./popup/main.css?inline"
@@ -30,37 +38,93 @@ const root = createRoot(SHADOW_ROOT)
 
 root.render(React.createElement(InspectTextPopup))
 
+chrome.runtime.onConnect.addListener((port) => {
+    if (port.name === Port.PAGE_TRANSLATE) {
+        console.log("Content Script: Connected to port:", port.name);
+
+        port.onMessage.addListener((message: Message) => {
+            switch (message.type) {
+                case MessageType.TRANSLATE_PAGE:
+                    let payload = message.payload as TranslationPayload
+                    console.log("Translating page to", payload.tgt_lang_code)
+
+                    // make sure that model is downloaded, if it is, this will return immediately
+                    downloadTranslationModel("en", payload.tgt_lang_code, () => null).then((res) => {
+                        if (!res) {
+                            // sendResponse({is_success: false, error_message: "Failed to download translation model"})
+                            try {
+                                port.postMessage({
+                                    type: PortMessage.PAGE_TRANSLATE_PROGRESS,
+                                    payload: {
+                                        progress: 0.5,
+                                        status: "error",
+                                        error_message: "Failed to download translation model"
+                                    } satisfies PageTranslateProgressPayload
+                                })
+                            } catch (err) {
+                                console.error("Error sending error message on port:", err);
+                            }
+                            return
+                        }
+                        translatePage(payload.tgt_lang_code, payload.tgt_proficiency, (progress) => {
+                            try {
+                                port.postMessage({
+                                    type: PortMessage.PAGE_TRANSLATE_PROGRESS,
+                                    payload: {
+                                        progress, status: "in_progress"
+                                    } satisfies PageTranslateProgressPayload
+                                })
+                            } catch (error) {
+                                console.error("Error sending progress message on port:", error);
+                            }
+                        }).then((result) => {
+                            if (result) {
+                                console.log("Page translated successfully");
+                                highlightPage().then(() => {
+                                    console.log("Page highlighted successfully after translation");
+                                    addListenersToArticles()
+                                })
+                            }
+                            // sendResponse({is_success: result});
+                            try {
+                                port.postMessage({
+                                    type: PortMessage.PAGE_TRANSLATE_PROGRESS,
+                                    payload: {
+                                        progress: 1, status: "success"
+                                    } satisfies PageTranslateProgressPayload
+                                })
+                            } catch (error) {
+                                console.error("Error sending success message on port:", error);
+                            }
+
+                        }).catch((error) => {
+                            console.error("Error translating page:", error);
+                            // sendResponse({is_success: false, error_message: error.message});
+                            try {
+                                port.postMessage({
+                                    type: PortMessage.PAGE_TRANSLATE_PROGRESS,
+                                    payload: {
+                                        progress: 0.5, status: "error", error_message: "Error translating page"
+                                    } satisfies PageTranslateProgressPayload
+                                })
+                            } catch (err) {
+                                console.error("Error sending error message on port:", err);
+                            }
+                        })
+                    })
+                    return true
+                default:
+                    console.warn('Content Script: Unknown message type on port:', message.type);
+                    break;
+            }
+        })
+    }
+})
+
 chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (response?: MessageResponse) => void) => {
     console.log("Messaging", "Content script received message:", message, "from", sender);
 
-    let payload;
     switch (message.type) {
-        case MessageType.TRANSLATE_PAGE:
-            payload = message.payload as TranslationPayload
-            console.log("Translating page to", payload.tgt_lang_code)
-
-            // make sure that model is downloaded, if it is, this will return immediately
-            downloadTranslationModel("en", payload.tgt_lang_code, () => null).then((res) => {
-                if (!res) {
-                    sendResponse({is_success: false, error_message: "Failed to download translation model"})
-                    return
-                }
-                payload = message.payload as TranslationPayload
-                translatePage(payload.tgt_lang_code, payload.tgt_proficiency,() => null).then((result) => {
-                    if (result) {
-                        console.log("Page translated successfully");
-                        highlightPage().then(() => {
-                            console.log("Page highlighted successfully after translation");
-                            addListenersToArticles()
-                        })
-                    }
-                    sendResponse({is_success: result});
-                }).catch((error) => {
-                    console.error("Error translating page:", error);
-                    sendResponse({is_success: false, error_message: error.message});
-                })
-            })
-            return true
 
         case MessageType.HIGHLIGHT_PAGE:
             highlightPage().then(() => {

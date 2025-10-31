@@ -6,7 +6,22 @@ export enum MessageType {
     GET_PAGE_LANG_CODE,
     SAVE_CARD,
     GET_CARDS,
-    UPDATE_PROGRESS
+
+    UPDATE_PROGRESS,
+}
+
+export enum Port {
+    PAGE_TRANSLATE = "PAGE_TRANSLATE",
+}
+
+export enum PortMessage {
+    PAGE_TRANSLATE_PROGRESS = "PAGE_TRANSLATE_PROGRESS",
+}
+
+export interface PageTranslateProgressPayload {
+    status: "success" | "in_progress" | "error";
+    progress: number; // progress value between 0 and 1
+    error_message?: string
 }
 
 

@@ -46,7 +46,7 @@ export async function initializeService(): Promise<Language[]> {
                 if (success) {
                     langs.push(updated_lang)
                 } else {
-                    console.warn("service", `Language ${lang.label} could not be updated after cleaning recent cards`)
+                    console.log("service", `Language ${lang.label} could not be updated after cleaning recent cards`)
                     langs.push(storedLang)
                 }
             } else {
@@ -172,7 +172,7 @@ export async function getAppConfigService(): Promise<AppConfig> {
         console.log('service', 'App config retrieved from local storage:', data);
         return data;
     } else {
-        console.warn('service', 'No app config found in local storage');
+        console.log('service', 'No app config found in local storage');
         // create default app config
         const default_config: AppConfig = {
             curr_language: null
@@ -233,6 +233,10 @@ export async function updateLanguageProgressService(code: string, deltas: Map<st
     const lang = await getLanguageFromLocalStorage(code)
     if (lang) {
         const updated_progress = {...lang.progress}
+        console.log("service", `Updating language ${code} progress with deltas:`, updated_progress, deltas)
+        if (!updated_progress.delta_queue) {
+            updated_progress.delta_queue = {}
+        }
         deltas.forEach((value, key) => {
             updated_progress.delta_queue[key] = {
                 datetime_t: Date.now(),

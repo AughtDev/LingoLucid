@@ -21,13 +21,12 @@ export async function translatePage(tgt_lang_code: string, tgt_level: Proficienc
         const text_nodes: Text[] = [];
         const walker = document.createTreeWalker(article, NodeFilter.SHOW_TEXT, null);
         let node;
-        // only the first 200 words for testing
         while (node = walker.nextNode()) {
             text_nodes.push(node as Text);
         }
 
         let i = 0
-        for (let text_node of text_nodes.slice(0, 5)) {
+        for (let text_node of text_nodes.slice(0, 30)) {
             // save the start and ending whitespace,
             const l_pad = text_node.nodeValue?.match(/^\s*/)?.[0] || '';
             const r_pad = text_node.nodeValue?.match(/\s*$/)?.[0] || '';
@@ -81,7 +80,7 @@ export async function translatePage(tgt_lang_code: string, tgt_level: Proficienc
             }
 
             i += 1;
-            setProgress((i / text_nodes.length) / articles.length);
+            setProgress((i / Math.min(text_nodes.length,30)) / articles.length);
         }
         // highlightArticleKeywords(article, word_map);
 
@@ -129,19 +128,13 @@ export async function highlightPage(): Promise<void> {
         const walker = document.createTreeWalker(article, NodeFilter.SHOW_TEXT, null);
         let node;
         // only the first 200 words for testing
-        let word_count = 0;
         while (node = walker.nextNode()) {
             text_nodes.push(node as Text);
-            word_count += (node.nodeValue || '').split(' ').length;
-            if (word_count >= 200) {
-                console.log("Reached word limit for text, stopping");
-                break;
-            }
         }
 
         const highlighted_ranges: Map<SnippetHighlightType, Range[]> = new Map();
 
-        for (let text_node of text_nodes) {
+        for (let text_node of text_nodes.slice(0,30)) {
             const og_text = text_node.nodeValue || '';
             if (og_text.trim().length === 0) continue;
 

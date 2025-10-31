@@ -4,21 +4,27 @@ import useAppContext from "../../context.tsx";
 import CardsView from "./CardsView.tsx";
 import {HomeIcon, IconHoverEffects, SettingsIcon, TranslateIcon} from "../../../constants/icons.tsx";
 import LanguageSettingsModal from "../../modals/language-settings";
-import {MessageResponse, MessageType, TranslationPayload} from "../../../types/comms.ts";
+import {
+    MessageResponse,
+    MessageType,
+    PageTranslateProgressPayload,
+    Port,
+    PortMessage,
+    TranslationPayload
+} from "../../../types/comms.ts";
 import Button from "../../../components/Button.tsx";
 import {Language, PROFICIENCY_LEVELS, ProficiencyLevel} from "../../../types/core.ts";
-import {SnippetHighlightType} from "../../../ai/highlight.ts";
 import {LogsButton} from "../../modals/logs";
 import ProficiencyBadge from "../../../components/ProficiencyBadge.tsx";
 import {getPageLangCodeService} from "../../App.tsx";
-import {downloadTranslationModel, translatorIsAvailable} from "../../../ai/translation.ts";
-import DownloadModelModal from "../../modals/download-model";
+import useTranslationModelsDownloader from "./useModelDownloader.tsx";
+import ProgressLoader from "../../../components/ProgressLoader.tsx";
 
 interface LangPageProps {
     code: string
 }
 
-enum PageStatus {
+export enum LangPageStatus {
     Loading,
     Untranslated,
     Translating,
@@ -29,46 +35,50 @@ enum PageStatus {
 
 function masteryToProficiencyLevel(mastery: number): ProficiencyLevel {
     const levels = ["a1", "a2", "b1", "b2", "c1", "c2"] as ProficiencyLevel[];
-    const index = Math.min(Math.floor(mastery * levels.length), levels.length - 1);
+    const index = Math.min(Math.floor(mastery), levels.length - 1);
     return levels[index];
 }
 
-function translatePageService(lang: Language, onSuccess: () => void, onFailure: () => void) {
+function translatePageService(lang: Language, setProgress: (progress: number) => void, onSuccess: () => void, onFailure: (error_message?: string) => void) {
     getActiveTabId().then((activeTabId) => {
         if (activeTabId === null) {
             return false;
         }
 
-        const highlight_map = new Map<string, SnippetHighlightType>();
+        const port = chrome.tabs.connect(activeTabId, {name: Port.PAGE_TRANSLATE});
 
-        lang.cards.saved.forEach(card => {
-            highlight_map.set(card.text, SnippetHighlightType.SAVED);
-        })
-
-        // for each recent card if not already in highlight_map, add it as RECENT
-        lang.cards.recent.forEach(card => {
-            if (!highlight_map.has(card.text)) {
-                highlight_map.set(card.text, SnippetHighlightType.NEW);
+        port.onMessage.addListener(message => {
+            switch (message.type) {
+                case PortMessage.PAGE_TRANSLATE_PROGRESS:
+                    const payload = message.payload as PageTranslateProgressPayload;
+                    console.log("service", `Translation progress: ${payload.progress}`);
+                    switch (payload.status) {
+                        case "in_progress":
+                            setProgress(payload.progress);
+                            break;
+                        case "success":
+                            onSuccess();
+                            break;
+                        case "error":
+                            console.error("service", `Translation error: ${payload.error_message}`);
+                            onFailure(payload.error_message);
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                default:
+                    break;
             }
         })
 
-        console.log("passing in highlight_map:", highlight_map);
-
         console.log("service", `Requesting translation of page to ${lang.code}`);
-        return chrome.tabs.sendMessage(activeTabId, {
+        port.postMessage({
             type: MessageType.TRANSLATE_PAGE,
             payload: {
                 tgt_lang_code: lang.code,
                 tgt_proficiency: masteryToProficiencyLevel(lang.progress.mastery),
             } satisfies TranslationPayload
-        }, (res: MessageResponse) => {
-            if (res.is_success) {
-                console.log('service', `Translation model for ${lang.code} downloaded successfully`);
-                onSuccess()
-            } else {
-                console.error('service', `Failed to download translation model for ${lang.code}:`, res.error_message);
-                onFailure()
-            }
         })
     })
 }
@@ -99,76 +109,16 @@ export function highlightPageService(): Promise<void> {
 
 
 export default function LangPage({code}: LangPageProps) {
-    const [page_status, setPageStatus] = React.useState<PageStatus>(PageStatus.Loading)
+    const [page_status, setPageStatus] = React.useState<LangPageStatus>(LangPageStatus.Loading)
 
-    const {meta: {warnings, errors}, nav: {goToPage}, modal: {openModal,closeModal}, data: {languages}} = useAppContext()
+    const [page_translate_progress, setPageTranslateProgress] = React.useState<number>(0)
+    const [page_translate_error_message, setPageTranslateErrorMessage] = React.useState<string | null>(null)
+
+    const {meta: {warnings, errors}, nav: {goToPage}, modal: {openModal}, data: {languages}} = useAppContext()
     const lang = languages.get(code)
 
-    const [translator_availability, setTranslatorAvailability] = React.useState<[boolean, boolean]>([false, false]);
+    const translator_availability = useTranslationModelsDownloader(lang, setPageStatus)
 
-    React.useEffect(() => {
-        if (!translator_availability[0]) {
-            // check if the models are downloaded. if not, download both
-            translatorIsAvailable("en", code).then(async (is_available) => {
-                if (!is_available) {
-                    openModal(
-                        <DownloadModelModal
-                            title={`Download English To ${lang?.label ?? code} Model`}
-                            details={[
-                                `To translate pages to ${lang?.label ?? code}, the translation model needs to be downloaded first.`,
-                                `The model will be stored locally on your device and will be used to translate pages offline.`,
-                                `This may take a few minutes depending on your internet connection.`
-                            ]}
-                            downloadFunc={async (setProgress) => {
-                                return await downloadTranslationModel("en", code, setProgress).then(res => {
-                                    if (res) {
-                                        closeModal()
-                                        setTranslatorAvailability((prev) => [true, prev[1]]);
-                                    } else {
-                                        console.error("Failed to download translation model for", code);
-                                        setPageStatus(PageStatus.DownloadError);
-                                    }
-                                    return res
-                                });
-                            }}/>
-                    )
-                } else {
-                    console.log("Translation model already available for", code);
-                    setTranslatorAvailability((prev) => [true, prev[1]]);
-                }
-            })
-        } else if (!translator_availability[1]) {
-            translatorIsAvailable(code, "en").then(async (is_available) => {
-                console.log("Reverse translation model availability for", code, "is", is_available);
-                if (!is_available) {
-                    openModal(
-                        <DownloadModelModal
-                            title={`Download ${lang?.label ?? code} To English Model`}
-                            details={[
-                                `To simplify translated text back to English, the translation model needs to be downloaded first.`,
-                                `The model will be stored locally on your device and will be used to translate pages offline.`,
-                                `This may take a few minutes depending on your internet connection.`
-                            ]}
-                            downloadFunc={async (setProgress) => {
-                                return await downloadTranslationModel(code, "en", setProgress).then(res => {
-                                    if (res) {
-                                        closeModal()
-                                        setTranslatorAvailability((prev) => [prev[0], true]);
-                                    } else {
-                                        console.error("Failed to download reverse translation model for", code);
-                                        setPageStatus(PageStatus.DownloadError);
-                                    }
-                                    return res
-                                });
-                            }}/>
-                    )
-                } else {
-                    console.log("Translation model already available for", code);
-                    setTranslatorAvailability((prev) => [prev[0], true]);
-                }
-            })
-        }
-    }, [translator_availability]);
     React.useEffect(() => {
         if (!translator_availability[0] || !translator_availability[1]) {
             return;
@@ -178,25 +128,29 @@ export default function LangPage({code}: LangPageProps) {
         updateLanguageMasteryService(code).then()
         getPageLangCodeService().then((page_code) => {
             if (page_code == code) {
-                setPageStatus(PageStatus.Ready);
+                setPageStatus(LangPageStatus.Ready);
             } else {
-                setPageStatus(PageStatus.Untranslated);
+                setPageStatus(LangPageStatus.Untranslated);
             }
         }).catch(() => {
-            setPageStatus(PageStatus.Error);
+            setPageStatus(LangPageStatus.Error);
         })
     }, [translator_availability]);
     const translatePage = React.useCallback(() => {
         // set lang as current language
         if (!lang) return;
-        setPageStatus(PageStatus.Translating)
-        translatePageService(lang, async () => {
-            setPageStatus(PageStatus.Ready);
-            setCurrentLanguageService(lang.code).then()
-        }, () => {
-            setPageStatus(PageStatus.Error);
-        })
-    }, [lang, setPageStatus]);
+        setPageStatus(LangPageStatus.Translating)
+        translatePageService(lang,
+            (progress) => {
+                setPageTranslateProgress(progress);
+            }, async () => {
+                setPageStatus(LangPageStatus.Ready);
+                setCurrentLanguageService(lang.code).then()
+            }, (err) => {
+                setPageStatus(LangPageStatus.Error);
+                setPageTranslateErrorMessage(err || "Unknown error");
+            })
+    }, [lang, setPageStatus, setPageTranslateProgress, setPageTranslateErrorMessage]);
 
     const onClickSettings = React.useCallback(() => {
         if (!lang) return;
@@ -236,14 +190,14 @@ export default function LangPage({code}: LangPageProps) {
                         </h1>
                     </div>
 
-                    {page_status === PageStatus.Loading ? (
+                    {page_status === LangPageStatus.Loading ? (
                             <div className={"flex flex-grow w-full items-center justify-center"}>
                                 <p className={"text-gray-500 text-lg text-center"}>
                                     Loading...
                                 </p>
                             </div>
                         ) :
-                        page_status === PageStatus.Untranslated ? (
+                        page_status === LangPageStatus.Untranslated ? (
                                 <div className={"flex flex-grow w-full items-center justify-center"}>
                                     <button onClick={translatePage}>
                                         <div className={"flex flex-col items-center justify-center"}>
@@ -257,19 +211,21 @@ export default function LangPage({code}: LangPageProps) {
                                     </button>
                                 </div>
                             ) :
-                            page_status === PageStatus.Translating ? (
-                                <div className={"flex flex-grow w-full items-center justify-center"}>
+                            page_status === LangPageStatus.Translating ? (
+                                <div className={"flex flex-col flex-grow w-full items-center justify-center"}>
                                     <p className={"text-gray-500 text-lg text-center"}>
                                         Translating page...
                                     </p>
+                                    <ProgressLoader progress={page_translate_progress} width={"70%"} height={"16px"}/>
                                 </div>
-                            ) : page_status === PageStatus.Error ? (
+                            ) : page_status === LangPageStatus.Error ? (
                                 <div className={"flex flex-grow w-full items-center justify-center"}>
                                     <p className={"text-gray-500 text-lg text-center"}>
-                                        Error translating page. Please try again later.
+                                        Error translating page. Please try again later. <br/>
+                                        {page_translate_error_message}
                                     </p>
                                 </div>
-                            ) : page_status === PageStatus.DownloadError ? (
+                            ) : page_status === LangPageStatus.DownloadError ? (
                                 <div className={"flex flex-grow w-full items-center justify-center"}>
                                     <p className={"text-gray-500 text-lg text-center"}>
                                         Error downloading translation model. Please try again later.

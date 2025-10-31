@@ -44,7 +44,8 @@ export default function ProficiencyBadge({proficiency, size, variant = "ghost"}:
                 backgroundColor: bg,
                 padding: size / 4,
                 borderRadius: size / 2,
-                lineHeight: 1
+                lineHeight: 1,
+                cursor: "pointer"
             }}
             className={"flex justify-center items-center"}>
             <p className={"font-semibold"}

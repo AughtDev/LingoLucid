@@ -3,12 +3,13 @@ import {BACKGROUND_COLOR} from "../../../constants/styling.ts";
 import Button from "../../../components/Button.tsx";
 import {CloseIcon, SaveIcon} from "../../../constants/icons.tsx";
 import {saveCardToLocalStorage} from "../utils.ts";
-import {translateFromTargetLanguage} from "../../../ai/translation.ts";
+import {downloadTranslationModel, translateFromTargetLanguage} from "../../../ai/translation.ts";
 import {highlightPage} from "../../content/page_actions.ts";
 import {PopupState, PopupType, updatePopupState} from "../../store/popup.ts";
 import {recordTextTranslation} from "../../store/performance.ts";
 import {PROFICIENCY_LEVELS, ProficiencyLevel} from "../../../types/core.ts";
 import ProficiencyBadge from "../../../components/ProficiencyBadge.tsx";
+import SpinLoader from "../../../components/SpinLoader.tsx";
 
 interface FullInspectPopupProps {
     state: PopupState
@@ -52,29 +53,36 @@ export default function FullInspectPopup({state}: FullInspectPopupProps) {
         const target_lang = document.body.getAttribute('data-target-lang') || undefined;
         // translate the text text to the target language
         if (!target_lang) return
-        translateFromTargetLanguage(state.content.focus_text, target_lang).then((original_text) => {
-            console.log("Translated ", text, " to Original text:", original_text);
-            if (original_text !== null) {
-                setText(original_text);
-                saveCardToLocalStorage(target_lang, state.content.focus_text, original_text, "recent").then(() => {
-                    console.log("Card saved successfully among recents");
-                }).catch((error) => {
-                    console.error("Error saving card:", error);
-                });
+        downloadTranslationModel(target_lang,"en",() => null).then(res => {
+            if (!res) {
+                console.error("Failed to download translation model to English");
+                setTranslationLoading(false)
+                return
             }
-            const text_node_id = state.content.focus_text_node?.parentElement?.getAttribute('ll_id');
-            if (text_node_id) {
-                recordTextTranslation(text_node_id, state.content.focus_text, target_lang).then(stats => {
-                    if (!stats) {
-                        setCefrLevel("c2")
-                        return
-                    }
-                    setCefrLevel(PROFICIENCY_LEVELS[stats.difficulty]);
-                });
-            }
-        }).finally(() => {
-            setTranslationLoading(false)
-        });
+            translateFromTargetLanguage(state.content.focus_text, target_lang).then((original_text) => {
+                console.log("Translated ", text, " to Original text:", original_text);
+                if (original_text !== null) {
+                    setText(original_text);
+                    saveCardToLocalStorage(target_lang, state.content.focus_text, original_text, "recent").then(() => {
+                        console.log("Card saved successfully among recents");
+                    }).catch((error) => {
+                        console.error("Error saving card:", error);
+                    });
+                }
+                const text_node_id = state.content.focus_text_node?.parentElement?.getAttribute('ll_id');
+                if (text_node_id) {
+                    recordTextTranslation(text_node_id, state.content.focus_text, target_lang).then(stats => {
+                        if (!stats) {
+                            setCefrLevel("c2")
+                            return
+                        }
+                        setCefrLevel(PROFICIENCY_LEVELS[stats.difficulty]);
+                    });
+                }
+            }).finally(() => {
+                setTranslationLoading(false)
+            });
+        })
 
     }, [state.type]);
 
@@ -146,9 +154,9 @@ export default function FullInspectPopup({state}: FullInspectPopupProps) {
                 text !== "" ? (
                     <p className={"text-sm text-gray-600 p-1 text-center"}>{text}</p>
                 ) : (
-                    <p className={"text-sm text-gray-600 p-1 text-center"}>Translate Error</p>
+                    <p className={"text-sm text-red-400 p-1 text-center"}>Translate Error</p>
                 )
-            ) : <p>...</p>}
+            ) : <SpinLoader size={"12px"}/>}
         </div>
     )
 }

@@ -134,7 +134,7 @@ export function textSelectListener(_e: MouseEvent) {
         }
 
         updatePopupState({
-            type: PopupType.FULL,
+            type: PopupType.HOVER,
             content: {
                 focus_text: selection.toString(),
                 focus_range: range,

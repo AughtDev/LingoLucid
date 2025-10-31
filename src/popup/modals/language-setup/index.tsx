@@ -4,6 +4,7 @@ import {Language, LanguageSettings, ProficiencyLevel} from "../../../types/core.
 import {BACKGROUND_COLOR, PRIMARY_COLOR} from "../../../constants/styling.ts";
 // import {saveLanguageSettingsService} from "../../../utils/data/services.ts";
 import useAppContext from "../../context.tsx";
+import {saveLanguageSettingsService} from "../../../utils/data/services.ts";
 // import {downloadTranslationModel} from "../../../ai/translation.ts";
 
 interface LanguageSetupModalProps {
@@ -21,12 +22,13 @@ export default function LanguageSetupModal({language}: LanguageSetupModalProps) 
 
 
     const onProceed = React.useCallback(() => {
-        goToPage(`lang/${language.code}`);
-        closeModal();
-        // saveLanguageSettingsService(language.code, {
-        //     skill_level: proficiency,
-        //     learning_pace: pace,
-        // }).then(() => {
+        saveLanguageSettingsService(language.code, {
+            skill_level: proficiency,
+            learning_pace: pace,
+        }).then(() => {
+            goToPage(`lang/${language.code}`);
+            closeModal();
+        })
         //     downloadTranslationModel(language.code, (to_progress) => {
         //         setDownloadingToModelProgress(to_progress);
         //     }, (from_progress) => {
@@ -36,7 +38,7 @@ export default function LanguageSetupModal({language}: LanguageSetupModalProps) 
         //     }).then(() => {
         //     })
         // })
-    }, [language.code, closeModal, goToPage]);
+    }, [language.code, closeModal, goToPage, proficiency, pace]);
 
     const proficiency_levels: { label: string, value: ProficiencyLevel }[] = React.useMemo(() => {
         return [
@@ -70,7 +72,7 @@ export default function LanguageSetupModal({language}: LanguageSetupModalProps) 
                 <>
                     <div className={"flex-1 w-full flex flex-col items-center justify-center gap-4"}>
                         <div className={"w-65 mb-4 flex flex-col items-center justify-center"}>
-                            <p className={"text-md"}>What is your level of mastery in {language.label}?</p>
+                            <p className={"text-md"}>What is your level of proficiency in {language.label}?</p>
                             <Slider val={proficiency} setVal={setProficiency} options={
                                 proficiency_levels
                             } visible_options={

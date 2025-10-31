@@ -20,13 +20,16 @@ interface RewriterOptions {
     monitor?: (m: any) => void;
 }
 
+interface Rewriter {
+    rewrite(text: string,options?: {
+    context: string;
+    outputLanguage?: string;
+}): Promise<any>;
+}
+
 declare const Rewriter: {
     availability(): Promise<any>;
-    create(options: RewriterOptions): Promise<{
-        rewrite(text: string,options?: {
-            context: string;
-        }): Promise<any>;
-    }>;
+    create(options: RewriterOptions): Promise<Rewriter>;
 };
 
 declare const LanguageDetector: {

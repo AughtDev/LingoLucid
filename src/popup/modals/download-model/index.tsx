@@ -2,6 +2,7 @@ import React from 'react';
 import {BACKGROUND_COLOR} from "../../../constants/styling.ts";
 import Button from "../../../components/Button.tsx";
 import {DownloadIcon} from "../../../constants/icons.tsx";
+import ProgressLoader from "../../../components/ProgressLoader.tsx";
 
 interface DownloadModelModalProps {
     title: string;
@@ -44,12 +45,8 @@ export default function DownloadModelModal({title,details,downloadFunc} : Downlo
                     variant={"solid"}
                     />
             ) : success === null ? (
-                <div className={"w-full flex flex-col items-center mb-2 p-2"}>
-                    <div className={"w-full bg-gray-300 rounded-full h-4 mb-2 overflow-hidden"}>
-                        <div
-                            className={"bg-green-400 h-4 rounded-full transition-all"}
-                            style={{width: `${Math.min(progress * 100, 100)}%`}}></div>
-                    </div>
+                <div className={"w-full flex flex-col items-center mb-2 p-2 px-4"}>
+                    <ProgressLoader progress={progress}/>
                     <p className={"text-sm"}>{progress < 1 ? `Downloading... ${Math.floor(progress * 100)}%` : "Download complete!"}</p>
                 </div>
             ): (

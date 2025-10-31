@@ -40,38 +40,6 @@ export function useLanguages(): LanguagesHookReturn {
 
     // Setup function to initialize extension
     const setupExtension = React.useCallback(async () => {
-        // await downloadRewriterModel((progress) => {
-        //     setInitLog(prev => ({...prev, progress: progress * 0.9}))
-        // }).then(res => {
-        //     if (!res) {
-        //         setInitLog(prev => ({
-        //             ...prev,
-        //             progress: 0.9,
-        //             warnings: [...prev.warnings, {
-        //                 title: "Rewriter model could not be downloaded.",
-        //                 details: "The text will not be able to be simplified based on your proficiency level but if the translation models are available," +
-        //                     "you may still translate text, save cards and review them."
-        //             }]
-        //         }))
-        //     } else {
-        //         console.log("Rewriter model downloaded successfully.")
-        //         setInitLog(prev => ({
-        //             ...prev,
-        //         }))
-        //     }
-        // }).catch(err => {
-        //     console.error("Error downloading Rewriter model:", err);
-        //     setInitLog(prev => ({
-        //         ...prev,
-        //         progress: 0.9,
-        //         warnings: [...prev.warnings, {
-        //             title: `Error downloading Rewriter model: ${err.message}`,
-        //             details: "The text will not be able to be simplified based on your proficiency level but if the translation models are available," +
-        //                 "you may still translate text, save cards and review them."
-        //         }]
-        //     }))
-        // })
-
         const map = new Map<string, Language>();
         await initializeService().then(res => {
             res.forEach(lang => {
@@ -82,7 +50,7 @@ export function useLanguages(): LanguagesHookReturn {
             console.log("initializing languages hook", map)
             setLanguages(map)
         })
-    }, [setInitLog, setLanguages]);
+    }, [setLanguages]);
 
     React.useEffect(() => {
         setupExtension().finally(() => {

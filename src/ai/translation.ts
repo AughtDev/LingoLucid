@@ -6,9 +6,9 @@ export async function translatorIsAvailable(src_lang_code: string, tgt_lang_code
     const ret = await Translator.availability({
         sourceLanguage: src_lang_code,
         targetLanguage: tgt_lang_code,
-    }) == "available"
+    })
     console.log("Translator availability for", src_lang_code, "to", tgt_lang_code, ":", ret);
-    return ret
+    return ret === "available"
 }
 
 export async function downloadTranslationModel(
