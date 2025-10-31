@@ -229,20 +229,14 @@ export async function clearLanguageDataService(code: string) {
 // region PROGRESS
 // ? ........................
 
-export async function updateLanguageProgressService(code: string, deltas: Map<string, number>) {
+
+export async function updateLanguageProgressService(code: string, delta: number) {
     const lang = await getLanguageFromLocalStorage(code)
     if (lang) {
         const updated_progress = {...lang.progress}
-        console.log("service", `Updating language ${code} progress with deltas:`, updated_progress, deltas)
-        if (!updated_progress.delta_queue) {
-            updated_progress.delta_queue = {}
-        }
-        deltas.forEach((value, key) => {
-            updated_progress.delta_queue[key] = {
-                datetime_t: Date.now(),
-                delta: value
-            }
-        })
+        updated_progress.mastery += delta * learningPaceToMultiplier(lang.settings.learning_pace)
+        updated_progress.mastery = Math.min(Math.max(updated_progress.mastery, 0), 5)
+        console.log("service", `Language ${code} mastery updated by ${delta} to ${updated_progress.mastery}`)
         return await saveLanguageToLocalStorage(code, {
             ...lang,
             progress: updated_progress
@@ -251,7 +245,7 @@ export async function updateLanguageProgressService(code: string, deltas: Map<st
     return false
 }
 
-const MASTERY_UPDATE_DELAY = 2 * 60 * 60 * 1000 // 2 hours in milliseconds
+// const MASTERY_UPDATE_DELAY = 2 * 60 * 60 * 1000 // 2 hours in milliseconds
 
 function learningPaceToMultiplier(learning_pace: LanguageSettings["learning_pace"]): number {
     switch (learning_pace) {
@@ -265,34 +259,34 @@ function learningPaceToMultiplier(learning_pace: LanguageSettings["learning_pace
             return 1.0
     }
 }
-export async function updateLanguageMasteryService(code: string) {
-    // use any deltas in the queue saved more than 2 hours ago to update mastery then delete them
-    const lang = await getLanguageFromLocalStorage(code)
-    if (lang) {
-        const updated_progress = {...lang.progress}
-        const now = Date.now()
-        let total_delta = 0
-        for (const [text_id, entry] of Object.entries(updated_progress.delta_queue)) {
-            if ((now - entry.datetime_t) >= MASTERY_UPDATE_DELAY) {
-                total_delta += entry.delta
-                delete updated_progress.delta_queue[text_id]
-            }
-        }
-        if (Math.abs(total_delta) > 0) {
-            updated_progress.mastery += total_delta * learningPaceToMultiplier(lang.settings.learning_pace)
-            updated_progress.mastery = Math.min(Math.max(updated_progress.mastery, 0), 5)
-            console.log("service", `Language ${code} mastery updated by ${total_delta} to ${updated_progress.mastery}`)
-            return await saveLanguageToLocalStorage(code, {
-                ...lang,
-                progress: updated_progress
-            })
-        } else {
-            console.log("service", `No mastery update needed for language ${code}`)
-            return true;
-        }
-    }
-    return false
-}
+// export async function updateLanguageMasteryService(code: string) {
+//     // use any deltas in the queue saved more than 2 hours ago to update mastery then delete them
+//     const lang = await getLanguageFromLocalStorage(code)
+//     if (lang) {
+//         const updated_progress = {...lang.progress}
+//         const now = Date.now()
+//         let total_delta = 0
+//         for (const [text_id, entry] of Object.entries(updated_progress.delta_queue)) {
+//             if ((now - entry.datetime_t) >= MASTERY_UPDATE_DELAY) {
+//                 total_delta += entry.delta
+//                 delete updated_progress.delta_queue[text_id]
+//             }
+//         }
+//         if (Math.abs(total_delta) > 0) {
+//             updated_progress.mastery += total_delta * learningPaceToMultiplier(lang.settings.learning_pace)
+//             updated_progress.mastery = Math.min(Math.max(updated_progress.mastery, 0), 5)
+//             console.log("service", `Language ${code} mastery updated by ${total_delta} to ${updated_progress.mastery}`)
+//             return await saveLanguageToLocalStorage(code, {
+//                 ...lang,
+//                 progress: updated_progress
+//             })
+//         } else {
+//             console.log("service", `No mastery update needed for language ${code}`)
+//             return true;
+//         }
+//     }
+//     return false
+// }
 
 // ? ........................
 // endregion ........................

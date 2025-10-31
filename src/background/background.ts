@@ -59,7 +59,7 @@ chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (r
 
         case MessageType.UPDATE_PROGRESS:
             payload = message.payload as UpdateProgressPayload
-            updateLanguageProgressService(payload.lang_code, new Map(payload.deltas)).then(res => {
+            updateLanguageProgressService(payload.lang_code, payload.delta).then(res => {
                 payload = message.payload as UpdateProgressPayload
                 if (!res) {
                     sendResponse({is_success: false, error_message: `Language ${payload.lang_code} not found`});

@@ -7,7 +7,7 @@ export interface SnippetHighlight {
 }
 
 export enum SnippetHighlightType {
-    SAVED = "saved", NEW = "new"
+    SAVED = "saved", NEW = "new", SIMPLIFIED = "simplified"
 }
 
 export function highlightTypeToStyle(type: SnippetHighlightType): SnippetHighlight {

@@ -6,6 +6,7 @@ import {simplifyText} from "../index.tsx";
 import {rewriterIsAvailable} from "../../../ai/simplify.ts";
 import {PopupState, PopupType, updatePopupState} from "../../store/popup.ts";
 import {getCachedCards} from "../../store/cards.ts";
+import {updateSimplifications} from "../../store/simplifications.ts";
 
 interface HoverInspectPopupProps {
     state: PopupState
@@ -32,7 +33,11 @@ export default function HoverInspectPopup({state}: HoverInspectPopupProps) {
             state.content.focus_text,
             state.content.focus_text_node,
             state.content.focus_range
-        )
+        ).then(ret => {
+            if (ret) {
+                updateSimplifications(ret.simplified)
+            }
+        })
     }, [state.content.focus_range, state.content.focus_text]);
 
     const onClickTranslate = React.useCallback(() => {

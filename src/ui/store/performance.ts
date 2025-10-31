@@ -35,9 +35,10 @@ export function recordTextEngagement(text_id: string, engagement_time_ms: number
         console.error("No performance stats found for text id:", text_id);
         return;
     }
-    stats.engagement_time_ms += engagement_time_ms;
+    const new_stats = {...stats}
+    new_stats.engagement_time_ms += engagement_time_ms;
     // performance.set(text_id, stats);
-    updateProgressInLocalStorage(lang_code, text_id, stats)
+    updateProgressInLocalStorage(lang_code, text_id, new_stats)
 }
 
 export async function recordTextTranslation(text_id: string, text: string, lang_code: string): Promise<TextEvalStats | null> {
@@ -51,21 +52,30 @@ export async function recordTextTranslation(text_id: string, text: string, lang_
         console.error("Could not evaluate translated text for comprehension stats:", text);
         return null;
     }
-    stats.translations.push({
+    const new_stats = {...stats}
+    new_stats.translations.push({
         text_difficulty: eval_stats.difficulty,
-        num_words: eval_stats.word_count
+        num_words: eval_stats.word_count,
     })
-    updateProgressInLocalStorage(lang_code, text_id, stats)
+    updateProgressInLocalStorage(lang_code, text_id, new_stats)
     return eval_stats
 }
 
 export function updateProgressInLocalStorage(lang_code: string, text_id: string, stats: TextComprehensionStats) {
+    const prev_stats = performance.get(text_id);
+    const prev_delta = prev_stats ? statsToDelta(prev_stats) : 0;
+    const agg_delta = statsToDelta(stats) - prev_delta;
+
+    console.log("Computed delta for text_id", text_id, ":", agg_delta, "from new stats :", stats, "compared to prev stats:", prev_stats, "and prev delta:", prev_delta);
+
+    // update stats
     performance.set(text_id, stats);
+
     chrome.runtime.sendMessage({
         type: MessageType.UPDATE_PROGRESS,
         payload: {
             lang_code,
-            deltas: [[text_id, statsToDelta(stats)]]
+            delta: agg_delta
         } satisfies UpdateProgressPayload
     }).then(res => {
         if (!res.is_success) {

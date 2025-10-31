@@ -1,5 +1,5 @@
 import React from 'react';
-import {getActiveTabId, setCurrentLanguageService, updateLanguageMasteryService} from "../../../utils/data/services.ts";
+import {getActiveTabId, setCurrentLanguageService} from "../../../utils/data/services.ts";
 import useAppContext from "../../context.tsx";
 import CardsView from "./CardsView.tsx";
 import {HomeIcon, IconHoverEffects, SettingsIcon, TranslateIcon} from "../../../constants/icons.tsx";
@@ -125,7 +125,7 @@ export default function LangPage({code}: LangPageProps) {
         }
 
         // check if page is already translated
-        updateLanguageMasteryService(code).then()
+        // updateLanguageMasteryService(code).then()
         getPageLangCodeService().then((page_code) => {
             if (page_code == code) {
                 setPageStatus(LangPageStatus.Ready);
@@ -168,11 +168,10 @@ export default function LangPage({code}: LangPageProps) {
                 </div>
             </div>
             {lang && <div
-                title={lang.progress.mastery.toFixed(3)}
                 className={"absolute top-12 left-0 p-2 flex flex-row"}>
                 <ProficiencyBadge proficiency={
                     PROFICIENCY_LEVELS[Math.floor(lang.progress.mastery)]
-                } size={20} variant={"solid"}/>
+                } size={20} variant={"solid"} tooltip_label={lang.progress.mastery.toFixed(3)}/>
             </div>}
             <div className={"absolute left-0 top-0 p-1"}>
             </div>

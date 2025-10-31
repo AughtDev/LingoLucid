@@ -10,6 +10,7 @@ import {recordTextTranslation} from "../../store/performance.ts";
 import {PROFICIENCY_LEVELS, ProficiencyLevel} from "../../../types/core.ts";
 import ProficiencyBadge from "../../../components/ProficiencyBadge.tsx";
 import SpinLoader from "../../../components/SpinLoader.tsx";
+import {updateEngagement} from "../../content/engagement.ts";
 
 interface FullInspectPopupProps {
     state: PopupState
@@ -78,6 +79,7 @@ export default function FullInspectPopup({state}: FullInspectPopupProps) {
                         }
                         setCefrLevel(PROFICIENCY_LEVELS[stats.difficulty]);
                     });
+                    updateEngagement(text_node_id)
                 }
             }).finally(() => {
                 setTranslationLoading(false)

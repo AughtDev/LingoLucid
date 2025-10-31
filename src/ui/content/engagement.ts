@@ -23,6 +23,27 @@ function startEngagement(id: string): void {
     }
 }
 
+export function updateEngagement(id: string): void {
+    // when there's a click or other interaction, we can update the start time and push the previous duration
+    const startTime = activeEngagements.get(id);
+    if (startTime) {
+        const durationMs = Date.now() - startTime;
+        console.log(`[ENGAGE] UPDATED tracking: ${id}. Duration so far: ${durationMs / 1000} seconds.`);
+
+        const target_lang = document.body.getAttribute('data-target-lang') || undefined;
+
+        if (!target_lang) {
+            console.log("No target language set; skipping update recording.");
+            return
+        }
+
+        recordTextEngagement(id, durationMs, target_lang)
+
+        // reset start time
+        activeEngagements.set(id, Date.now());
+    }
+}
+
 /**
  * Ends engagement tracking for a given node ID.
  * In a real app, this would calculate the duration (Date.now() - start time)

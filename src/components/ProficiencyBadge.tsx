@@ -5,9 +5,10 @@ interface ProficiencyBadgeProps {
     proficiency: ProficiencyLevel
     size: number
     variant?: "solid" | "ghost"
+    tooltip_label?: string
 }
 
-export default function ProficiencyBadge({proficiency, size, variant = "ghost"}: ProficiencyBadgeProps) {
+export default function ProficiencyBadge({proficiency, size, variant = "ghost", tooltip_label}: ProficiencyBadgeProps) {
     const {color, label} = React.useMemo(() => {
         switch (proficiency) {
             case "a1":
@@ -45,14 +46,20 @@ export default function ProficiencyBadge({proficiency, size, variant = "ghost"}:
                 padding: size / 4,
                 borderRadius: size / 2,
                 lineHeight: 1,
-                cursor: "pointer"
             }}
-            className={"flex justify-center items-center"}>
-            <p className={"font-semibold"}
-               style={{
-                   fontSize: size,
-                   color: col,
-               }}>
+            className={"relative flex justify-center items-center overflow-hidden"}>
+            <div
+                style={{
+                    cursor: "pointer",
+                }}
+                title={tooltip_label}
+                className={"absolute z-50 w-full h-full top-0 left-0"}/>
+            <p
+                className={"font-semibold"}
+                style={{
+                    fontSize: size,
+                    color: col,
+                }}>
                 {label}
             </p>
         </div>

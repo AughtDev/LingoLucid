@@ -44,7 +44,7 @@ export interface GetCardsPayload {
 
 export interface UpdateProgressPayload {
     lang_code: string;
-    deltas: [string,number][]
+    delta: number
 }
 
 export interface Message<T = TranslationPayload | SaveCardPayload | UpdateProgressPayload> {

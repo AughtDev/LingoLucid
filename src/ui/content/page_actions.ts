@@ -8,6 +8,7 @@ import {generateUniqueId} from "../../helpers/strings.ts";
 import {initEngagementTracking} from "./engagement.ts";
 import {updateCachedCards} from "../store/cards.ts";
 import {instantiateTextNode} from "../store/performance.ts";
+import {getSimplifications} from "../store/simplifications.ts";
 
 export async function translatePage(tgt_lang_code: string, tgt_level: ProficiencyLevel, setProgress: (progress: number) => void): Promise<boolean> {
     // convert all text nodes within any article tags to the target language
@@ -102,7 +103,9 @@ export async function highlightPage(): Promise<void> {
 
     const articles = document.getElementsByTagName('article');
 
-    const word_map = await chrome.runtime.sendMessage({
+    const word_map = new Map<string,SnippetHighlightType>()
+
+    await chrome.runtime.sendMessage({
         type: MessageType.GET_CARDS,
         payload: {
             lang_code: target_lang
@@ -111,12 +114,20 @@ export async function highlightPage(): Promise<void> {
         console.log("response is ", response);
         if (response.is_success && response.data) {
             updateCachedCards(response.data)
-            return cardsToHighlightMap(response.data)
+            const map = cardsToHighlightMap(response.data)
+            for (let [word, highlight_type] of map.entries()) {
+                word_map.set(word, highlight_type);
+            }
         }
         return null
     }).catch((error) => {
         console.error("Error getting saved cards:", error);
     });
+
+    // add simplifications
+    getSimplifications().forEach(txt => {
+        word_map.set(txt, SnippetHighlightType.SIMPLIFIED);
+    })
 
     if (!word_map) {
         console.warn("No saved cards found for language", target_lang);
