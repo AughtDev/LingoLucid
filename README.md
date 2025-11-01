@@ -27,7 +27,7 @@ To build the extension from source, please refer to the "Getting Started (For De
  <img src="public/icons/icon128.png"/>
  </p>
 
-# LingoLucid
+# 🌐LingoLucid
 
 *Learn a language passively by browsing the web.*
 
@@ -39,15 +39,15 @@ To build the extension from source, please refer to the "Getting Started (For De
 LingoLucid is an open-source Chrome extension that transforms your regular browsing into a passive language-learning experience. It assumes you are an English speaker and supports learning French, German, Spanish, Italian, and Portuguese.
 
 It works by translating the text on your favorite blogs and websites (optimized for **Substack** at the moment) into 
-your target language and then simplifying it to your exact proficiency level. As you read, study, and improve, the extension automatically increases the difficulty, forcing you to learn more complex vocabulary and grammar to keep up.
+your target language and then simplifying it to your exact proficiency level (this is exclusive to Spanish for now due to API constraints). As you read, study, and improve, the extension automatically increases the difficulty, forcing you to learn more complex vocabulary and grammar to keep up.
 
 ![Screenshot 2025-10-30 150323.png](./media/screenshots/Screenshot%202025-10-30%20150323.png)
 
-## Key Features
+## ✨Key Features
 
 - Adaptive Translation: Automatically translates text within ```<article>``` tags into your target language.
 
-- AI-Powered Simplification: Uses the Chrome Rewriter API to simplify the translated text to your selected CEFR proficiency level (A1 to C2).
+- AI-Powered Simplification (Spanish-Only): Uses the Chrome Rewriter API to simplify the translated text to your selected CEFR proficiency level (A1 to C2).
 
 - In-Line Learning:
 
@@ -79,11 +79,11 @@ your target language and then simplifying it to your exact proficiency level. As
 
 - Automatic Proficiency Tracking: This is the core feature. You don't need to manually update your level. The extension automatically adjusts your proficiency score based on your reading and translation habits.
 
-## How It Works: The Passive Learning Engine
+## 🧠How It Works: The Passive Learning Engine
 
 LingoLucid's goal is to make learning invisible. This is achieved through a continuous feedback loop.
 
-1. Translate & Simplify: When you open an article, the text is first translated and then "rewritten" (simplified) to match your B1 level.
+1. Translate & Simplify: When you open an article, the text is first translated and then "rewritten" (simplified) to match your proficiency level.
 
 2. Track Engagement: As you read, the extension tracks:
 - Successful Reading: How long you spend engaged with text blocks without translating.
@@ -95,9 +95,9 @@ LingoLucid's goal is to make learning invisible. This is achieved through a cont
 - C1/C2 (Rare Words): Reading these successfully gives a larger proficiency boost, while translating them is penalized less.
 5. Update Proficiency: Every interaction generates a small "delta" (a positive or negative number). This delta, weighted by your chosen "pace," is applied to your proficiency score.
 
-6. Adapt: As your proficiency score slowly climbs from B1 towards B2, the AI simplifies the text less and less, gently increasing the difficulty and forcing you to improve.
+6. Adapt: As your proficiency score slowly climbs from level to level towards C2, the AI simplifies the text less and less, gently increasing the difficulty and forcing you to improve.
 
-## The Extension Popup
+## 🖥️The Extension Popup
 
 | ![](./media/screenshots/Screenshot%202025-10-30%20151311.png) | ![](./media/screenshots/Screenshot%202025-10-30%20151247.png) |
 | ------------------------------------------------------------- | ------------------------------------------------------------- |
@@ -118,7 +118,7 @@ LingoLucid's goal is to make learning invisible. This is achieved through a cont
 
 - Saved Tab: Your main flashcard deck. You can shuffle, delete, or click the "Review" button to start a study session.
 
-## Getting Started (For Developers)
+## 🛠️Getting Started (For Developers)
 
 This is a standard Chrome extension built with TypeScript and Vite.
 
