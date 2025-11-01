@@ -19,7 +19,6 @@ const activeEngagements = new Map<string, number>();
 function startEngagement(id: string): void {
     if (!activeEngagements.has(id)) {
         activeEngagements.set(id, Date.now());
-        console.log(`[ENGAGE] STARTED tracking: ${id}`);
     }
 }
 
@@ -28,12 +27,10 @@ export function updateEngagement(id: string): void {
     const startTime = activeEngagements.get(id);
     if (startTime) {
         const durationMs = Date.now() - startTime;
-        console.log(`[ENGAGE] UPDATED tracking: ${id}. Duration so far: ${durationMs / 1000} seconds.`);
 
         const target_lang = document.body.getAttribute('data-target-lang') || undefined;
 
         if (!target_lang) {
-            console.log("No target language set; skipping update recording.");
             return
         }
 
@@ -54,14 +51,12 @@ function endEngagement(id: string): void {
     const target_lang = document.body.getAttribute('data-target-lang') || undefined;
 
     if (!target_lang) {
-        console.log("No target language set; skipping update recording.");
         return
     }
 
     const startTime = activeEngagements.get(id);
     if (startTime) {
         const durationMs = Date.now() - startTime;
-        console.log(`[ENGAGE] ENDED tracking: ${id}. Duration: ${durationMs / 1000} seconds.`);
         activeEngagements.delete(id);
 
         recordTextEngagement(id, durationMs, target_lang)
@@ -108,11 +103,9 @@ function handleVisibilityChange(): void {
     const isTabActive = document.visibilityState === 'visible';
 
     if (isTabActive) {
-        console.log("[VISIBILITY] Tab is now active. Restarting engagements for visible nodes.");
         // When becoming visible, start tracking all elements that are currently intersecting
         intersectingIds.forEach(id => startEngagement(id));
     } else {
-        console.log("[VISIBILITY] Tab is now hidden. Pausing all active engagements.");
         // When becoming hidden, end all current engagements
         activeEngagements.forEach((_, id) => endEngagement(id));
     }

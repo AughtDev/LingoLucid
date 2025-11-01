@@ -23,7 +23,6 @@ const PAGES: { id: string, content: () => React.ReactElement }[] = [
     })))
 ]
 
-console.log("PAGES:", PAGES);
 
 export async function getPageLangCodeService(): Promise<string | null> {
     return new Promise((resolve) => {
@@ -32,12 +31,10 @@ export async function getPageLangCodeService(): Promise<string | null> {
                 resolve(null);
                 return;
             }
-            console.log("service", `Checking if page is already translated`);
             chrome.tabs.sendMessage(activeTabId, {
                 type: MessageType.GET_PAGE_LANG_CODE,
             }, (res: MessageResponse<string | null>) => {
                 if (res.is_success && res.data !== undefined) {
-                    console.log('service', `Page translation status: ${res.data}`);
                     resolve(res.data);
                 } else {
                     console.error('service', `Failed to check page translation status:`, res.error_message);
@@ -70,7 +67,6 @@ export default function App() {
     React.useEffect(() => {
         getCurrentUrl().then(url => {
             if (url) {
-                console.log("Current URL:", url);
                 // check using regex if the url matches any of the supported sites, if not, add a warning
                 const is_supported = SUPPORTED_SITES.some(site => {
                     return url.includes(site)
@@ -115,7 +111,7 @@ export default function App() {
         rewriterIsAvailable().then(res => {
             if (!res) {
                 makeLog("warning", "Rewriter Model Unavailable",
-                    "The AI rewriter model is not available. Text simplification based on your proficiency level will be disabled.");
+                    "The AI rewriter model is not available. Text simplification based on your proficiency level for supported languages will be disabled.");
                 setModal(
                     <DownloadModelModal
                         title={"Download Rewriter Model"}

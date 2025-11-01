@@ -6,7 +6,6 @@ import App from './App';
 // Find the root DOM element where the React app will be mounted.
 const container = document.getElementById('root');
 
-console.log('Mounting React app to container:', container);
 // Ensure the container exists before attempting to create a root.
 if (container) {
     // Create a React root and render the App component.

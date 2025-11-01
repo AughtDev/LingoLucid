@@ -35,14 +35,12 @@ export default function FullInspectPopup({state}: FullInspectPopupProps) {
     }, []);
     const saveCard = React.useCallback(() => {
         const target_lang = document.body.getAttribute('data-target-lang') || undefined;
-        console.log("Saving card to target lang :", target_lang);
         if (!target_lang) return;
         saveCardToLocalStorage(target_lang, state.content.focus_text, text, "saved").then(() => {
             // state.actions.onSaveCard()
             highlightPage().finally(() => {
                 closePopup();
             })
-            console.log("Saved Card saved successfully");
         }).catch((error) => {
             console.error("Error saving card:", error);
         });
@@ -50,6 +48,9 @@ export default function FullInspectPopup({state}: FullInspectPopupProps) {
 
     React.useEffect(() => {
         if (state.type !== PopupType.FULL) return;
+
+        // remove selection if there is one
+        window.getSelection()?.removeAllRanges()
 
         const target_lang = document.body.getAttribute('data-target-lang') || undefined;
         // translate the text text to the target language
@@ -60,12 +61,10 @@ export default function FullInspectPopup({state}: FullInspectPopupProps) {
                 setTranslationLoading(false)
                 return
             }
-            translateFromTargetLanguage(state.content.focus_text, target_lang).then((original_text) => {
-                console.log("Translated ", text, " to Original text:", original_text);
+            translateFromTargetLanguage(state.content.focus_text, target_lang).then(async (original_text) => {
                 if (original_text !== null) {
                     setText(original_text);
-                    saveCardToLocalStorage(target_lang, state.content.focus_text, original_text, "recent").then(() => {
-                        console.log("Card saved successfully among recents");
+                    await saveCardToLocalStorage(target_lang, state.content.focus_text, original_text, "recent").then(() => {
                     }).catch((error) => {
                         console.error("Error saving card:", error);
                     });
@@ -94,7 +93,6 @@ export default function FullInspectPopup({state}: FullInspectPopupProps) {
             const path = event.composedPath()
 
             if (popup_ref.current && !path.includes(popup_ref.current)) {
-                console.log("Clicked outside the popup, closing it.", event.target);
                 closePopup();
             }
         };
@@ -158,7 +156,7 @@ export default function FullInspectPopup({state}: FullInspectPopupProps) {
                 ) : (
                     <p className={"text-sm text-red-400 p-1 text-center"}>Translate Error</p>
                 )
-            ) : <SpinLoader size={"12px"}/>}
+            ) : <div className={"p-1"}><SpinLoader size={"12px"}/></div>}
         </div>
     )
 }

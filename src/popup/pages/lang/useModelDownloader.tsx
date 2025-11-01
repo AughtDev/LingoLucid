@@ -22,7 +22,7 @@ export default function useTranslationModelsDownloader(lang: Language | undefine
                             details={[
                                 `To translate pages to ${lang?.label ?? code}, the translation model needs to be downloaded first.`,
                                 `The model will be stored locally on your device and will be used to translate pages offline.`,
-                                `This may take a few minutes depending on your internet connection.`
+                                `This may take a few seconds to a minutes depending on your internet connection.`
                             ]}
                             downloadFunc={async (setProgress) => {
                                 return await downloadTranslationModel("en", code, setProgress).then(res => {
@@ -38,13 +38,11 @@ export default function useTranslationModelsDownloader(lang: Language | undefine
                             }}/>
                     )
                 } else {
-                    console.log("Translation model already available for", code);
                     setTranslatorAvailability((prev) => [true, prev[1]]);
                 }
             })
         } else if (!translator_availability[1]) {
             translatorIsAvailable(code, "en").then(async (is_available) => {
-                console.log("Reverse translation model availability for", code, "is", is_available);
                 if (!is_available) {
                     openModal(
                         <DownloadModelModal
@@ -52,7 +50,7 @@ export default function useTranslationModelsDownloader(lang: Language | undefine
                             details={[
                                 `To simplify translated text back to English, the translation model needs to be downloaded first.`,
                                 `The model will be stored locally on your device and will be used to translate pages offline.`,
-                                `This may take a few minutes depending on your internet connection.`
+                                `This may take a few seconds to a few minutes depending on your internet connection.`
                             ]}
                             downloadFunc={async (setProgress) => {
                                 return await downloadTranslationModel(code, "en", setProgress).then(res => {
@@ -68,7 +66,6 @@ export default function useTranslationModelsDownloader(lang: Language | undefine
                             }}/>
                     )
                 } else {
-                    console.log("Translation model already available for", code);
                     setTranslatorAvailability((prev) => [prev[0], true]);
                 }
             })

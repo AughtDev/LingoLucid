@@ -4,7 +4,6 @@ export async function getLanguageFromLocalStorage(code: string): Promise<Languag
     const result = await chrome.storage.local.get(code);
     const data = result[code] as Language | undefined;
     if (data) {
-        console.log('storage', 'data', data, 'retrieved from code', code, 'in local storage');
         return data;
     } else {
         console.warn('storage', 'No data found for key', code, 'in local storage');
@@ -18,7 +17,6 @@ export async function saveLanguageToLocalStorage(
     onSuccess?: () => void, onFailure?: () => void
 ): Promise<boolean> {
     return chrome.storage.local.set({[code]: data}).then(() => {
-        console.log('storage', 'data', data, 'saved to code', code, 'in local storage');
         onSuccess?.();
         return true;
     }).catch((error) => {

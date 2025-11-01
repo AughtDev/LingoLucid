@@ -25,8 +25,7 @@ async function saveCard(payload: SaveCardPayload) {
 
 }
 
-chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (response?: MessageResponse) => void) => {
-    console.log("Background: Received message:", message, "from", sender);
+chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse: (response?: MessageResponse) => void) => {
 
     let payload;
     switch (message.type) {

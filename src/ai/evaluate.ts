@@ -69,7 +69,6 @@ export async function textToEvalStats(text: string, lang_code: string): Promise<
         console.error("No words found in text for CEFR evaluation");
         return null;
     }
-    console.log(`tokens of text: ${text} are `, words);
 
     let max_rank = 0;
     let valid_word_count = 0;

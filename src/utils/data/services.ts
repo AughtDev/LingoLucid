@@ -23,7 +23,6 @@ export async function initializeService(): Promise<Language[]> {
         if (!storedLang) {
             await saveLanguageToLocalStorage(lang.code, lang)
             langs.push(lang)
-            console.log("service", `Language ${lang.label} initialized`)
         } else {
             // check if any of recent cards are expired, if so, remove them and save the new language data
             const now = Date.now()
@@ -42,17 +41,14 @@ export async function initializeService(): Promise<Language[]> {
                     }
                 }
                 const success = await saveLanguageToLocalStorage(lang.code, updated_lang)
-                console.log("service", `Language ${lang.label} recent cards cleaned up`)
                 if (success) {
                     langs.push(updated_lang)
                 } else {
-                    console.log("service", `Language ${lang.label} could not be updated after cleaning recent cards`)
                     langs.push(storedLang)
                 }
             } else {
                 langs.push(storedLang)
             }
-            console.log("service", `Language ${lang.label} already initialized`)
         }
     }
     // check if app config exists, if not, create it
@@ -108,7 +104,6 @@ export async function saveLanguageCardService(code: string, data: Card, type: 's
         // make sure that a card with the same text doesn't already exist in the specified type
         const existing_card = lang.cards[type].find(c => c.text === data.text)
         if (existing_card) {
-            console.log("service", `Card with text "${data.text}" already exists in ${type} cards for language ${code}`)
             return false
         }
         return await saveLanguageToLocalStorage(code, {
@@ -169,23 +164,19 @@ export async function getAppConfigService(): Promise<AppConfig> {
     const result = await chrome.storage.local.get('app_config');
     const data = result['app_config'] as AppConfig | undefined
     if (data) {
-        console.log('service', 'App config retrieved from local storage:', data);
         return data;
     } else {
-        console.log('service', 'No app config found in local storage');
         // create default app config
         const default_config: AppConfig = {
             curr_language: null
         }
         await chrome.storage.local.set({'app_config': default_config});
-        console.log('service', 'Default app config created in local storage:', default_config);
         return default_config
     }
 }
 
 export async function clearAppDataService() {
     return chrome.storage.local.clear().then(() => {
-        console.log('service', 'All app data cleared from local storage');
         return true;
     }).catch((error) => {
         console.error('service', 'Error clearing app data from local storage:', error);
@@ -203,7 +194,6 @@ export async function setCurrentLanguageService(code: string) {
     }
     app_config.curr_language = code
     await chrome.storage.local.set({'app_config': app_config});
-    console.log('service', 'Current language set to', code, 'in app config');
 }
 
 export async function clearLanguageDataService(code: string) {
@@ -214,7 +204,6 @@ export async function clearLanguageDataService(code: string) {
     }
 
     return await saveLanguageToLocalStorage(code, init_lang).then(() => {
-        console.log('service', `Language data for ${code} reset to initial state`);
         return true;
     }).catch((error) => {
         console.error('service', `Error resetting language data for ${code}:`, error);
@@ -236,7 +225,6 @@ export async function updateLanguageProgressService(code: string, delta: number)
         const updated_progress = {...lang.progress}
         updated_progress.mastery += delta * learningPaceToMultiplier(lang.settings.learning_pace)
         updated_progress.mastery = Math.min(Math.max(updated_progress.mastery, 0), 5)
-        console.log("service", `Language ${code} mastery updated by ${delta} to ${updated_progress.mastery}`)
         return await saveLanguageToLocalStorage(code, {
             ...lang,
             progress: updated_progress
@@ -250,13 +238,13 @@ export async function updateLanguageProgressService(code: string, delta: number)
 function learningPaceToMultiplier(learning_pace: LanguageSettings["learning_pace"]): number {
     switch (learning_pace) {
         case 'slow':
-            return 0.8
+            return 0.08
         case 'medium':
-            return 1.0
+            return 0.10
         case 'fast':
-            return 1.2
+            return 0.12
         default:
-            return 1.0
+            return 0.1
     }
 }
 // export async function updateLanguageMasteryService(code: string) {
@@ -304,7 +292,6 @@ export async function getActiveTabId(): Promise<number | null> {
         console.error('service', 'No active tab found');
         return null;
     }
-    console.log('service', 'Active tab ID:', tabs[0].id);
     return tabs[0].id;
 }
 

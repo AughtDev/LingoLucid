@@ -66,7 +66,6 @@ export function updateProgressInLocalStorage(lang_code: string, text_id: string,
     const prev_delta = prev_stats ? statsToDelta(prev_stats) : 0;
     const agg_delta = statsToDelta(stats) - prev_delta;
 
-    console.log("Computed delta for text_id", text_id, ":", agg_delta, "from new stats :", stats, "compared to prev stats:", prev_stats, "and prev delta:", prev_delta);
 
     // update stats
     performance.set(text_id, stats);
@@ -81,7 +80,6 @@ export function updateProgressInLocalStorage(lang_code: string, text_id: string,
         if (!res.is_success) {
             console.error("Failed to update progress in local storage:", res.error_message);
         } else {
-            console.log("Successfully updated progress in local storage for language:", lang_code);
         }
     })
 

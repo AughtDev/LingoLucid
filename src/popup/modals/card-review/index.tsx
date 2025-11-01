@@ -122,18 +122,6 @@ function CardReviewModal({lang_code, cards}: CardReviewModalProps) {
                                 variant={"solid"}
                                 label={"Close"}
                                 onClick={closeModal}/>
-
-                            {/*<button*/}
-                            {/*    className={"mt-4 px-2 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600"}*/}
-                            {/*    onClick={() => {*/}
-                            {/*        setActiveCardIdx(0)*/}
-                            {/*        setCards(og_cards)*/}
-                            {/*    }}>Go Again*/}
-                            {/*</button>*/}
-                            {/*<button*/}
-                            {/*    className={"mt-4 px-2 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600"}*/}
-                            {/*    onClick={closeModal}>Close*/}
-                            {/*</button>*/}
                         </div>
                     </div>
                 ) : (
@@ -150,9 +138,9 @@ function CardReviewModal({lang_code, cards}: CardReviewModalProps) {
                         </div>
                         {
                             !card_flipped ? (
-                                <p className={"text-lg font-semibold"}>{cards[active_card_idx].text}</p>
+                                <p className={"text-lg font-semibold px-4 text-center"}>{cards[active_card_idx].text}</p>
                             ) : (
-                                <p className={"text-lg font-semibold"}>{cards[active_card_idx].translation}</p>
+                                <p className={"text-lg font-semibold px-4 text-center"}>{cards[active_card_idx].translation}</p>
                             )
                         }
                     </div>

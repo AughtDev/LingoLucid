@@ -51,7 +51,6 @@ function translatePageService(lang: Language, setProgress: (progress: number) =>
             switch (message.type) {
                 case PortMessage.PAGE_TRANSLATE_PROGRESS:
                     const payload = message.payload as PageTranslateProgressPayload;
-                    console.log("service", `Translation progress: ${payload.progress}`);
                     switch (payload.status) {
                         case "in_progress":
                             setProgress(payload.progress);
@@ -72,7 +71,6 @@ function translatePageService(lang: Language, setProgress: (progress: number) =>
             }
         })
 
-        console.log("service", `Requesting translation of page to ${lang.code}`);
         port.postMessage({
             type: MessageType.TRANSLATE_PAGE,
             payload: {
@@ -91,12 +89,10 @@ export function highlightPageService(): Promise<void> {
                 reject('No active tab');
                 return;
             }
-            console.log("service", `Requesting page highlight`);
             chrome.tabs.sendMessage(activeTabId, {
                 type: MessageType.HIGHLIGHT_PAGE
             }, (res: MessageResponse) => {
                 if (res.is_success) {
-                    console.log('service', `Page highlighted successfully`);
                     resolve();
                 } else {
                     console.error('service', `Failed to highlight page:`, res.error_message);

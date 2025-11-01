@@ -42,20 +42,17 @@ export function wordHoverListener(e: MouseEvent) {
         const rects = Array.from(range_check.getClientRects());
 
         if (rects.length === 0) {
-            console.log("No visible rects for hovered text");
             return;
         }
         const pd = HOVER_DETECT_PADDING
         const hit = rects.find(r => coords.x >= r.left - pd && coords.x <= r.right + pd && coords.y >= r.top - pd && coords.y <= r.bottom + pd);
 
         if (!hit) {
-            console.log("Not actually hovering over visible text");
             return;
         }
 
         popup_delay_timer = setTimeout(() => {
             if (getPopupState().type !== PopupType.NONE) {
-                console.log("Popup already shown, not showing hover popup");
                 return; // popup already shown, do nothing
             }
 
@@ -77,7 +74,6 @@ export function wordHoverListener(e: MouseEvent) {
             hovered_word = hovered_word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
 
             if (hovered_word.trim().length > 0) {
-                console.log("Hovered word:", hovered_word);
                 const start = offset - left_word.length;
                 const end = start + hovered_word.length;
 
@@ -120,7 +116,6 @@ export function wordHoverListener(e: MouseEvent) {
 export function textSelectListener(_e: MouseEvent) {
     const selection = window.getSelection();
     if (selection && selection.toString().length > 0) {
-        console.log("User selected text:", selection.toString());
 
         // set the position of the popup near the selection
         const range = selection.getRangeAt(0);

@@ -16,7 +16,6 @@ export async function translatePage(tgt_lang_code: string, tgt_level: Proficienc
     for (let article of articles) {
         // check if article has already been translated
         if (article.classList.contains('lingolucid-translated')) {
-            console.log("Article already translated, skipping");
             continue;
         }
         const text_nodes: Text[] = [];
@@ -27,7 +26,7 @@ export async function translatePage(tgt_lang_code: string, tgt_level: Proficienc
         }
 
         let i = 0
-        for (let text_node of text_nodes.slice(0, 30)) {
+        for (let text_node of text_nodes) {
             // save the start and ending whitespace,
             const l_pad = text_node.nodeValue?.match(/^\s*/)?.[0] || '';
             const r_pad = text_node.nodeValue?.match(/\s*$/)?.[0] || '';
@@ -46,11 +45,9 @@ export async function translatePage(tgt_lang_code: string, tgt_level: Proficienc
                     console.warn("Text already in target language:", og_text, "skipping translation");
                     translation = og_text
                 } else if (detected_lang === 'en') {
-                    console.log("Text detected as English, translating to target language:", og_text);
                     translation = await translateToTargetLanguage(og_text, tgt_lang_code);
-                    console.log("Translating text:", og_text, "to", translation);
                 } else {
-                    console.error("Text detected in unsupported language:", detected_lang, "for text:", og_text, "skipping this article");
+                    console.warn("Text detected in unsupported language:", detected_lang, "for text:", og_text, "skipping this article");
                     continue
                 }
 
@@ -62,7 +59,6 @@ export async function translatePage(tgt_lang_code: string, tgt_level: Proficienc
                     })
 
                     if (simplified && simplified.trim().length > 0) {
-                        console.log("Simplified translation:", translation, "to", simplified);
                         text_node.nodeValue = l_pad + simplified + r_pad;
                     } else {
                         console.warn("Simplification failed or empty, using original translation");
@@ -111,7 +107,6 @@ export async function highlightPage(): Promise<void> {
             lang_code: target_lang
         } satisfies GetCardsPayload
     }).then((response: MessageResponse<LanguageCards>) => {
-        console.log("response is ", response);
         if (response.is_success && response.data) {
             updateCachedCards(response.data)
             const map = cardsToHighlightMap(response.data)
@@ -134,23 +129,27 @@ export async function highlightPage(): Promise<void> {
         return;
     }
 
+
     for (let article of articles) {
         const text_nodes: Text[] = [];
         const walker = document.createTreeWalker(article, NodeFilter.SHOW_TEXT, null);
         let node;
-        // only the first 200 words for testing
         while (node = walker.nextNode()) {
             text_nodes.push(node as Text);
         }
 
         const highlighted_ranges: Map<SnippetHighlightType, Range[]> = new Map();
 
-        for (let text_node of text_nodes.slice(0,30)) {
+        for (let text_node of text_nodes) {
             const og_text = text_node.nodeValue || '';
             if (og_text.trim().length === 0) continue;
 
             for (let [word, highlight_type] of word_map.entries()) {
-                const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                // const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+                // Use Unicode-aware word boundaries
+                const regex = new RegExp(`(?<![\\p{L}\\p{N}_])${escapedWord}(?![\\p{L}\\p{N}_])`, 'giu');
                 let match;
                 while ((match = regex.exec(og_text)) !== null) {
                     const range = document.createRange();

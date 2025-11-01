@@ -13,7 +13,6 @@ export async function downloadLanguageDetectorModel(onProgress: (progress: numbe
         return false
     }
     if (await languageDetectorIsAvailable()) {
-        console.log("Cannot download, Language Detector model already available");
         onProgress(1)
         return true
     }
@@ -23,7 +22,6 @@ export async function downloadLanguageDetectorModel(onProgress: (progress: numbe
     await LanguageDetector.create({
         monitor(m: any) {
             m.addEventListener('downloadprogress', (e: { loaded: number }) => {
-                console.log(`Downloaded ${e.loaded * 100}%`);
                 onProgress(e.loaded)
             });
         },

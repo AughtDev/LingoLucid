@@ -3,10 +3,11 @@ import {BACKGROUND_COLOR} from "../../../constants/styling.ts";
 import Button from "../../../components/Button.tsx";
 import {SimplifyIcon, TranslateIcon} from "../../../constants/icons.tsx";
 import {simplifyText} from "../index.tsx";
-import {rewriterIsAvailable} from "../../../ai/simplify.ts";
+import {rewriterIsAvailable, rewriterSupportsLanguage} from "../../../ai/simplify.ts";
 import {PopupState, PopupType, updatePopupState} from "../../store/popup.ts";
 import {getCachedCards} from "../../store/cards.ts";
 import {updateSimplifications} from "../../store/simplifications.ts";
+import {highlightPage} from "../../content/page_actions.ts";
 
 interface HoverInspectPopupProps {
     state: PopupState
@@ -24,8 +25,8 @@ export default function HoverInspectPopup({state}: HoverInspectPopupProps) {
         })
     }, []);
 
+    const target_lang = document.body.getAttribute('data-target-lang') || undefined;
     const onClickSimplify = React.useCallback(async () => {
-        const target_lang = document.body.getAttribute('data-target-lang') || undefined;
         if (!target_lang) return;
 
         await simplifyText(
@@ -36,6 +37,7 @@ export default function HoverInspectPopup({state}: HoverInspectPopupProps) {
         ).then(ret => {
             if (ret) {
                 updateSimplifications(ret.simplified)
+                highlightPage().then()
             }
         })
     }, [state.content.focus_range, state.content.focus_text]);
@@ -50,7 +52,7 @@ export default function HoverInspectPopup({state}: HoverInspectPopupProps) {
     React.useEffect(() => {
         // check if the simplification model is available
         rewriterIsAvailable().then((available) => {
-            setCanSimplify(available)
+            setCanSimplify(available && target_lang !== undefined && rewriterSupportsLanguage(target_lang))
         })
         const handleMoveOutsidePopupAndRange = (event: MouseEvent) => {
             if (!popup_ref.current) return;

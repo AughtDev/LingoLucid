@@ -73,7 +73,7 @@ export async function simplifyText(
     text_node.textContent = before_text + reattached + after_text;
     highlightPage().then();
 
-    return { sides: { left, right }, simplified: simplified_text };
+    return { sides: { left, right }, simplified: simplified_text.trim().toLowerCase() };
 }
 
 export function InspectTextPopup() {

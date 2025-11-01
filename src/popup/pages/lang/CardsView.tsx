@@ -7,6 +7,8 @@ import {deleteLanguageCardService, saveLanguageCardService} from "../../../utils
 import Button from "../../../components/Button.tsx";
 import {highlightPageService} from "./index.tsx";
 import ProficiencyBadge from "../../../components/ProficiencyBadge.tsx";
+import AlertModal from "../../modals/alert";
+import useAppContext from "../../context.tsx";
 
 interface CardsViewProps {
     lang_code: string
@@ -76,9 +78,10 @@ interface CardPaneProps {
     code: string
     card: Card
     type: keyof LanguageCards
+    openModal: (content: React.ReactElement) => void
 }
 
-function CardPane({code, card, type}: CardPaneProps) {
+function CardPane({code, card, type,openModal}: CardPaneProps) {
     const [is_hovered, setIsHovered] = React.useState<boolean>(false)
     const card_ref = React.useRef<HTMLDivElement | null>(null);
 
@@ -92,7 +95,9 @@ function CardPane({code, card, type}: CardPaneProps) {
                 created_at_t: Date.now()
             }, "saved"
         ).then(() => {
-            console.log("Card saved successfully");
+            openModal(
+                <AlertModal title={"Success"} details={"Added card to saved cards."}/>
+            )
         }).catch((error) => {
             console.error("Error saving card:", error);
         })
@@ -136,7 +141,6 @@ function CardPane({code, card, type}: CardPaneProps) {
                         onClick={async () => {
                             await deleteLanguageCardService(code, card.text, type).then(() => {
                                 highlightPageService()
-                                console.log("Card deleted successfully");
                             }).catch((error) => {
                                 console.error("Error deleting card:", error);
                             });
@@ -149,15 +153,15 @@ function CardPane({code, card, type}: CardPaneProps) {
                         onClick={saveCard} icon={SaveIcon}/>
                 )}
             </div>
-            <p className={"text-md font-semibold p-1 text-center"}>{card.text}</p>
+            <p className={"px-4 text-md font-semibold p-1 text-center"}>{card.text}</p>
             <hr style={{width: "70%", opacity: 0.1}}/>
-            <p className={"text-md text-gray-600 p-1 text-center"}>{card.translation}</p>
+            <p className={"px-4 text-md text-gray-600 p-1 text-center"}>{card.translation}</p>
         </div>
     )
 }
 
 export default function CardsView({lang_code, cards}: CardsViewProps) {
-    // const {modal: {openModal}} = useAppContext()
+    const {modal: {openModal}} = useAppContext()
     const [shuffle_count, setShuffleCount] = React.useState<number>(0)
     const [active_tab, setActiveTab] = React.useState<"saved" | "recent">("saved")
 
@@ -191,6 +195,7 @@ export default function CardsView({lang_code, cards}: CardsViewProps) {
                     <CardPane
                         key={card.text} card={card} code={lang_code}
                         type={active_tab === "recent" ? "recent" : "saved"}
+                        openModal={openModal}
                     />
                 )) : (
                     <div className={"w-full h-full flex flex-col items-center justify-center gap-2"}>

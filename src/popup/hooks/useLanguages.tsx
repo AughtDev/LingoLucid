@@ -32,7 +32,6 @@ export function useLanguages(): LanguagesHookReturn {
                 if (changes[key]) {
                     const newData = changes[key].newValue as Language;
                     setLanguages(prev => new Map(prev).set(key, newData));
-                    console.log("service", `Language ${key} updated from storage change`)
                 }
             }
         }
@@ -47,7 +46,6 @@ export function useLanguages(): LanguagesHookReturn {
                     map.set(lang.code, lang)
                 }
             })
-            console.log("initializing languages hook", map)
             setLanguages(map)
         })
     }, [setLanguages]);

@@ -1,5 +1,5 @@
 import React from 'react';
-import {PRIMARY_COLOR} from "../constants/styling.ts";
+import { SECONDARY_COLOR} from "../constants/styling.ts";
 
 interface SpinLoaderProps {
     size: string | number
@@ -11,7 +11,7 @@ interface SpinLoaderProps {
 export default function SpinLoader({
     size,
     thickness = '4px',
-    spinner_color = PRIMARY_COLOR,
+    spinner_color = SECONDARY_COLOR,
     track_color = '#e5e7eb'
 }: SpinLoaderProps) {
     const sizeValue = typeof size === 'number' ? `${size}px` : size;

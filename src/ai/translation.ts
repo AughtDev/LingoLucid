@@ -7,7 +7,6 @@ export async function translatorIsAvailable(src_lang_code: string, tgt_lang_code
         sourceLanguage: src_lang_code,
         targetLanguage: tgt_lang_code,
     })
-    console.log("Translator availability for", src_lang_code, "to", tgt_lang_code, ":", ret);
     return ret === "available"
 }
 
@@ -23,7 +22,6 @@ export async function downloadTranslationModel(
     }
 
     if (await translatorIsAvailable(src_lang_code, tgt_lang_code)) {
-        console.log("Cannot download, Translator models already available for", tgt_lang_code);
         onProgress(1)
         return true
     }
@@ -32,7 +30,6 @@ export async function downloadTranslationModel(
         targetLanguage: tgt_lang_code,
         monitor(m: any) {
             m.addEventListener('downloadprogress', (e: { loaded: number }) => {
-                console.log(`Downloaded to ${e.loaded * 100}%`);
                 onProgress(e.loaded)
             });
         },

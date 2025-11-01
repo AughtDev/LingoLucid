@@ -40,7 +40,6 @@ root.render(React.createElement(InspectTextPopup))
 
 chrome.runtime.onConnect.addListener((port) => {
     if (port.name === Port.PAGE_TRANSLATE) {
-        console.log("Content Script: Connected to port:", port.name);
 
         port.onMessage.addListener((message: Message) => {
             switch (message.type) {
@@ -121,8 +120,7 @@ chrome.runtime.onConnect.addListener((port) => {
     }
 })
 
-chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse: (response?: MessageResponse) => void) => {
-    console.log("Messaging", "Content script received message:", message, "from", sender);
+chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse: (response?: MessageResponse) => void) => {
 
     switch (message.type) {
 
@@ -173,7 +171,7 @@ function addListenersToArticles() {
     // }
     document.body.addEventListener('mouseup', textSelectListener)
     document.body.addEventListener("mouseover", debounce(wordHoverListener, 100));
-    document.body.addEventListener("mousemove", debounce(wordHoverListener, 100));
+    document.body.addEventListener("mousemove", debounce(wordHoverListener, 25));
 }
 
 

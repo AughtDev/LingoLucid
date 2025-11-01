@@ -22,7 +22,7 @@ interface RewriterOptions {
 
 interface Rewriter {
     rewrite(text: string,options?: {
-    context: string;
+    context?: string;
     outputLanguage?: string;
 }): Promise<any>;
 }
