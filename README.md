@@ -27,7 +27,7 @@ To build the extension from source, please refer to the "Getting Started (For De
  <img src="public/icons/icon128.png"/>
  </p>
 
-# 🌐LingoLucid
+# 🌐 LingoLucid
 
 *Learn a language passively by browsing the web.*
 
@@ -43,7 +43,7 @@ your target language and then simplifying it to your exact proficiency level (th
 
 ![Screenshot 2025-10-30 150323.png](./media/screenshots/Screenshot%202025-10-30%20150323.png)
 
-## ✨Key Features
+## ✨ Key Features
 
 - Adaptive Translation: Automatically translates text within ```<article>``` tags into your target language.
 
@@ -79,7 +79,7 @@ your target language and then simplifying it to your exact proficiency level (th
 
 - Automatic Proficiency Tracking: This is the core feature. You don't need to manually update your level. The extension automatically adjusts your proficiency score based on your reading and translation habits.
 
-## 🧠How It Works: The Passive Learning Engine
+## 🧠 How It Works: The Passive Learning Engine
 
 LingoLucid's goal is to make learning invisible. This is achieved through a continuous feedback loop.
 
@@ -97,7 +97,7 @@ LingoLucid's goal is to make learning invisible. This is achieved through a cont
 
 6. Adapt: As your proficiency score slowly climbs from level to level towards C2, the AI simplifies the text less and less, gently increasing the difficulty and forcing you to improve.
 
-## 🖥️The Extension Popup
+## 🖥️ The Extension Popup
 
 | ![](./media/screenshots/Screenshot%202025-10-30%20151311.png) | ![](./media/screenshots/Screenshot%202025-10-30%20151247.png) |
 | ------------------------------------------------------------- | ------------------------------------------------------------- |
@@ -118,7 +118,7 @@ LingoLucid's goal is to make learning invisible. This is achieved through a cont
 
 - Saved Tab: Your main flashcard deck. You can shuffle, delete, or click the "Review" button to start a study session.
 
-## 🛠️Getting Started (For Developers)
+## 🛠️ Getting Started (For Developers)
 
 This is a standard Chrome extension built with TypeScript and Vite.
 
