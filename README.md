@@ -7,7 +7,7 @@
 This extension is unfortunately **not yet** on the Chrome Web Store. Please use the following steps to install the app for review:
 
 1.  **Download:** Go to the **[Latest Release Page](https://github.com/AughtDev/LingoLucid/releases/latest)** and
-    download the `LingoLucid-v1.0.zip` file.
+    download the `LingoLucid-v1_0_0.zip` file.
 2.  **Unzip:** Unzip the downloaded file. You will have a folder named `dist`.
 3.  **Open Chrome:** Navigate to `chrome://extensions` in your browser.
 4.  **Enable Developer Mode:** Ensure the **"Developer mode"** toggle in the top-right corner is **ON**.
